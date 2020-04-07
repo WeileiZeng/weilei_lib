@@ -8,6 +8,7 @@
 #include <itpp/itcomm.h>
 #include <stdio.h>
 #include "my_lib.h"
+#include <cmath>
 using namespace itpp;
 using namespace std;
 
@@ -250,4 +251,161 @@ int read_matrices_for_partial_sum(char * filename_prefix, char * filename_suffix
   //  GF2mat G0=MM_to_GF2mat( (char *) "mathematica/matrices/surf5_g_1.mtx" );
   
   return 0;
+}
+
+int test_bp_syndrome_llr(GF2mat H,  bvec syndrome, vec & LLRin, vec   & LLRout, int exit_iteration){
+  LLRout.set(1,2);
+  //  LLRin.set(1,3);
+  cout<<LLRin<<endl;
+  cout<<LLRout<<endl;
+  return 1;
+}
+
+bool match_syndrome(GF2mat H, vec LLR, bvec syndrome){
+  bvec  error = LLR < 0;
+  return GF2mat(H*error - syndrome).is_zero();
+}
+
+int bp_syndrome_llr(const GF2mat H,  bvec syndrome,  vec & LLRin, vec   & LLRout, int exit_iteration){
+  // input: parity check matrix H, syndrome vector s, loglikelihood ratio LLRin and LLRout
+  //LLR(x) = log( p(x)/ (1-p(x)) )
+  // initially we assume zero error, so LLR = LLR(0)=log ( (1-p)/p )>0
+  // bits_out = LLRout < 0;
+  //output: number of iteration, negative if not converge.
+
+  if ( GF2mat(syndrome).is_zero() ){
+    //return zero error vector, which is the default input for LLRout
+    return 1;
+  }
+  
+  bool debug = false;// enable/disable printing
+  //initialize
+  int nvar = H.cols(), ncheck = H.rows();
+  if (debug) cout<<"nvar = "<<nvar <<", ncheck = "<<ncheck<<endl;
+  mat llrs = zeros(ncheck, nvar), LLRs=zeros(ncheck, nvar);  
+  LLRout.set_size(nvar);
+  //  bool match_syndrome = false;// a flag to indicate whether the syndrome has been satisfied
+  
+  for ( int i = 0; i< ncheck ; i++){
+    for ( int j=0; j<nvar; j++){
+      if (H(i,j)) {
+	llrs.set(i,j,LLRin(j));
+	//llrs.set(i,j,log( (1-p)/p ));
+      }
+    }
+  }
+  //  if (debug) cout<<"finish initialize"<<endl;
+
+  //*********************************
+  int update_count=0;
+  double sum=0;
+  string str="";
+  while ( update_count < exit_iteration ){
+    //check to variable update, LLR
+    for ( int i = 0; i< ncheck ; i++){
+      for ( int j=0; j<nvar; j++){
+	if (H(i,j)) {
+	  
+	  double prod=1.0;
+	  str = "prod list: i,j,k,prod,llr:";	  
+	  for ( int k=0; k<nvar; k++){
+	    if ( H(i,k) ){
+	      if ( k != j ) {
+		prod = prod * tanh( llrs(i,k)/2 );
+		str += to_string(i)+",";
+		str += to_string(j)+",";
+		str += to_string(k)+",";
+		str += to_string(prod)+",";
+		str += to_string(llrs(i,k))+",";
+		//if (debug) cout<<",prod = "<<prod<<" i="<<i <<endl;
+	      }
+	    }
+	  }
+	
+	  double LLR = atanh(prod)*2;
+	  if ( syndrome(i) ){
+	    LLR = -LLR;
+	  }
+	  LLRs.set(i,j,LLR);
+
+	  if (debug) if ( std::abs(LLR) > 1000000.0) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+	}
+
+      }
+    }
+    
+    //    if (debug) cout<<"finish check to variable update"<<endl;
+    
+    //variable to check update, llr
+    
+
+
+    for ( int i = 0; i< ncheck ; i++){
+      for ( int j=0; j<nvar; j++){
+	if (H(i,j)) {
+	  sum=  LLRin(j);
+	
+	
+	  for ( int t=0; t<ncheck; t++){
+	    if ( H(t,j) ){
+	      if ( t != i ) {
+		sum += LLRs(t,j);
+		
+	      }
+	    }
+	  }
+	  llrs.set(i,j,sum);
+	  //	  if ( std::abs(sum) > 1000)	  cout<<"llrs: sum = "<<sum<<"\n"<<LLRs.get_col(j)<<endl;
+	}
+
+      }
+    }
+
+    //    if (debug) cout<<"finish variable to checkupdate"<<endl;
+  
+    // get output LLRout and check result
+    //    match_syndrome = true;
+    for ( int j=0; j<nvar; j++){
+        sum=LLRin(j);
+	//if (debug) cout<<" sum = "<<sum<<endl;
+	for ( int t=0; t<ncheck; t++){
+	  //if (debug) cout<<"t = "<<t<<", sum = "<<sum<<endl;
+	  if ( H(t,j) ){
+	      sum += LLRs(t,j);
+	  }
+	}
+	//if (debug) cout<<"LLRout = "<<LLRout<<endl;
+	LLRout.set(j,sum);
+
+	//	if ( std::abs(sum) > 1000)	  cout<<"LLRout: sum = "<<sum<<endl;
+	/*if ( std::abs(sum) > 1000){
+	  cout<< sum<<endl;
+	  }*/	
+	//if (debug) cout<<" sum = "<<sum<<endl;
+	/*
+	if ( sum * (double) syndrome(j) <0 ){ //syndrome not satisfied
+	  match_syndrome = false;
+	  //break;
+	  }*/	
+    }
+    if (debug) cout<<"update_count = "<<update_count<<", LLRout = "<<floor(LLRout)<<endl ;
+    //if (debug) cout<<"update_count = "<<update_count<<endl;
+    //if (debug) draw_toric_x_error(LLRout<0);
+    update_count++;
+    if ( match_syndrome(H, LLRout, syndrome) ){
+      break;
+    }        
+  }
+    
+  if (debug) cout<<"LLRout = "<<LLRout<<endl;
+
+  //  if (debug) cout<<"llrs = "<<llrs<<endl;
+  //if (debug) cout<<"LLRs = "<<LLRs<<endl;
+
+  //not converge, output negative value
+  if (! match_syndrome(H, LLRout, syndrome) ){
+    update_count = - update_count;
+  }
+    
+  return update_count ;
 }

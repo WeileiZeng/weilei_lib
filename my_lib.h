@@ -9,6 +9,7 @@
 #include <math.h> //sqrt
 #include "dist.h" //random window method to clculate distance
 #include "concatenation_lib.h"
+#include "bp.h"
 
 const int MAX_M=6;//maximum of the length of the complex chain
 const int INF=999;//infinity distance

@@ -7,6 +7,7 @@
 #include <itpp/itcomm.h>
 #include <stdio.h>
 #include "my_lib.h"
+#include <string>
 using namespace itpp;
 using namespace std;
 
@@ -40,6 +41,9 @@ string color_text(string str);
 int draw_toric_x_error(bvec error_bits);
 //draw the lattice, with error bond in red
 
+int draw_toric_x_error(bvec error_bits, string header);
+//draw the lattice, with error bond in red
+
 bvec find_error(bvec e_in, GF2mat H);
   //input: original error and parity check matrix
   //output: an error with same syndrome
@@ -62,24 +66,6 @@ LDPC_Code GF2mat_to_LDPC_Code(GF2mat G);
 LDPC_Code MM_to_LDPC_Code(char * filename);
   //convert GF2mat saved in .mm file to LDPC_Code  
     
-//bvec error_transform(bvec e_in, GF2mat H); not needed so far
-
-bvec reduce_weight(bvec e, GF2mat G);
-//reduce the weight of en error vector e, G include all cycles (equivalent error). G is assument to be the generator matrix of   an Quantum LDPC CSS code. such that rows of G correspond to the smallest cycles. It is assument that e is an effectively small/zero weight error, which contains many trivial cycles. This function will reduce most of those small individual cycles so that we can count the effective weight of e.
-//  complexity of this program: ~ G.rows() * weight(e)   
-
-
-bvec qllr_to_bvec(QLLRvec llr, int bound);
-  //find the appropriate bound value and return binary vector from this qllr.
-  //Its sign is the same as the sign of "bound"    
-
-int check_matrices(GF2mat * G, GF2mat * H, GF2mat *U, GF2mat * W, mat * K);
-  //check if those matrices are valid 
-
-//for partial sum decoder
-//read those matrices in the folder
-int read_matrices_for_partial_sum(char * filename_prefix, char * filename_suffix, GF2mat * G, GF2mat * H, GF2mat *U, GF2mat * W, 
-				  mat * K);
 
 #endif
 
