@@ -253,6 +253,7 @@ int read_matrices_for_partial_sum(char * filename_prefix, char * filename_suffix
   return 0;
 }
 
+/*
 int test_bp_syndrome_llr(GF2mat H,  bvec syndrome, vec & LLRin, vec   & LLRout, int exit_iteration){
   LLRout.set(1,2);
   //  LLRin.set(1,3);
@@ -265,9 +266,14 @@ bool match_syndrome(GF2mat H, vec LLR, bvec syndrome){
   bvec  error = LLR < 0;
   return GF2mat(H*error - syndrome).is_zero();
 }
+*/
 
-int bp_syndrome_llr(const GF2mat H,  bvec syndrome,  vec & LLRin, vec   & LLRout, int exit_iteration){
+
+/*
+int bp_syndrome_llr(const GF2mat H,  bvec syndrome,  vec & LLRin, vec   & LLRout, int exit_iteration, int decode_mode){
   // input: parity check matrix H, syndrome vector s, loglikelihood ratio LLRin and LLRout
+  // exit_iteration: max number of iteration
+  // decode_mode 1: standard, 2: min sum
   //LLR(x) = log( p(x)/ (1-p(x)) )
   // initially we assume zero error, so LLR = LLR(0)=log ( (1-p)/p )>0
   // bits_out = LLRout < 0;
@@ -296,41 +302,85 @@ int bp_syndrome_llr(const GF2mat H,  bvec syndrome,  vec & LLRin, vec   & LLRout
   }
   //  if (debug) cout<<"finish initialize"<<endl;
 
-  //*********************************
+  // *********************************
   int update_count=0;
   double sum=0;
+  double llr,LLR;
   string str="";
+  int sign = 1;
+  double prod=1.0;
+  //  bool degree_one=true;
   while ( update_count < exit_iteration ){
     //check to variable update, LLR
-    for ( int i = 0; i< ncheck ; i++){
-      for ( int j=0; j<nvar; j++){
-	if (H(i,j)) {
-	  
-	  double prod=1.0;
-	  str = "prod list: i,j,k,prod,llr:";	  
-	  for ( int k=0; k<nvar; k++){
-	    if ( H(i,k) ){
-	      if ( k != j ) {
-		prod = prod * tanh( llrs(i,k)/2 );
-		str += to_string(i)+",";
-		str += to_string(j)+",";
-		str += to_string(k)+",";
-		str += to_string(prod)+",";
-		str += to_string(llrs(i,k))+",";
-		//if (debug) cout<<",prod = "<<prod<<" i="<<i <<endl;
+    switch (decode_mode){
+    case 1://standard
+      for ( int i = 0; i< ncheck ; i++){
+	for ( int j=0; j<nvar; j++){
+	  if (H(i,j)) {
+	    prod=1.0;
+	    str = "prod list: i,j,k,prod,llr:";	  
+	    for ( int k=0; k<nvar; k++){
+	      if ( H(i,k) ){
+		if ( k != j ) {
+		  prod = prod * tanh( llrs(i,k)/2 );
+		  str += to_string(i)+",";
+		  str += to_string(j)+",";
+		  str += to_string(k)+",";
+		  str += to_string(prod)+",";
+		  str += to_string(llrs(i,k))+",";
+		  //if (debug) cout<<",prod = "<<prod<<" i="<<i <<endl;
+		}
 	      }
 	    }
-	  }
-	
-	  double LLR = atanh(prod)*2;
-	  if ( syndrome(i) ){
-	    LLR = -LLR;
-	  }
-	  LLRs.set(i,j,LLR);
+	    
+	    LLR = atanh(prod)*2;
+	    if ( syndrome(i) ){
+	      LLR = -LLR;
+	    }
+	    LLRs.set(i,j,LLR);
 
-	  if (debug) if ( std::abs(LLR) > 1000000.0) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+	    if (debug) if ( std::abs(LLR) > 1000000.0) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+	  }
 	}
+      }
+    case 2://min sum
+      for ( int i = 0; i< ncheck ; i++){
+	for ( int j=0; j<nvar; j++){
+	  if (H(i,j)) {
+	    prod=INF_BP;
+	    sign = 1;
+	    //	    str = "prod list: i,j,k,prod,llr:";	  
+	    for ( int k=0; k<nvar; k++){
+	      if ( H(i,k) ){
+		if ( k != j ) {
+		  if (llrs(i,k)>0){
+		    llr = llrs(i,k);
+		  }else{
+		    llr = -llrs(i,k);
+		    sign = -sign;
+		  }
+		  prod = min( prod, llr);
+			      
+		    //		  prod = prod * tanh( llrs(i,k)/2 );
+		    /*str += to_string(i)+",";
+		  str += to_string(j)+",";
+		  str += to_string(k)+",";
+		  str += to_string(prod)+",";
+		  str += to_string(llrs(i,k))+",";* /
+		  //if (debug) cout<<",prod = "<<prod<<" i="<<i <<endl;
+		}
+	      }
+	    }
+	    LLR = sign * prod;
+	    //	    double LLR = atanh(prod)*2;
+	    if ( syndrome(i) ){
+	      LLR = -LLR;
+	    }
+	    LLRs.set(i,j,LLR);
 
+	    if (debug) if ( std::abs(LLR) > 1000000.0) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+	  }
+	}
       }
     }
     
@@ -343,8 +393,7 @@ int bp_syndrome_llr(const GF2mat H,  bvec syndrome,  vec & LLRin, vec   & LLRout
     for ( int i = 0; i< ncheck ; i++){
       for ( int j=0; j<nvar; j++){
 	if (H(i,j)) {
-	  sum=  LLRin(j);
-	
+	  sum=  LLRin(j);	
 	
 	  for ( int t=0; t<ncheck; t++){
 	    if ( H(t,j) ){
@@ -386,7 +435,7 @@ int bp_syndrome_llr(const GF2mat H,  bvec syndrome,  vec & LLRin, vec   & LLRout
 	if ( sum * (double) syndrome(j) <0 ){ //syndrome not satisfied
 	  match_syndrome = false;
 	  //break;
-	  }*/	
+	  }* /	
     }
     if (debug) cout<<"update_count = "<<update_count<<", LLRout = "<<floor(LLRout)<<endl ;
     //if (debug) cout<<"update_count = "<<update_count<<endl;
@@ -409,3 +458,4 @@ int bp_syndrome_llr(const GF2mat H,  bvec syndrome,  vec & LLRin, vec   & LLRout
     
   return update_count ;
 }
+	*/
