@@ -260,8 +260,7 @@ int BP_Decoder::bp_syndrome_llr( bvec syndrome,  vec & LLRin, vec   & LLRout){
       }
     }
     
-    //    if (debug) cout<<"finish check to variable update"<<endl;
-    
+    //    if (debug) cout<<"finish check to variable update"<<endl;    
     //variable to check update, llr
     
 

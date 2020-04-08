@@ -25,16 +25,8 @@ int check_matrices(GF2mat * G, GF2mat * H, GF2mat *U, GF2mat * W, mat * K);
 
 //for partial sum decoder
 //read those matrices in the folder
-int read_matrices_for_partial_sum(char * filename_prefix, char * filename_suffix, GF2mat * G, GF2mat * H, GF2mat *U, GF2mat * W, 
-mat * K);
+int read_matrices_for_partial_sum(char * filename_prefix, char * filename_suffix, GF2mat * G, GF2mat * H, GF2mat *U, GF2mat * W, mat * K);
 
-/*
-int test_bp_syndrome_llr(GF2mat H,  bvec syndrome, vec & LLRin, vec & LLRout, int exit_iteration = 50);
-
-// for my own bp decoding
-int bp_syndrome_llr(GF2mat H,  bvec syndrome, vec & LLRin, vec & LLRout, int exit_iteration = 50, int decode_mode = 1);
-//LLR(x) = log( p(x)/ (1-p(x)) )
-*/
 
 #endif
 
