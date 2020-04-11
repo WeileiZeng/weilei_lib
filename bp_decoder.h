@@ -29,7 +29,7 @@ class BP_Decoder{
   int exit_iteration=50;
   int decode_mode = 1;
   std::string decode_mode_str="standard";
-  int nvar, ncheck;
+  int nvar, ncheck, nedge;
   bool is_initialized=false;
   bool is_H_valid(itpp::GF2mat H_temp);
   void init(itpp::GF2mat H_temp);
@@ -45,10 +45,12 @@ class BP_Decoder{
   int bp_syndrome_llr(bvec syndrome,  const vec & LLRin, vec   & LLRout);
   int bp_schedule(bvec syndrome,  const vec & LLRin, vec   & LLRout);
   bool match_syndrome(vec LLR, bvec syndrome);
-
-  int schedule_mode=0;
-  void set_schedule_mode(int schedule_mode_temp);
+  int bp_flexible( bvec syndrome,  const vec & LLRin, vec   & LLRout);
   
+  int schedule_mode=0;
+  mat schedule;
+  void set_schedule_mode(int schedule_mode_temp);
+  void set_schedule(int schedule_mode_temp);
 };
 
 void BP_Decoder::set_silent_mode(bool silent_mode_temp){
@@ -80,6 +82,12 @@ void BP_Decoder::init(itpp::GF2mat H_temp){
   ncheck = H.rows();  
   if ( ! is_H_valid(H) ) throw std::invalid_argument( "BP_Decoder: invalid parity check matrix H" );
   is_initialized = true;
+  nedge=0;
+  for ( int i =0; i<ncheck; i++){
+    for ( int j = 0; j<nvar;j++){
+      if (H(i,j)) nedge++;
+    }
+  }
   return;
 }
 
@@ -142,14 +150,45 @@ void BP_Decoder::set_decode_mode_str(std::string decode_mode_str_temp){
 
 void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
   schedule_mode = schedule_mode_temp;
-  if ( schedule_mode ==1 )  set_decode_mode_str("standard");
+  //schedule mode is used in decode();
+  if ( schedule_mode == 1 )  set_decode_mode_str("standard");
+  if ( schedule_mode == 2 )  set_decode_mode_str("standard");
+  return;
 }
+
+
+void BP_Decoder::set_schedule(int schedule_mode_temp){
+  // set up schedule accordingly
+  //mat schedule dimension ncheck*nvar*2
+  // default schedule mode 1, edge by edge
+
+  schedule_mode =2;
+  schedule.set_size(2*nedge,3);
+  int s=0;
+  for ( int i =0; i<ncheck; i++ ){
+    for ( int j = 0; j<nvar; j ++){
+      if (H(i,j)){
+	schedule.set(s,0,0);// 0 for v-c, 1 for c-v
+	schedule.set(s,1,i);
+	schedule.set(s,2,j);
+	schedule.set(s+1,0,1);// 0 for v-c, 1 for c-v
+	schedule.set(s+1,1,i);
+	schedule.set(s+1,2,j);
+	s +=2;
+      }
+    }
+  }
+  return;
+}
+
 
 int BP_Decoder::decode( bvec syndrome,  const vec & LLRin, vec   & LLRout){
   // a wrapper to determine using which decoding function
   switch ( schedule_mode){
   case 1://same position for u and v, one by one
     return bp_schedule( syndrome, LLRin, LLRout);
+  case 2://same position for u and v, one by one
+    return bp_flexible( syndrome, LLRin, LLRout);
   default: //no schedule
     return bp_syndrome_llr(syndrome,  LLRin,  LLRout);
   }  
@@ -370,7 +409,7 @@ int BP_Decoder::bp_schedule( bvec syndrome,  const vec & LLRin, vec   & LLRout){
   }
   //  if (debug) cout<<"finish initialize"<<endl;
 
-  //*********************************
+  // *********************************
   int update_count=0;
   double sum=0;
   double LLR;//llr is not used yet
@@ -435,6 +474,117 @@ int BP_Decoder::bp_schedule( bvec syndrome,  const vec & LLRin, vec   & LLRout){
   
     // get output LLRout and check result
     //    match_syndrome = true;
+    for ( int j=0; j<nvar; j++){
+        sum=LLRin(j);
+	//if (debug) cout<<" sum = "<<sum<<endl;
+	for ( int t=0; t<ncheck; t++){
+	  //if (debug) cout<<"t = "<<t<<", sum = "<<sum<<endl;
+	  if ( H(t,j) ){
+	      sum += LLRs(t,j);
+	  }
+	}
+	//if (debug) cout<<"LLRout = "<<LLRout<<endl;
+	LLRout.set(j,sum);
+    }
+    if (debug) cout<<"update_count = "<<update_count<<", LLRout = "<<floor(LLRout)<<endl ;
+    //if (debug) cout<<"update_count = "<<update_count<<endl;
+    //if (debug) draw_toric_x_error(LLRout<0);
+    update_count++;
+    if ( match_syndrome( LLRout, syndrome) ){
+      break;
+    }        
+  }
+    
+  if (debug) cout<<"LLRout = "<<LLRout<<endl;
+
+  //  if (debug) cout<<"llrs = "<<llrs<<endl;
+  //if (debug) cout<<"LLRs = "<<LLRs<<endl;
+
+  //not converge, output negative value
+  if (! match_syndrome( LLRout, syndrome) ){
+    update_count = - update_count;
+  }
+    
+  return update_count ;
+
+}
+
+
+int BP_Decoder::bp_flexible( bvec syndrome,  const vec & LLRin, vec   & LLRout){
+  // a flexible function to encorporate all variations
+ // input: syndrome vector s, loglikelihood ratio LLRin and LLRout
+  // exit_iteration: max number of iteration
+  // decode_mode 1: standard, 2: min sum
+  //LLR(x) = log( p(x)/ (1-p(x)) )
+  // initially we assume zero error, so LLR = LLR(0)=log ( (1-p)/p )>0
+  // bits_out = LLRout < 0;
+  //output: number of iteration, negative if not converge.
+
+  if ( GF2mat(syndrome).is_zero() )     return 1;
+    //return zero error vector, which is the default input for LLRout
+  
+  //initialize
+  if (debug) cout<<"nvar = "<<nvar <<", ncheck = "<<ncheck<<endl;
+  mat llrs = zeros(ncheck, nvar), LLRs=zeros(ncheck, nvar);  
+  //LLRout.set_size(nvar);should be the same size
+  
+  for ( int i = 0; i< ncheck ; i++){
+    for ( int j=0; j<nvar; j++){
+      if (H(i,j)) {
+	llrs.set(i,j,LLRin(j));
+	//llrs.set(i,j,log( (1-p)/p ));
+      }
+    }
+  }
+
+  // ********************************* start updating cycle
+  int update_count=0;
+  double sum=0;
+  double LLR;//llr is not used yet
+  string str="";
+  //  int sign; //not used yet
+  double prod=1.0;
+  //  bool degree_one=true;
+  while ( update_count < exit_iteration ){
+    //check to variable update, LLR
+    //use standard updating rule, no min sum
+      for ( int i = 0; i< ncheck ; i++){
+	for ( int j=0; j<nvar; j++){
+	  if (H(i,j)) {
+	    prod=1.0;
+	    for ( int k=0; k<nvar; k++){
+	      if ( H(i,k) ){
+		if ( k != j ) {
+		  prod = prod * tanh( llrs(i,k)/2 );
+		}
+	      }
+	    }
+	    
+	    LLR = atanh(prod)*2;
+	    if ( syndrome(i) ){
+	      LLR = -LLR;
+	    }
+	    LLRs.set(i,j,LLR);
+
+	    if (debug) if ( std::abs(LLR) > 1000000.0) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+
+	    // LLR updating
+	  sum=  LLRin(j);		
+	  for ( int t=0; t<ncheck; t++){
+	    if ( H(t,j) ){
+	      if ( t != i ) {
+		sum += LLRs(t,j);		
+	      }
+	    }
+	  }
+	  llrs.set(i,j,sum);
+	  //	  if ( std::abs(sum) > 1000)	  cout<<"llrs: sum = "<<sum<<"\n"<<LLRs.get_col(j)<<endl;
+	}
+
+      }
+    }
+  
+    // get output LLRout and check result
     for ( int j=0; j<nvar; j++){
         sum=LLRin(j);
 	//if (debug) cout<<" sum = "<<sum<<endl;
