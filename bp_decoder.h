@@ -27,12 +27,15 @@ class BP_Decoder{
   const double INF_BP=10000;
   itpp::GF2mat H;//parity check matrix
   int exit_iteration=50;
+  double alpha=1.0; // used for normalized decoder, alpha=1.25
   int decode_mode = 1;
   std::string decode_mode_str="standard";
   int nvar, ncheck, nedge;
+
   bool is_initialized=false;
   bool is_H_valid(itpp::GF2mat H_temp);
   void init(itpp::GF2mat H_temp);
+
   void set_exit_iteration(int exit_iteration_temp);
   void set_decode_mode(int decode_mode_temp);
   void set_decode_mode_str(std::string decode_mode_str_temp);
@@ -50,7 +53,7 @@ class BP_Decoder{
   int schedule_mode=0;
   mat schedule;
   void set_schedule_mode(int schedule_mode_temp);
-  void set_schedule(int schedule_mode_temp);
+  //  void set_schedule(int schedule_mode_temp);
 };
 
 void BP_Decoder::set_silent_mode(bool silent_mode_temp){
@@ -116,14 +119,18 @@ void BP_Decoder::set_exit_iteration(int exit_iteration_temp){
 
 
 void BP_Decoder::set_decode_mode(int decode_mode_temp){
+  decode_mode = decode_mode_temp;
+  alpha=1.0;//reset first
   switch (decode_mode_temp){
   case 1:
-    decode_mode = 1;
     decode_mode_str = "standard";
     break;
   case 2:
-    decode_mode = 2;
     decode_mode_str = "min sum";
+    break;
+  case 3:// part of min sum, just change alpha
+    decode_mode_str = "normalization";
+    alpha = 1.25;
     break;
   default:
     throw std::invalid_argument( "BP_Decoder: illegal decode mode" );
@@ -134,49 +141,87 @@ void BP_Decoder::set_decode_mode(int decode_mode_temp){
 
    
 void BP_Decoder::set_decode_mode_str(std::string decode_mode_str_temp){
-  if (decode_mode_str_temp =="standard"){
-    decode_mode = 1;
-    decode_mode_str = "standard";
-  }
-  else if (decode_mode_str_temp == "min sum"){
-    decode_mode = 2;
-    decode_mode_str = "min sum";
-  }else{  
-    throw std::invalid_argument( "BP_Decoder: illegal decode mode string" );
-  }
+  decode_mode_str = decode_mode_str_temp;
+  if (decode_mode_str_temp =="standard")    decode_mode = 1;   
+  else if (decode_mode_str_temp == "min sum") decode_mode = 2;  
+  else if (decode_mode_str_temp == "normalization") decode_mode = 3;
+  else throw std::invalid_argument( "BP_Decoder: illegal decode mode string" );
+  
   if (debug)  cout<<"BP_Dcoder: set decode mode "<<decode_mode<<" - "<<decode_mode_str.c_str()<<std::endl;
   return;
 }
 
 void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
   schedule_mode = schedule_mode_temp;
+  int s;
   //schedule mode is used in decode();
-  if ( schedule_mode == 1 )  set_decode_mode_str("standard");
-  if ( schedule_mode == 2 )  set_decode_mode_str("standard");
-  return;
-}
-
-
-void BP_Decoder::set_schedule(int schedule_mode_temp){
-  // set up schedule accordingly
-  //mat schedule dimension ncheck*nvar*2
-  // default schedule mode 1, edge by edge
-
-  schedule_mode =2;
-  schedule.set_size(2*nedge,3);
-  int s=0;
-  for ( int i =0; i<ncheck; i++ ){
-    for ( int j = 0; j<nvar; j ++){
-      if (H(i,j)){
-	schedule.set(s,0,0);// 0 for v-c, 1 for c-v
-	schedule.set(s,1,i);
-	schedule.set(s,2,j);
-	schedule.set(s+1,0,1);// 0 for v-c, 1 for c-v
-	schedule.set(s+1,1,i);
-	schedule.set(s+1,2,j);
-	s +=2;
+  switch ( schedule_mode ){
+  case 0:
+    //no schedule, parrallel schedule
+    set_decode_mode_str("standard");
+    break;
+  case 1: // default schedule mode 1, edge by edge
+    set_decode_mode_str("standard");
+    break;
+  case 2: //flexible
+    {// edge by edge
+      schedule.set_size(2*nedge,3);
+      schedule.zeros();
+      s=0;
+      for ( int i =0; i<ncheck; i++ ){
+	for ( int j = 0; j<nvar; j ++){
+	  if (H(i,j)){
+	    schedule.set(s,0,0);// 0 for v-c, 1 for c-v
+	    schedule.set(s,1,i);
+	    schedule.set(s,2,j);
+	    schedule.set(s+1,0,1);// 0 for v-c, 1 for c-v
+	    schedule.set(s+1,1,i);
+	    schedule.set(s+1,2,j);
+	    s +=2;
+	  }
+	}
       }
+      break;
     }
+  case 3: //flexible
+    { // edge by edge, switch var and check
+      schedule.set_size(2*nedge,3);
+      schedule.zeros();
+      s=0;
+      for ( int j = 0; j<nvar; j ++){
+	for ( int i =0; i<ncheck; i++ ){	
+	  if (H(i,j)){
+	    schedule.set_row(s,vec("0 i j"));
+	    schedule.set_row(s+1,vec("1 i j"));	    
+	    /*schedule.set(s,0,0);// 0 for v-c, 1 for c-v
+	    schedule.set(s,1,i);
+	    schedule.set(s,2,j);
+	    schedule.set(s+1,0,1);// 0 for v-c, 1 for c-v
+	    schedule.set(s+1,1,i);
+	    schedule.set(s+1,2,j);*/
+	    s +=2;
+	  }
+	}
+      }
+      break;
+    }
+  case 4: //flexible
+    { // random
+      set_schedule_mode(2);
+      schedule_mode = 4;
+      //random permutate
+      int permutation=2*nedge;//number of swaps
+      RNG_randomize();//get randome seed 
+      ivec source=randi(permutation,0,nedge*2-1);
+      ivec target=randi(permutation,0,nedge*2-1);
+      for ( int i =0; i< permutation; i++){
+	schedule.swap_rows(source(i),target(i));
+      }
+      break;
+    }
+
+  default:
+    throw std::invalid_argument( "BP_Decoder: illegal schedule" );
   }
   return;
 }
@@ -185,12 +230,17 @@ void BP_Decoder::set_schedule(int schedule_mode_temp){
 int BP_Decoder::decode( bvec syndrome,  const vec & LLRin, vec   & LLRout){
   // a wrapper to determine using which decoding function
   switch ( schedule_mode){
+  case 0: // no schedule
+    return bp_syndrome_llr(syndrome,  LLRin,  LLRout);
   case 1://same position for u and v, one by one
     return bp_schedule( syndrome, LLRin, LLRout);
   case 2://same position for u and v, one by one
+  case 3://same position for v and u, one by one,
+  case 4: //random permutation of case 2
     return bp_flexible( syndrome, LLRin, LLRout);
-  default: //no schedule
-    return bp_syndrome_llr(syndrome,  LLRin,  LLRout);
+  default:
+    throw std::invalid_argument( "BP_Decoder: illegal schedule" );
+    //return bp_syndrome_llr(syndrome,  LLRin,  LLRout);
   }  
 }
 
@@ -540,35 +590,74 @@ int BP_Decoder::bp_flexible( bvec syndrome,  const vec & LLRin, vec   & LLRout){
   // ********************************* start updating cycle
   int update_count=0;
   double sum=0;
-  double LLR;//llr is not used yet
+  double LLR, llr;
   string str="";
-  //  int sign; //not used yet
+  int sign; 
   double prod=1.0;
-  //  bool degree_one=true;
   while ( update_count < exit_iteration ){
-    //check to variable update, LLR
-    //use standard updating rule, no min sum
-      for ( int i = 0; i< ncheck ; i++){
-	for ( int j=0; j<nvar; j++){
-	  if (H(i,j)) {
-	    prod=1.0;
-	    for ( int k=0; k<nvar; k++){
-	      if ( H(i,k) ){
-		if ( k != j ) {
-		  prod = prod * tanh( llrs(i,k)/2 );
+    int i,j;
+    for ( int is = 0; is < nedge*2; is ++){
+      i = schedule(is,1);
+      j = schedule(is,2);      
+      //      for ( int i = 0; i< ncheck ; i++){
+      //for ( int j=0; j<nvar; j++){
+      int direction = schedule(is,0);
+      switch ( direction ){
+      case 0:     //check to variable update, LLR
+	{
+	  switch ( decode_mode ) {
+	  case 1: //standard
+	    {
+	      prod=1.0;
+	      for ( int k=0; k<nvar; k++){
+		if ( H(i,k) ){
+		  if ( k != j ) prod = prod * tanh( llrs(i,k)/2 );		  
 		}
 	      }
-	    }
+	      
+	      LLR = atanh(prod)*2;
+	      if ( syndrome(i) ) LLR = -LLR;	      
+	      LLRs.set(i,j,LLR);
 	    
-	    LLR = atanh(prod)*2;
-	    if ( syndrome(i) ){
-	      LLR = -LLR;
+	      if (debug) if ( std::abs(LLR) > 1000000.0) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+	      break;
 	    }
-	    LLRs.set(i,j,LLR);
 
-	    if (debug) if ( std::abs(LLR) > 1000000.0) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+	  case 2://min sum
+	    //      for ( int i = 0; i< ncheck ; i++){
+	    //for ( int j=0; j<nvar; j++){
+	    //  if (H(i,j)) {
+	    {
+	      prod=INF_BP;
+	      sign = 1;
+	      //	    str = "prod list: i,j,k,prod,llr:";	
+	      for ( int k=0; k<nvar; k++){
+		if ( H(i,k) ){
+		  if ( k != j ) {
+		    if (llrs(i,k)>0){
+		      llr = llrs(i,k);
+		    }else{
+		      llr = -llrs(i,k);
+		      sign = -sign;
+		    }
+		    prod = min( prod, llr);
+		  }
+		}
+	      }
+	      LLR = sign * prod;
+	      if ( syndrome(i) ) LLR = -LLR;
+	      LLRs.set(i,j,LLR);
 
-	    // LLR updating
+	      if (debug) if ( std::abs(LLR) > INF_BP ) cout<<"LLRs: LLR = "<<LLR<<", prod = "<<prod<<"\n"<<str<<endl<<"H.get_row(i)="<<H.get_row(i)<<endl <<"llrs.get_row(i)="<<llrs.get_row(i)<<endl;
+
+	      break;
+	    }
+	    break;
+	  }
+	}
+      case 1:
+	{
+	    // variable to check, llr updating
 	  sum=  LLRin(j);		
 	  for ( int t=0; t<ncheck; t++){
 	    if ( H(t,j) ){
@@ -578,9 +667,8 @@ int BP_Decoder::bp_flexible( bvec syndrome,  const vec & LLRin, vec   & LLRout){
 	    }
 	  }
 	  llrs.set(i,j,sum);
-	  //	  if ( std::abs(sum) > 1000)	  cout<<"llrs: sum = "<<sum<<"\n"<<LLRs.get_col(j)<<endl;
+	  break;
 	}
-
       }
     }
   
