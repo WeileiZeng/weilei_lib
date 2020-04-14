@@ -28,8 +28,8 @@ class BP_Decoder{
   itpp::GF2mat H;//parity check matrix
   int exit_iteration=50;
   double alpha=1.0; // used for normalized decoder, alpha=1.25
-  int decode_mode = 1;
-  std::string decode_mode_str="standard";
+  int decode_mode = 2;
+  std::string decode_mode_str="min sum";
   int nvar, ncheck, nedge;
 
   bool is_initialized=false;
@@ -51,6 +51,7 @@ class BP_Decoder{
   int bp_flexible( bvec syndrome,  const vec & LLRin, vec   & LLRout);
   
   int schedule_mode=0;
+  string schedule_mode_str="no schedule, parallel";
   mat schedule;
   void set_schedule_mode(int schedule_mode_temp);
   //  void set_schedule(int schedule_mode_temp);
@@ -98,7 +99,7 @@ void BP_Decoder::print_info(){
   if (is_initialized){
     std::cout<<"--- BP_Decoder --- nvar = "<<nvar
 	     <<", ncheck ="<<ncheck
-	     <<", schedule_mode = "<<schedule_mode
+	     <<", schedule_mode ("<<schedule_mode<<") "<<schedule_mode_str.c_str()
 	     <<", decode mode ("<<decode_mode<<") "<<decode_mode_str.c_str()
 	     <<", exit_iteration = "<<exit_iteration
 	     <<std::endl;
@@ -158,23 +159,27 @@ void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
   switch ( schedule_mode ){
   case 0:
     //no schedule, parrallel schedule
-    set_decode_mode_str("standard");
+    //    set_decode_mode_str("standard");
+    schedule_mode_str = "no schedule, parallel; using bp_syndrome_llr()";
     break;
   case 1: // default schedule mode 1, edge by edge
-    set_decode_mode_str("standard");
+    //set_decode_mode_str("standard");
+    schedule_mode_str  = "edge by edge, using bp_schedule()";
     break;
   case 2: //flexible
     {// edge by edge
+      schedule_mode_str ="edge by edge, using bp_flexible()";
       schedule.set_size(2*nedge,3);
       schedule.zeros();
       s=0;
       for ( int i =0; i<ncheck; i++ ){
 	for ( int j = 0; j<nvar; j ++){
 	  if (H(i,j)){
-	    schedule.set(s,0,0);// 0 for v-c, 1 for c-v
+	    // 0 for c->v, 1 for v->c
+	    schedule.set(s,0,0);
 	    schedule.set(s,1,i);
 	    schedule.set(s,2,j);
-	    schedule.set(s+1,0,1);// 0 for v-c, 1 for c-v
+	    schedule.set(s+1,0,1);
 	    schedule.set(s+1,1,i);
 	    schedule.set(s+1,2,j);
 	    s +=2;
@@ -185,20 +190,19 @@ void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
     }
   case 3: //flexible
     { // edge by edge, switch var and check
+      schedule_mode_str ="edge by edge, switch var and check order. using bp_flexible()";
       schedule.set_size(2*nedge,3);
       schedule.zeros();
       s=0;
       for ( int j = 0; j<nvar; j ++){
 	for ( int i =0; i<ncheck; i++ ){	
 	  if (H(i,j)){
-	    schedule.set_row(s,vec("0 i j"));
-	    schedule.set_row(s+1,vec("1 i j"));	    
-	    /*schedule.set(s,0,0);// 0 for v-c, 1 for c-v
+	    schedule.set(s,0,0);
 	    schedule.set(s,1,i);
-	    schedule.set(s,2,j);
-	    schedule.set(s+1,0,1);// 0 for v-c, 1 for c-v
+	    schedule.set(s,2,j);	
+	    schedule.set(s+1,0,1);
 	    schedule.set(s+1,1,i);
-	    schedule.set(s+1,2,j);*/
+	    schedule.set(s+1,2,j);
 	    s +=2;
 	  }
 	}
@@ -209,6 +213,7 @@ void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
     { // random
       set_schedule_mode(2);
       schedule_mode = 4;
+      schedule_mode_str ="random purterbation of of mode 2, using bp_flexible()";
       //random permutate
       int permutation=2*nedge;//number of swaps
       RNG_randomize();//get randome seed 
@@ -219,7 +224,35 @@ void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
       }
       break;
     }
-
+  case 5: //flexible
+    { // edge by edge, 
+      schedule_mode_str ="edge by edge, follow the paper. using bp_flexible()";
+      schedule.set_size(2*nedge,3);
+      schedule.zeros();
+      s=0;
+      std::cout<<"start updating schedule"<<std::endl;
+      for ( int j = 0; j<nvar; j ++){
+	for ( int i =0; i<ncheck; i++ ){	
+	  if (H(i,j)){
+	    schedule.set(s,0,0);
+	    schedule.set(s,1,i);
+	    schedule.set(s,2,j);
+	    s ++;
+	  }	
+	}
+	for ( int i =0; i<ncheck; i++ ){	
+	  if (H(i,j)){
+	    schedule.set(s,0,1);
+	    schedule.set(s,1,i);
+	    schedule.set(s,2,j);
+	    s ++;
+	  }	
+	}
+      }
+      std::cout<<"finish updating schedule"<<std::endl;
+      break;
+    }
+    
   default:
     throw std::invalid_argument( "BP_Decoder: illegal schedule" );
   }
@@ -237,6 +270,7 @@ int BP_Decoder::decode( bvec syndrome,  const vec & LLRin, vec   & LLRout){
   case 2://same position for u and v, one by one
   case 3://same position for v and u, one by one,
   case 4: //random permutation of case 2
+  case 5: //follow the paper
     return bp_flexible( syndrome, LLRin, LLRout);
   default:
     throw std::invalid_argument( "BP_Decoder: illegal schedule" );
