@@ -26,6 +26,7 @@ int min_wt_decoding(GF2mat C){
   bvec zero = zeros_b(C.cols());
   //  cout<<"min_wt_decodnig"<<endl;
   //  cout<<"max = "<<max<<endl<<C.rows()<<endl;
+  bvec min_codeword=zero;
   for ( int i =1;i<max;i++){
     //    dec2bin(i,alpha);
     alpha = dec2bin(C.rows(),i);
@@ -34,8 +35,10 @@ int min_wt_decoding(GF2mat C){
     //    cout<<"alpha = "<<alpha<<endl;
     codeword=(alphaM*C).get_row(0);
     wt = BERC::count_errors(zero,codeword);
+    if ( wt < min_wt ) min_codeword=codeword;
     min_wt = (wt<min_wt)? wt : min_wt;
   }
+  //  cout<<"min wt codeword: "<<min_codeword<<endl;
   return min_wt;    
 }
 

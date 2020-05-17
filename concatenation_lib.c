@@ -13,6 +13,92 @@ using namespace itpp;
 using namespace std;
 
 
+
+bool is_quantum_code(GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
+  if (!(Gx*Gz.transpose()).is_zero()){
+    cout<<"(Gx*Gz.transpose()) is not zero"<<endl;return false;
+  }
+  if (!(Gx*Cz.transpose()).is_zero()){
+    cout<<"(Gx*Cz.transpose()) is not zero"<<endl;return false;
+  }
+  if (!(Gz*Cx.transpose()).is_zero()){
+    cout<<"(Gz*Cx.transpose()) is not zero"<<endl;return false;
+  }
+  int rank_of_Gx=Gx.row_rank();
+  int rank_of_Gz=Gz.row_rank();
+  int rank_of_Cx=Cx.row_rank();
+  int rank_of_Cz=Cz.row_rank();
+  int n=Gx.cols();
+  if (rank_of_Gx+rank_of_Gz+rank_of_Cx != n){
+    cout<<"(rank_of_Gx+rank_of_Gz+rank_of_Cx != n)"<<endl;
+    return false;
+  }
+  if(rank_of_Cx != rank_of_Cz){
+    cout<<"(rank_of_Cx != rank_of_Cz)"<<endl;return false;
+  }
+  //  cout<<"is_quantum_code(): It is a quantum code!"<<endl;
+  return true;
+}
+
+/*int getRandomQuantumCode(GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
+  int n=21;//sample input
+  int Gx_row=8;
+  int Gz_row=8;
+  getRandomQuantumCode(n,Gx_row,Gz_row,Gx,Gz,Cx,Cz);
+  return 0;
+  }*/
+
+int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
+
+  Gx = GF2mat(Gx_row,n);
+  Gz = GF2mat(Gz_row,n);
+  for ( int i =0;i<Gx_row;i++){//random G_x
+    Gx.set_row(i,randb(n));//equally 0 and 1s
+  }
+  GF2mat T,U; ivec P;
+  int rank_of_Gx = Gx.transpose().T_fact(T,U,P);
+  //  GF2matPrint(T,"T");
+  GF2mat Q=T.get_submatrix(rank_of_Gx,0,n-1,n-1);
+  //  Q.permute_cols(P,true); no need for T, only need for U which is not used here
+  //  GF2matPrint(Q,"Q");
+  GF2mat alpha(Gz_row,Q.rows()); //a random binary matrix to select G_z
+  for ( int i=0;i<Gz_row;i++){
+    alpha.set_row(i,randb(Q.rows()));
+  }
+  Gz=alpha*Q;
+  //  Gz=Q.get_submatrix(0,0,Gz_row-1,n-1);
+  //Cz=Q.get_submatrix(Gz_row,0,Q.rows()-1,n-1);
+  //  GF2matPrint(Gz,"Gz");
+  //  GF2matPrint(Cz,"Cz");
+  Cx=getC(Gx,Gz);
+  Cz=getC(Gx,Gz,1);
+  return 0;
+}
+
+int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
+  //repeat multiple times to get the best distance
+  GF2mat Gx_temp, Gz_temp,Cx_temp,Cz_temp;
+  for ( int i =0; i<10; i++){
+
+    getRandomQuantumCode( n, Gx_row,Gz_row, Gx_temp, Gz_temp,Cx_temp,Cz_temp);
+    //check distance and update if get larger distance
+    int dx = quantum_dist_v2(Gx_temp,Gz_temp);
+    if ( dx >1 ){
+      int dz = quantum_dist_v2(Gx_temp,Gz_temp,1);
+      if (dz >1 ){
+	Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
+	return 0;
+      }
+    }
+  }
+  Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
+  return 0;
+}
+
+
+
+
+
 int reduce(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz){
   //construct code C and calculate the distance; Compare it with the input (estimated) value
   cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;
