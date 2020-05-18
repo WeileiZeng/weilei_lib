@@ -55,6 +55,8 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   for ( int i =0;i<Gx_row;i++){//random G_x
     Gx.set_row(i,randb(n));//equally 0 and 1s
   }
+  //Gx might not be full rank at this point
+  
   GF2mat T,U; ivec P;
   int rank_of_Gx = Gx.transpose().T_fact(T,U,P);
   //  GF2matPrint(T,"T");
@@ -70,6 +72,7 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   //Cz=Q.get_submatrix(Gz_row,0,Q.rows()-1,n-1);
   //  GF2matPrint(Gz,"Gz");
   //  GF2matPrint(Cz,"Cz");
+  Gx = nullSpace(Gz).get_submatrix(0,0,Gx_row-1,n-1);
   Cx=getC(Gx,Gz);
   Cz=getC(Gx,Gz,1);
   return 0;
@@ -165,7 +168,7 @@ int reduce(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int 
   }else if(dcz == INF) {
     cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<endl;
   }else{
-    cout<<"---------------------------------------------------------------------CASE: daz*dbz="<<daz*dbz<<", dcz="<<dcz<<endl;
+    cout<<"-------------------------------------------------------------counter example CASE: daz*dbz="<<daz*dbz<<", dcz="<<dcz<<endl;
   }
   return 0;
   

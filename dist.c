@@ -99,6 +99,18 @@ int classical_dist(GF2mat G){
   return min_wt;
 }
 
+
+//return H such that GH^T = 0, and rank G + rank H = n = full rank
+GF2mat nullSpace(GF2mat G){
+  GF2mat T,U; ivec P;
+  int n=G.cols();
+  int rank_of_G = G.transpose().T_fact(T,U,P);
+  //  GF2matPrint(T,"T");
+  GF2mat Q=T.get_submatrix(rank_of_G,0,n-1,n-1);
+  return Q;
+}
+
+
 GF2mat getC(GF2mat G_x,GF2mat G_z,int flip){
   //return C_x
   //flip=1 to get C_z

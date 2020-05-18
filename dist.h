@@ -20,6 +20,9 @@ int classical_dist(GF2mat G);
 //return distance of classical binary code GH^T=0;
 //G is the parity check matrix
 
+//return H such that GH^T = 0, and rank G + rank H = n = full rank
+GF2mat nullSpace(GF2mat G);
+
 GF2mat getC(GF2mat G_x,GF2mat G_z,int flip=0);//return C_x or C_z if flip=1
 
 int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip=0);//without expectation value
