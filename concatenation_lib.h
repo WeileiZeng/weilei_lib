@@ -9,6 +9,7 @@ using namespace itpp;
 using namespace std;
 
 
+// same functionis also defined in lib.h
 bool is_quantum_code(GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz);
 
 

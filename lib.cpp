@@ -51,7 +51,7 @@ int matPrint(mat G,char * name){
   return 0;
 }
 
-GF2mat kron(GF2mat B, GF2mat A){//kronex tensor product of B x A
+GF2mat kron(GF2mat B, GF2mat A){//Kroneker tensor product of B x A
   //how could I define this in the wrong way?
   //although I define it in the wrong way, I dont think it will affect the result
   //but in any later calculation, use the right definition. May 26, 2018
