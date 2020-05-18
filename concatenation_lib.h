@@ -28,4 +28,15 @@ int reduce(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int 
 
 int concatenate(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz);
 
+
+
+// a version include both reduce and concatenation
+// mode=1 for reduce/subsystem product
+// mode=2 for concatenation
+//only dz is checked cause dx is known to be tight
+int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz, int mode=1);
+
+
+
+
 #endif

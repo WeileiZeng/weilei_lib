@@ -15,7 +15,7 @@ using namespace itpp;
 using namespace std;
 
 //int GF2mat_to_MM(GF2mat G, char* file_name="mm_temp.dat")
-int GF2mat_to_MM(GF2mat G, char* file_name)
+int GF2mat_to_MM(GF2mat G, char* file_name, int debug)
 {
   int M=G.rows(),N=G.cols(),nt=M*N;//nt is the total number of elements, will find nz later. nz is the number of non-zero elements
   //make nt smaller; the size of int[] should be less than about 2000000+; otherwise it creat segmentation fault
@@ -65,7 +65,7 @@ int GF2mat_to_MM(GF2mat G, char* file_name)
         fprintf(fout, "%d %d %10.3g\n", I[i]+1, J[i]+1, val[i]);
 
     fclose(fout);
-    cout<<"wrote the matrix (density:"<<G.density()<<") into file "<<file_name<<endl;
+    if ( debug )   cout<<"wrote the matrix (density:"<<G.density()<<") into file "<<file_name<<endl;
     return 0;
 	
 }

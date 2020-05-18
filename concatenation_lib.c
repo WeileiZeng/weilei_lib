@@ -16,7 +16,8 @@ using namespace std;
 
 bool is_quantum_code(GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
   if (!(Gx*Gz.transpose()).is_zero()){
-    cout<<"(Gx*Gz.transpose()) is not zero"<<endl;return false;
+    cout<<"(Gx*Gz.transpose()) is not zero"<<endl;
+    return false;
   }
   if (!(Gx*Cz.transpose()).is_zero()){
     cout<<"(Gx*Cz.transpose()) is not zero"<<endl;return false;
@@ -153,6 +154,66 @@ int reduce(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int 
           	     kron(Gax,Cbx)
 								  )
 						);
+  //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
+  /*  int daz = quantum_dist(Gax,Gaz,ddaz,1);
+  cout<<"daz="<<daz<<",ddaz="<<ddaz<<endl;
+  int dbz = quantum_dist(Gbx,Gbz,ddbz,1);
+  cout<<"dbz="<<dbz<<",ddbz="<<ddbz<<endl;*/
+  /*  if (is_quantum_code(Gcx,Gcz) ){
+    cout<<"C is a quantum Code."<<endl;
+    }*/
+  int daz=ddaz,dbz=ddbz;
+  int dcz = quantum_dist(Gcx,Gcz,daz*dbz,1);//donot use estimated value ddaz and ddbz
+  if (dcz == daz*dbz){
+    cout<<"dcz = daz*dbz = "<<dcz<<endl;
+  }else if(dcz == INF) {
+    cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<endl;
+  }else{
+    cout<<"-------------------------------------------------------------counter example CASE: daz*dbz="<<daz*dbz<<", dcz="<<dcz<<endl;
+  }
+  return 0;
+  
+}
+
+
+// a version include both reduce and concatenation
+// mode=1 for reduce/subsystem product
+// mode=2 for concatenation
+//only dz is checked cause dx is known to be tight
+int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz, int mode){
+  //construct code C and calculate the distance; Compare it with the input (estimated) value
+  cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;
+  int na=Gax.cols(),nb=Gbx.cols();//,nc=na*nb;//size of the codes
+
+  GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
+  GF2mat Caz=getC(Gax,Gaz,1),Cbz=getC(Gbx,Gbz,1);//This line doesn't allow C to be empty  
+  
+  //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
+  /*//check Cax
+  if ( (Gaz*Cax.transpose()).is_zero() ){
+      cout<<"Good Cax"<<endl;
+      }*/
+  GF2mat Gcx,Gcz;
+  switch ( mode ){
+  case 1://reduce/subsystem product
+    Gcz = kron(Gaz,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
+    Gcx=kron(Gax,Gbx).concatenate_vertical(
+					   kron(Cax,Gbx).concatenate_vertical(
+									      kron(Gax,Cbx)
+									      ));
+    break;
+  case 2://concatenation
+    Gcz = kron(Gaz,Cbz).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
+  //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
+
+  /*//check Cax
+  if ( (Gaz*Cax.transpose()).is_zero() ){
+      cout<<"Good Cax"<<endl;
+      }*/
+    Gcx=kron(gf2dense_eye(na),Gbx).concatenate_vertical( kron(Gax,Cbx)   );
+    break;
+  }  
+
   //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
   /*  int daz = quantum_dist(Gax,Gaz,ddaz,1);
   cout<<"daz="<<daz<<",ddaz="<<ddaz<<endl;

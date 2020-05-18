@@ -5,7 +5,7 @@
 using namespace itpp;
 
 //int GF2mat_to_MM(GF2mat G, char* file_name="mm_temp.dat");
-int GF2mat_to_MM(GF2mat G, char* file_name);
+int GF2mat_to_MM(GF2mat G, char* file_name, int debug=0);
 
 //int mat_to_MM(mat G, char* file_name="mm_temp.dat");
 int mat_to_MM(mat G, char* file_name);
