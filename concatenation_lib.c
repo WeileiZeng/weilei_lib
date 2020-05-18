@@ -52,6 +52,35 @@ bool is_quantum_code(GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
   return 0;
   }*/
 
+GF2mat remove_col(GF2mat G, int col){
+  int n = G.cols();
+  if ( col ==0 ) return G.get_submatrix(0,1,G.rows()-1,G.cols()-1);
+  if ( col == n-1 ) return G.get_submatrix(0,0,G.rows()-1,G.cols()-2);
+  return G.get_submatrix(0,0,G.rows()-1,col-1).concatenate_horizontal(
+								      G.get_submatrix(0,col+1,G.rows()-1,G.cols()-1)
+								      );  
+}
+
+void remove_singleton(GF2mat &Gx, GF2mat &Gz){
+  //remove zero columns in Gx and Gz
+  int n = Gx.cols();
+  bvec to_remove(n);//1 fro remove, 0 remain  
+  for ( int i=0;i<n;i++){
+    if (GF2mat(Gx.get_col(i)).is_zero()) to_remove.set(i,1);
+    if (GF2mat(Gz.get_col(i)).is_zero()) to_remove.set(i,1);
+  }
+  for ( int i=0;i<n;i++){
+    if ( to_remove(n-i-1) ){
+	Gx=remove_col(Gx,n-i-1);
+	Gz=remove_col(Gz,n-i-1);
+      }
+  }
+  Gx=make_it_full_rank(Gx);
+  Gz=make_it_full_rank(Gz);
+  cout<<"singleton removed"<<endl;
+  return;
+}
+
 int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
 
   Gx = GF2mat(Gx_row,n);
@@ -77,6 +106,7 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   //  GF2matPrint(Gz,"Gz");
   //  GF2matPrint(Cz,"Cz");
   Gx = nullSpace(Gz).get_submatrix(0,0,Gx_row-1,n-1);
+  //  remove_singleton(Gx,Gz);
   Cx=getC(Gx,Gz);
   Cz=getC(Gx,Gz,1);
   //  if (! is_quantum_code(Gx,Gz,Cx,Cz)) throw "invalid code";
@@ -96,13 +126,13 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2ma
       int dz = quantum_dist_v2(Gx_temp,Gz_temp,1);
       if (dz >1 ){
 	Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
-	if (debug) cout<<"get good code when i ="<<i<<endl;
+	if (debug) cout<<blue_text("get good code when i =")<<i<<endl;
 	return 0;
       }
     }
   }
   Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
-  cout<<color_text("didn't find good code")<<endl;
+  if ( debug) cout<<color_text("didn't find good code")<<endl;
   return 0;
 }
 

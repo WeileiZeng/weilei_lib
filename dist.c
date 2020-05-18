@@ -132,9 +132,17 @@ GF2mat getC(GF2mat G_x,GF2mat G_z,int flip){
     cout<<"getC(): It is not a quantum code:zero rank for codeword space"<<endl;
     //    return;
   }
+  if ( G_x.cols()-rank_of_G_z-rank_of_G_x < 1){
+    cout<<"empty code space"<<endl;
+    throw "empty code space";
+  }
+  GF2matPrint(G_x,"G_x");
+  GF2matPrint(U,"U");
   GF2mat C = U.get_submatrix(rank_of_G_x,0,rank_of_Q-1,G_x.cols()-1 );
+  
   C.permute_cols(P,true);//codewords/logical group 
   //check  if ((G_z*C.transpose()).is_zero() ){    cout<<"GOOD C"<<endl;  }
+  cout<<"get C"<<endl;
   return C;
 }
 
