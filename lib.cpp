@@ -136,6 +136,18 @@ int mat2gnudata(mat data, string filename, string header){
   return 0;	      
 }
 
+/*
+         foreground background
+black        30         40
+red          31         41
+green        32         42
+yellow       33         43
+blue         34         44
+magenta      35         45
+cyan         36         46
+white        37         47
+*/
+
 
 string color_text(string str){
   //return text in red color
