@@ -39,4 +39,15 @@ double get_error_density(GF2mat E);
 //save mat into gnuplot data file, with a custom comment as header
 int mat2gnudata(mat data, string filename, string header);
 
+
+string color_text(string str);
+//return red string. same as red_text
+
+string red_text(string str);
+//return red string
+
+string blue_text(string str);
+//return blue string
+
+
 #endif

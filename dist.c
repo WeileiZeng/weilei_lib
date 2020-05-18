@@ -335,11 +335,7 @@ int hypergraph_dist(GF2mat Aj, GF2mat Ajplus,int dist_expected,int flip){
 }
 
 
-string color_text(string str){
-  //return text in red color
-  string color = "\033[1;31m"+str+"\033[0m";
-  return color;
-}
+
 
 int draw_toric_x_error(bvec error_bits){
   //  cout<<"draw with weight = "<<weight(error_bits)<<endl;

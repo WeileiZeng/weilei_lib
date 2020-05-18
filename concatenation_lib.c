@@ -17,12 +17,15 @@ using namespace std;
 bool is_quantum_code(GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
   if (!(Gx*Gz.transpose()).is_zero()){
     cout<<"(Gx*Gz.transpose()) is not zero"<<endl;
+    //    throw "(Gx*Gz.transpose()) is not zero";
     return false;
   }
   if (!(Gx*Cz.transpose()).is_zero()){
+    //    throw "(Gx*Cz.transpose()) is not zero";
     cout<<"(Gx*Cz.transpose()) is not zero"<<endl;return false;
   }
   if (!(Gz*Cx.transpose()).is_zero()){
+    //    throw "(Gz*Cx.transpose()) is not zero";
     cout<<"(Gz*Cx.transpose()) is not zero"<<endl;return false;
   }
   int rank_of_Gx=Gx.row_rank();
@@ -60,8 +63,8 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   
   GF2mat T,U; ivec P;
   int rank_of_Gx = Gx.transpose().T_fact(T,U,P);
-  //  GF2matPrint(T,"T");
   GF2mat Q=T.get_submatrix(rank_of_Gx,0,n-1,n-1);
+  
   //  Q.permute_cols(P,true); no need for T, only need for U which is not used here
   //  GF2matPrint(Q,"Q");
   GF2mat alpha(Gz_row,Q.rows()); //a random binary matrix to select G_z
@@ -76,13 +79,15 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   Gx = nullSpace(Gz).get_submatrix(0,0,Gx_row-1,n-1);
   Cx=getC(Gx,Gz);
   Cz=getC(Gx,Gz,1);
+  //  if (! is_quantum_code(Gx,Gz,Cx,Cz)) throw "invalid code";
   return 0;
 }
 
-int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz){
+int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2mat &Cx,GF2mat &Cz, int debug){
+  // return best codes among multip trial
   //repeat multiple times to get the best distance
   GF2mat Gx_temp, Gz_temp,Cx_temp,Cz_temp;
-  for ( int i =0; i<10; i++){
+  for ( int i =0; i<10000; i++){
 
     getRandomQuantumCode( n, Gx_row,Gz_row, Gx_temp, Gz_temp,Cx_temp,Cz_temp);
     //check distance and update if get larger distance
@@ -91,11 +96,13 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2ma
       int dz = quantum_dist_v2(Gx_temp,Gz_temp,1);
       if (dz >1 ){
 	Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
+	if (debug) cout<<"get good code when i ="<<i<<endl;
 	return 0;
       }
     }
   }
   Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
+  cout<<color_text("didn't find good code")<<endl;
   return 0;
 }
 

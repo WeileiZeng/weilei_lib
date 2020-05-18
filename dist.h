@@ -38,8 +38,7 @@ int hypergraph_dist(GF2mat Aj, GF2mat Ajplus,int dist_expected,int flip=0);
 
 //following functions for bp_new, Belief Propagation decoder.
 
-string color_text(string str);
-//return red string
+
 
 int draw_toric_x_error(bvec error_bits);
 //draw the lattice, with error bond in red

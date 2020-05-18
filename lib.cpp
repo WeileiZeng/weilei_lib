@@ -135,3 +135,20 @@ int mat2gnudata(mat data, string filename, string header){
   fclose(fout);
   return 0;	      
 }
+
+
+string color_text(string str){
+  //return text in red color
+  return red_text(str);
+}
+
+string red_text(string str){
+  //return text in red color
+  return "\033[1;31m"+str+"\033[0m";
+}
+
+string blue_text(string str){
+  //return text in blue color
+  return "\033[1;39m"+str+"\033[0m";
+}
+
