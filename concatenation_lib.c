@@ -271,7 +271,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     if (debug) cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<endl;
     return 1;
   }else{
-    cout<<red_text("counter example")<<" CASE: daz*dbz="<<daz*dbz<<", dcz="<<dcz;
+    cout<<red_text("CASE:")<<" daz*dbz="<<daz*dbz<<", dcz="<<dcz;
     cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
     return 2;
   }

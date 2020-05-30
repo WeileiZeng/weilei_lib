@@ -89,7 +89,7 @@ int classical_dist(GF2mat G){
   ivec P;
   int rank_of_G = G.transpose().T_fact(T,U,P);
   if ( rank_of_G == G.cols()  ){
-    return 999;//999 for infinity
+    return INF;//999;//999 for infinity
   }
   GF2mat H = T.get_submatrix(rank_of_G,0,G.cols()-1,G.cols()-1);
   if (H.rows()<7){//use true min wt decoding for small codes.
@@ -190,7 +190,7 @@ int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip){//without expected value
 int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int debug, int flip){
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
-  int trialQ=1000;//50000;//1000;permute GQ this max amount of time
+  int trialQ=10000;//50000;//1000;permute GQ this max amount of time
   int trialQflag=1;//a flag to adjust the max amount of permutation
   
   if (flip==1){//flip G_x and G_z
