@@ -234,7 +234,31 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       }*/
   GF2mat Gcx,Gcz;
   switch ( mode ){
-  case 1://reduce/subsystem product
+  case 0://reduce/subsystem product, x distance
+    
+    Gcx = kron(Gax,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbx));
+    Gcz=kron(Gaz,Gbz).concatenate_vertical(
+					   kron(Caz,Gbz).concatenate_vertical(
+									      kron(Gaz,Cbz)
+									      ));
+    {
+    int dax=ddax,dbx=ddbx;
+    int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
+    if (debug) cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+    if (dcx == dax*dbx){
+      if (debug) cout<<"dcx = dax*dbx = "<<dcx<<endl;
+      return 0;
+    }else if(dcx == INF) {
+      if (debug) cout<<"dcx = "<<dcx<<", dax = "<<dax<<", dbx = "<<dbx<<endl;
+      return 1;
+    }else{
+      cout<<red_text("CASE:")<<" dax*dbx="<<dax*dbx<<", dcx="<<dcx;
+      cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+      return 2;
+    }
+    }
+    break;
+  case 1://reduce/subsystem product, z distance
     Gcz = kron(Gaz,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
     Gcx=kron(Gax,Gbx).concatenate_vertical(
 					   kron(Cax,Gbx).concatenate_vertical(
