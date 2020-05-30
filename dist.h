@@ -27,7 +27,7 @@ GF2mat getC(GF2mat G_x,GF2mat G_z,int flip=0);//return C_x or C_z if flip=1
 
 int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip=0);//without expectation value
 
-int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int flip=0);
+int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int debug, int flip=0);
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1  
 

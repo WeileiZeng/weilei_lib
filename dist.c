@@ -136,13 +136,13 @@ GF2mat getC(GF2mat G_x,GF2mat G_z,int flip){
     cout<<"empty code space"<<endl;
     throw "empty code space";
   }
-  GF2matPrint(G_x,"G_x");
-  GF2matPrint(U,"U");
+  //  GF2matPrint(G_x,"G_x");
+  //  GF2matPrint(U,"U");
   GF2mat C = U.get_submatrix(rank_of_G_x,0,rank_of_Q-1,G_x.cols()-1 );
   
   C.permute_cols(P,true);//codewords/logical group 
   //check  if ((G_z*C.transpose()).is_zero() ){    cout<<"GOOD C"<<endl;  }
-  cout<<"get C"<<endl;
+  //  cout<<"get C"<<endl;
   return C;
 }
 
@@ -187,11 +187,11 @@ int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip){//without expected value
   }
   return min_wt;
 }
-int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int flip){
+int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int debug, int flip){
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
   int trialQ=1000;//50000;//1000;permute GQ this max amount of time
-  int trialQflag=1;//a falg to control the max amout of permutation
+  int trialQflag=1;//a flag to adjust the max amount of permutation
   
   if (flip==1){//flip G_x and G_z
     GF2mat temp=G_x;    G_x=G_z;    G_z=temp;
@@ -232,16 +232,18 @@ int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int flip){
     }
     if (trialQflag) {//adjust the max number of permutation, only do this once
         if (min_wt <= dist_expected){
-	  cout<<"reach min distance when iq = "<<iq<<endl;
 	  trialQflag=0;
+	  // continue to run to see if smaller distance can be achieved.
 	  if (iq<3) {
 	    //  cout<<"wt: "<<min_wt<<","<<dist_expected<<endl;
-	    trialQ=4;
-	  }	  else {trialQ = 4*iq;}
+	    trialQ=10;
+	  } else {
+	    trialQ = 4*iq;
+	  }
+	  if (debug) cout<<"quantum_dist: reach min distance when iq = "<<iq<<", continue to run with trialQ = "<<trialQ<<endl;
 	}
     }
   }
-  cout<<"--------trialQ = "<<trialQ<<"--------";
   return min_wt;
 }
 

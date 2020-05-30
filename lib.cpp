@@ -161,6 +161,6 @@ string red_text(string str){
 
 string blue_text(string str){
   //return text in blue color
-  return "\033[1;39m"+str+"\033[0m";
+  return "\033[1;34m"+str+"\033[0m";
 }
 
