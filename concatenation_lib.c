@@ -244,7 +244,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     {
     int dax=ddax,dbx=ddbx;
     int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
-    if (debug) cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+    if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
     if (dcx == dax*dbx){
       if (debug) cout<<"dcx = dax*dbx = "<<dcx<<endl;
       return 0;
@@ -253,7 +253,8 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       return 1;
     }else{
       cout<<red_text("CASE:")<<" dax*dbx="<<dax*dbx<<", dcx="<<dcx;
-      cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
+      cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
+      cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
       return 2;
     }
     }
@@ -287,7 +288,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     }*/
   int daz=ddaz,dbz=ddbz;
   int dcz = quantum_dist(Gcx,Gcz,daz*dbz,debug,1);//donot use estimated value ddaz and ddbz
-  if (debug) cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+  if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
   if (dcz == daz*dbz){
     if (debug) cout<<"dcz = daz*dbz = "<<dcz<<endl;
     return 0;
@@ -296,7 +297,8 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     return 1;
   }else{
     cout<<red_text("CASE:")<<" daz*dbz="<<daz*dbz<<", dcz="<<dcz;
-    cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
+    cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";
+    cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";    
     return 2;
   }
   return 0;
