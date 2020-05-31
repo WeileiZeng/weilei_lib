@@ -253,7 +253,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       return 1;
     }else{
       cout<<red_text("CASE:")<<" dax*dbx="<<dax*dbx<<", dcx="<<dcx;
-      cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+      cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
       return 2;
     }
     }
@@ -296,7 +296,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     return 1;
   }else{
     cout<<red_text("CASE:")<<" daz*dbz="<<daz*dbz<<", dcz="<<dcz;
-    cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+    cout<<". estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
     return 2;
   }
   return 0;
