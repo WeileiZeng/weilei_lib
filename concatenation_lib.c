@@ -252,7 +252,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       if (debug) cout<<"dcx = "<<dcx<<", dax = "<<dax<<", dbx = "<<dbx<<endl;
       return 1;
     }else{
-      if (dcz > daz*dbz) cout<<"PSEUDO ";
+      if (dcx > dax*dbx) cout<<"PSEUDO ";
       cout<<red_text("CASE:")<<" dax*dbx="<<dax*dbx<<", dcx="<<dcx;
       cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
       cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
