@@ -235,16 +235,17 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     
     Gcx = kron(Gax,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbx));
     Gcz=kron(Gaz,Gbz).concatenate_vertical(
-					   kron(Caz,Gbz).concatenate_vertical(
-									      kron(Gaz,Cbz)
-									      ));
+					   kron(Caz,Gbz)
+					   .concatenate_vertical(kron(Gaz,Cbz))
+					   );
     break;
   case 1://reduce/subsystem product, z distance
     Gcz = kron(Gaz,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
-    Gcx=kron(Gax,Gbx).concatenate_vertical(
-					   kron(Cax,Gbx).concatenate_vertical(
-									      kron(Gax,Cbx)
-									      ));
+    Gcx=kron(Gax,Gbx)
+      .concatenate_vertical(
+			    kron(Cax,Gbx)
+			    .concatenate_vertical(kron(Gax,Cbx))
+			    );
     break;
   case 2://concatenation
     Gcz = kron(Gaz,Cbz).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
@@ -255,48 +256,32 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
   case 4:
     {
     // chain complex to two CSS codes.
-    Gcx=kron(
-	     Gaz.transpose(), gf2dense_eye(Gbx.rows())
-	     ).concatenate_horizontal(
-				      kron(gf2dense_eye(Gax.cols()),Gbx)
-				      ).concatenate_horizontal(
-							       kron(GF2mat(Gax.cols(),Gax.rows()),GF2mat(Gbx.rows(),Gbz.rows()))
-							       );
-    Gcx = Gcx.concatenate_vertical(
-				   kron(
-					GF2mat(Gax.rows(),Gaz.rows()),GF2mat(Gbx.cols(),Gbx.rows())
-					).concatenate_horizontal(
-								 kron(Gax, gf2dense_eye(Gbx.cols()))
-								 ).concatenate_horizontal(
-											  kron(gf2dense_eye(Gax.rows()),Gbz.transpose())
-											  )
-				   );
-    Gcz=kron(
-	     gf2dense_eye(Gaz.rows()), Gbx.transpose()
-	     ).concatenate_horizontal(
-				      kron(Gaz,gf2dense_eye(Gbx.cols()))
-				      ).concatenate_horizontal(
-							       kron(GF2mat(Gaz.rows(),Gax.rows()),GF2mat(Gbz.cols(),Gbz.rows()))
-							       );
-    Gcz=Gcz.concatenate_vertical(
-				 kron(
-				      GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() )
-				      ).concatenate_horizontal(
-							       kron(gf2dense_eye(Gaz.cols()),Gbz)
-							       ).concatenate_horizontal(
-											kron(Gax.transpose(),gf2dense_eye(Gbz.rows()))
-											)
-				 );
+    Gcx=kron(Gaz.transpose(), gf2dense_eye(Gbx.rows()))
+      .concatenate_horizontal(kron(gf2dense_eye(Gax.cols()),Gbx))
+      .concatenate_horizontal(kron(GF2mat(Gax.cols(),Gax.rows()),GF2mat(Gbx.rows(),Gbz.rows())));
+    Gcx = Gcx
+      .concatenate_vertical(
+			    kron(GF2mat(Gax.rows(),Gaz.rows()),GF2mat(Gbx.cols(),Gbx.rows()))
+			    .concatenate_horizontal(kron(Gax, gf2dense_eye(Gbx.cols())))
+			    .concatenate_horizontal(kron(gf2dense_eye(Gax.rows()),Gbz.transpose()))
+			    );
+    Gcz=kron(gf2dense_eye(Gaz.rows()), Gbx.transpose())
+      .concatenate_horizontal(kron(Gaz,gf2dense_eye(Gbx.cols())))
+      .concatenate_horizontal(kron(GF2mat(Gaz.rows(),Gax.rows()),GF2mat(Gbz.cols(),Gbz.rows())));
+    Gcz=Gcz
+      .concatenate_vertical(
+			    kron(GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() ))
+			    .concatenate_horizontal(kron(gf2dense_eye(Gaz.cols()),Gbz))
+			    .concatenate_horizontal(kron(Gax.transpose(),gf2dense_eye(Gbz.rows())))
+			    );
     
-
-
     }
     break;
 
   }  
 
 
-  int flag_dist_flip;
+  int flag_dist_flip=1;
   switch ( mode ){
   case 0:
   case 4:
