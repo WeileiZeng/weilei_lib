@@ -242,22 +242,22 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 									      kron(Gaz,Cbz)
 									      ));
     {
-    int dax=ddax,dbx=ddbx;
-    int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
-    if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
-    if (dcx == dax*dbx){
-      if (debug) cout<<"dcx = dax*dbx = "<<dcx<<endl;
-      return 0;
-    }else if(dcx == INF) {
-      if (debug) cout<<"dcx = "<<dcx<<", dax = "<<dax<<", dbx = "<<dbx<<endl;
-      return 1;
-    }else{
-      if (dcx > dax*dbx) cout<<"PSEUDO ";
-      cout<<red_text("CASE:")<<" dax*dbx="<<dax*dbx<<", dcx="<<dcx;
-      cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
-      cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
-      return 2;
-    }
+      int dax=ddax,dbx=ddbx;
+      int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
+      if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+      if (dcx == dax*dbx){
+	if (debug) cout<<"dcx = dax*dbx = "<<dcx<<endl;
+	return 0;
+      }else if(dcx == INF) {
+	if (debug) cout<<"dcx = "<<dcx<<", dax = "<<dax<<", dbx = "<<dbx<<endl;
+	return 1;
+      }else{
+	if (dcx > dax*dbx) cout<<"PSEUDO ";
+	cout<<red_text("CASE: ")<<"mode("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
+	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
+	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
+	return 2;
+      }
     }
     break;
   case 1://reduce/subsystem product, z distance
@@ -371,7 +371,27 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       GF2matPrint(Gcx,"Gcx");
       GF2matPrint(Gcz,"Gcz");
     }
-  }
+
+    {
+      int dax=ddax,dbx=ddbx;
+      int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
+      if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+      if (dcx == dax*dbx){
+	if (debug) cout<<"dcx = dax*dbx = "<<dcx<<endl;
+	return 0;
+      }else if(dcx == INF) {
+	if (debug) cout<<"dcx = "<<dcx<<", dax = "<<dax<<", dbx = "<<dbx<<endl;
+	return 1;
+      }else{
+	if (dcx > dax*dbx) cout<<"PSEUDO ";
+	cout<<red_text("CASE:")<<"mode("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
+	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
+	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
+	return 2;
+      }
+    }
+
+    }
     break;
 
   }  
@@ -395,7 +415,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     return 1;
   }else{
     if (dcz > daz*dbz) cout<<"PSEUDO ";
-    cout<<red_text("CASE:")<<" daz*dbz="<<daz*dbz<<", dcz="<<dcz;
+    cout<<red_text("CASE:")<<"mode("<<mode<<") daz*dbz="<<daz*dbz<<", dcz="<<dcz;
     cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";
     cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";    
     return 2;

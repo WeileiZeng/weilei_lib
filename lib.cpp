@@ -37,10 +37,19 @@ GF2mat make_it_full_rank(GF2mat fat){
   return thin;
 }
 
-int GF2matPrint(GF2mat G,char * name){
+/*
+int GF2matPrint(GF2mat &G,char * name){
   //print brief information of G
   cout<<"GF2mat "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<"), density = "
       <<G.density()<<endl;
+  return 0;
+}
+*/
+int GF2matPrint(GF2mat &G, string name){
+  //print brief information of G
+  //GF2matPrint(G, name.c_str());
+    cout<<"GF2mat "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<"), density = "
+    <<G.density()<<endl;
   return 0;
 }
 

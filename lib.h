@@ -16,7 +16,8 @@ bool is_quantum_code(GF2mat G_x, GF2mat G_z);
 GF2mat make_it_full_rank(GF2mat fat);
   //reduce a fat matrix with degenerate rows to a thin matrix with full rank; remove the dependent rows 
 
-int GF2matPrint(GF2mat G, char * name = (char *) " ");//print brief infomation of G
+//int GF2matPrint(GF2mat &G, char * name = (char *) " ");//print brief infomation of G
+int GF2matPrint(GF2mat &G, string name);
 int matPrint(mat G, char * name = (char *) " ");//print brief infomation of G
 
 
