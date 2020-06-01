@@ -227,13 +227,9 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
   GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
   GF2mat Caz=getC(Gax,Gaz,1),Cbz=getC(Gbx,Gbz,1);//This line doesn't allow C to be empty  
   
-  //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
-  /*//check Cax
-  if ( (Gaz*Cax.transpose()).is_zero() ){
-      cout<<"Good Cax"<<endl;
-      }*/
+  //  Gcz=make_it_full_rank(Gcz);//not needed for calculating distance
   GF2mat Gcx,Gcz;
-  int flag_dist_flip=1;
+
   switch ( mode ){
   case 0://reduce/subsystem product, x distance
     
@@ -242,28 +238,6 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 					   kron(Caz,Gbz).concatenate_vertical(
 									      kron(Gaz,Cbz)
 									      ));
-    /*    flag_dist_flip=0;
-    {
-      //      if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
-      int dax=ddax,dbx=ddbx;
-      int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
-      if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
-      if (dcx == dax*dbx){
-	if (debug) cout<<"dcx = dax*dbx = "<<dcx<<endl;
-	return 0;
-      }else if(dcx == INF) {
-	if (debug) cout<<"dcx = "<<dcx<<", dax = "<<dax<<", dbx = "<<dbx<<endl;
-	return 1;
-      }else{
-	if (dcx > dax*dbx) cout<<"PSEUDO ";
-	cout<<red_text("CASE: ")<<"mode ("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
-	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
-	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
-	return 2;
-      }
-
-    }
-    */
     break;
   case 1://reduce/subsystem product, z distance
     Gcz = kron(Gaz,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
@@ -274,65 +248,12 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     break;
   case 2://concatenation
     Gcz = kron(Gaz,Cbz).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
-  //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
-
-  /*//check Cax
-  if ( (Gaz*Cax.transpose()).is_zero() ){
-      cout<<"Good Cax"<<endl;
-      }*/
     Gcx=kron(gf2dense_eye(na),Gbx).concatenate_vertical( kron(Gax,Cbx)   );
     break;
   case 3:
     // chain complex to two CSS codes.
-    /*
-    {
-    Gcx=kron(
-	     Gaz.transpose(), gf2dense_eye(Gbx.rows())
-	     ).concatenate_horizontal(
-				      kron(gf2dense_eye(Gax.cols()),Gbx)
-				      ).concatenate_horizontal(
-							       kron(GF2mat(Gax.cols(),Gax.rows()),GF2mat(Gbx.rows(),Gbz.rows()))
-							       );
-
-    //    if (debug)    GF2matPrint(Gcx,"Gcx");
-    Gcx = Gcx.concatenate_vertical(
-				   kron(
-					GF2mat(Gax.rows(),Gaz.rows()),GF2mat(Gbx.cols(),Gbx.rows())
-					).concatenate_horizontal(
-								 kron(Gax, gf2dense_eye(Gbx.cols()))
-								 ).concatenate_horizontal(
-											  kron(gf2dense_eye(Gax.rows()),Gbz.transpose())
-											  )
-				   );
-    //    if (debug)    GF2matPrint(Gcx,"Gcx");
-    Gcz=kron(
-	     gf2dense_eye(Gaz.rows()), Gbx.transpose()
-	     ).concatenate_horizontal(
-				      kron(Gaz,gf2dense_eye(Gbx.cols()))
-				      ).concatenate_horizontal(
-							       kron(GF2mat(Gaz.rows(),Gax.rows()),GF2mat(Gbz.cols(),Gbz.rows()))
-							       );
-    //    if (debug)    GF2matPrint(Gcz,"Gcz");
-    Gcz=Gcz.concatenate_vertical(
-				 kron(
-				      GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() )
-				      ).concatenate_horizontal(
-							       kron(gf2dense_eye(Gaz.cols()),Gbz)
-							       ).concatenate_horizontal(
-											kron(Gax.transpose(),gf2dense_eye(Gbz.rows()))
-											)
-				 );
-    
-    if (debug){
-      GF2matPrint(Gcx,"Gcx");
-      GF2matPrint(Gcz,"Gcz");
-    }
-  }
-    */
-    //break;
   case 4:
     {
-    //switch Gcx and Gcz in case 3
     // chain complex to two CSS codes.
     Gcx=kron(
 	     Gaz.transpose(), gf2dense_eye(Gbx.rows())
@@ -367,14 +288,6 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 											)
 				 );
     
-
-
-    /*GF2mat tempG;
-    tempG=Gcx;
-    Gcx=Gcz;
-    Gcz=tempG;*/
-    //    flag_dist_flip=0;
-
 
 
     }
@@ -382,6 +295,8 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 
   }  
 
+
+  int flag_dist_flip;
   switch ( mode ){
   case 0:
   case 4:
