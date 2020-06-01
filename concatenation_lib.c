@@ -317,7 +317,10 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 											)
 				 );
     
-    if (debug)    GF2matPrint(Gcz,"Gcz");
+    if (debug){
+      GF2matPrint(Gcx,"Gcx");
+      GF2matPrint(Gcz,"Gcz");
+    }
   }
     break;
   case 4:
@@ -331,7 +334,6 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 				      ).concatenate_horizontal(
 							       kron(GF2mat(Gax.cols(),Gax.rows()),GF2mat(Gbx.rows(),Gbz.rows()))
 							       );
-    GF2matPrint(Gcx,"Gcx");
     Gcx = Gcx.concatenate_vertical(
 				   kron(
 					GF2mat(Gax.rows(),Gaz.rows()),GF2mat(Gbx.cols(),Gbx.rows())
@@ -341,7 +343,6 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 											  kron(gf2dense_eye(Gax.rows()),Gbz.transpose())
 											  )
 				   );
-    GF2matPrint(Gcx,"Gcx");
     Gcz=kron(
 	     gf2dense_eye(Gaz.rows()), Gbx.transpose()
 	     ).concatenate_horizontal(
@@ -349,20 +350,6 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 				      ).concatenate_horizontal(
 							       kron(GF2mat(Gaz.rows(),Gax.rows()),GF2mat(Gbz.cols(),Gbz.rows()))
 							       );
-    GF2matPrint(Gcz,"Gcz");
-    GF2mat temp;
-    temp= kron(
-	       GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() )
-	       );
-    GF2matPrint(temp,"temp1");
-    /*    temp=temp.concatenate_horizontal(
-				     kron(gf2dense_eye(Gaz.cols()),Gbz)
-				     );*/
-    temp= kron(gf2dense_eye(Gaz.cols()),Gbz);
-
-    GF2matPrint(temp,"temp2");
-    temp = kron(Gax.transpose(),gf2dense_eye(Gbz.rows()));
-    GF2matPrint(temp,"temp3");
     Gcz=Gcz.concatenate_vertical(
 				 kron(
 				      GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() )
@@ -373,12 +360,17 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 											)
 				 );
     
-    GF2matPrint(Gcz,"Gcz");
+
 
     GF2mat tempG;
     tempG=Gcx;
     Gcx=Gcz;
     Gcz=tempG;
+
+    if (debug){
+      GF2matPrint(Gcx,"Gcx");
+      GF2matPrint(Gcz,"Gcz");
+    }
   }
     break;
 
