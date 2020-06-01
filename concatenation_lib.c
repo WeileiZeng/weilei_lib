@@ -233,6 +233,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       cout<<"Good Cax"<<endl;
       }*/
   GF2mat Gcx,Gcz;
+  int flag_dist_flip=1;
   switch ( mode ){
   case 0://reduce/subsystem product, x distance
     
@@ -241,6 +242,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 					   kron(Caz,Gbz).concatenate_vertical(
 									      kron(Gaz,Cbz)
 									      ));
+    /*    flag_dist_flip=0;
     {
       //      if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
       int dax=ddax,dbx=ddbx;
@@ -254,12 +256,14 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 	return 1;
       }else{
 	if (dcx > dax*dbx) cout<<"PSEUDO ";
-	cout<<red_text("CASE: ")<<"mode("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
+	cout<<red_text("CASE: ")<<"mode ("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
 	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
 	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
 	return 2;
       }
+
     }
+    */
     break;
   case 1://reduce/subsystem product, z distance
     Gcz = kron(Gaz,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
@@ -280,6 +284,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     break;
   case 3:
     // chain complex to two CSS codes.
+    /*
     {
     Gcx=kron(
 	     Gaz.transpose(), gf2dense_eye(Gbx.rows())
@@ -323,7 +328,8 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       GF2matPrint(Gcz,"Gcz");
     }
   }
-    break;
+    */
+    //break;
   case 4:
     {
     //switch Gcx and Gcz in case 3
@@ -363,16 +369,55 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     
 
 
-    GF2mat tempG;
+    /*GF2mat tempG;
     tempG=Gcx;
     Gcx=Gcz;
-    Gcz=tempG;
+    Gcz=tempG;*/
+    //    flag_dist_flip=0;
 
-    if (debug){
-      GF2matPrint(Gcx,"Gcx");
-      GF2matPrint(Gcz,"Gcz");
+
+
     }
+    break;
 
+  }  
+
+  switch ( mode ){
+  case 0:
+  case 4:
+    //x distance
+    flag_dist_flip=0;
+    break;
+  case 1:
+  case 2:
+  case 3:
+    // z distance
+    flag_dist_flip=1;
+    break;
+  }
+
+  if (debug){GF2matPrint(Gcx,"Gcx"); GF2matPrint(Gcz,"Gcz");}
+
+  if ( ! (Gcx*Gcz.transpose()).is_zero() ){
+    cout<<"concatenation_lib: not a quantum code "<<endl;
+    throw "not a quantum code";
+  }else{
+    if ( debug) cout<<"mode ("<<mode<<") is quantum code"<<endl;
+  }
+
+  //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
+  /*  int daz = quantum_dist(Gax,Gaz,ddaz,1);
+  cout<<"daz="<<daz<<",ddaz="<<ddaz<<endl;
+  int dbz = quantum_dist(Gbx,Gbz,ddbz,1);
+  cout<<"dbz="<<dbz<<",ddbz="<<ddbz<<endl;*/
+  /*  if (is_quantum_code(Gcx,Gcz) ){
+    cout<<"C is a quantum Code."<<endl;
+    }*/
+  //  if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
+
+  switch ( flag_dist_flip ){
+  case 0:
+    //x distance
     {
       //  if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
       int dax=ddax,dbx=ddbx;
@@ -386,42 +431,34 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 	return 1;
       }else{
 	if (dcx > dax*dbx) cout<<"PSEUDO ";
-	cout<<red_text("CASE:")<<"mode("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
+	cout<<red_text("CASE:")<<" mode ("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
 	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
 	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
 	return 2;
       }
     }
 
-    }
     break;
-
-  }  
-
-  //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
-  /*  int daz = quantum_dist(Gax,Gaz,ddaz,1);
-  cout<<"daz="<<daz<<",ddaz="<<ddaz<<endl;
-  int dbz = quantum_dist(Gbx,Gbz,ddbz,1);
-  cout<<"dbz="<<dbz<<",ddbz="<<ddbz<<endl;*/
-  /*  if (is_quantum_code(Gcx,Gcz) ){
-    cout<<"C is a quantum Code."<<endl;
-    }*/
-  //  if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
-  int daz=ddaz,dbz=ddbz;
-  int dcz = quantum_dist(Gcx,Gcz,daz*dbz,debug,1);//donot use estimated value ddaz and ddbz
-  if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
-  if (dcz == daz*dbz){
-    if (debug) cout<<"dcz = daz*dbz = "<<dcz<<endl;
-    return 0;
-  }else if(dcz == INF) {
-    if (debug) cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<endl;
-    return 1;
-  }else{
-    if (dcz > daz*dbz) cout<<"PSEUDO ";
-    cout<<red_text("CASE:")<<"mode("<<mode<<") daz*dbz="<<daz*dbz<<", dcz="<<dcz;
-    cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";
-    cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";    
-    return 2;
+  case 1:
+    //z distance
+    {
+      int daz=ddaz,dbz=ddbz;
+      int dcz = quantum_dist(Gcx,Gcz,daz*dbz,debug,1);//donot use estimated value ddaz and ddbz
+      if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
+      if (dcz == daz*dbz){
+	if (debug) cout<<"dcz = daz*dbz = "<<dcz<<endl;
+	return 0;
+      }else if(dcz == INF) {
+	if (debug) cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<endl;
+	return 1;
+      }else{
+	if (dcz > daz*dbz) cout<<"PSEUDO ";
+	cout<<red_text("CASE:")<<" mode ("<<mode<<") daz*dbz="<<daz*dbz<<", dcz="<<dcz;
+	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";
+	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";    
+	return 2;
+      }
+    }
   }
   return 0;
   
