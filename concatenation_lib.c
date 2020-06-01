@@ -277,6 +277,111 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       }*/
     Gcx=kron(gf2dense_eye(na),Gbx).concatenate_vertical( kron(Gax,Cbx)   );
     break;
+  case 3:
+    // chain complex to two CSS codes.
+    {
+    Gcx=kron(
+	     Gaz.transpose(), gf2dense_eye(Gbx.rows())
+	     ).concatenate_horizontal(
+				      kron(gf2dense_eye(Gax.cols()),Gbx)
+				      ).concatenate_horizontal(
+							       kron(GF2mat(Gax.cols(),Gax.rows()),GF2mat(Gbx.rows(),Gbz.rows()))
+							       );
+
+    //    if (debug)    GF2matPrint(Gcx,"Gcx");
+    Gcx = Gcx.concatenate_vertical(
+				   kron(
+					GF2mat(Gax.rows(),Gaz.rows()),GF2mat(Gbx.cols(),Gbx.rows())
+					).concatenate_horizontal(
+								 kron(Gax, gf2dense_eye(Gbx.cols()))
+								 ).concatenate_horizontal(
+											  kron(gf2dense_eye(Gax.rows()),Gbz.transpose())
+											  )
+				   );
+    //    if (debug)    GF2matPrint(Gcx,"Gcx");
+    Gcz=kron(
+	     gf2dense_eye(Gaz.rows()), Gbx.transpose()
+	     ).concatenate_horizontal(
+				      kron(Gaz,gf2dense_eye(Gbx.cols()))
+				      ).concatenate_horizontal(
+							       kron(GF2mat(Gaz.rows(),Gax.rows()),GF2mat(Gbz.cols(),Gbz.rows()))
+							       );
+    //    if (debug)    GF2matPrint(Gcz,"Gcz");
+    Gcz=Gcz.concatenate_vertical(
+				 kron(
+				      GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() )
+				      ).concatenate_horizontal(
+							       kron(gf2dense_eye(Gaz.cols()),Gbz)
+							       ).concatenate_horizontal(
+											kron(Gax.transpose(),gf2dense_eye(Gbz.rows()))
+											)
+				 );
+    
+    if (debug)    GF2matPrint(Gcz,"Gcz");
+  }
+    break;
+  case 4:
+    {
+    //switch Gcx and Gcz in case 3
+    // chain complex to two CSS codes.
+    Gcx=kron(
+	     Gaz.transpose(), gf2dense_eye(Gbx.rows())
+	     ).concatenate_horizontal(
+				      kron(gf2dense_eye(Gax.cols()),Gbx)
+				      ).concatenate_horizontal(
+							       kron(GF2mat(Gax.cols(),Gax.rows()),GF2mat(Gbx.rows(),Gbz.rows()))
+							       );
+    GF2matPrint(Gcx,"Gcx");
+    Gcx = Gcx.concatenate_vertical(
+				   kron(
+					GF2mat(Gax.rows(),Gaz.rows()),GF2mat(Gbx.cols(),Gbx.rows())
+					).concatenate_horizontal(
+								 kron(Gax, gf2dense_eye(Gbx.cols()))
+								 ).concatenate_horizontal(
+											  kron(gf2dense_eye(Gax.rows()),Gbz.transpose())
+											  )
+				   );
+    GF2matPrint(Gcx,"Gcx");
+    Gcz=kron(
+	     gf2dense_eye(Gaz.rows()), Gbx.transpose()
+	     ).concatenate_horizontal(
+				      kron(Gaz,gf2dense_eye(Gbx.cols()))
+				      ).concatenate_horizontal(
+							       kron(GF2mat(Gaz.rows(),Gax.rows()),GF2mat(Gbz.cols(),Gbz.rows()))
+							       );
+    GF2matPrint(Gcz,"Gcz");
+    GF2mat temp;
+    temp= kron(
+	       GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() )
+	       );
+    GF2matPrint(temp,"temp1");
+    /*    temp=temp.concatenate_horizontal(
+				     kron(gf2dense_eye(Gaz.cols()),Gbz)
+				     );*/
+    temp= kron(gf2dense_eye(Gaz.cols()),Gbz);
+
+    GF2matPrint(temp,"temp2");
+    temp = kron(Gax.transpose(),gf2dense_eye(Gbz.rows()));
+    GF2matPrint(temp,"temp3");
+    Gcz=Gcz.concatenate_vertical(
+				 kron(
+				      GF2mat( Gaz.cols(),Gaz.rows() ), GF2mat( Gbz.rows(),Gbx.rows() )
+				      ).concatenate_horizontal(
+							       kron(gf2dense_eye(Gaz.cols()),Gbz)
+							       ).concatenate_horizontal(
+											kron(Gax.transpose(),gf2dense_eye(Gbz.rows()))
+											)
+				 );
+    
+    GF2matPrint(Gcz,"Gcz");
+
+    GF2mat tempG;
+    tempG=Gcx;
+    Gcx=Gcz;
+    Gcz=tempG;
+  }
+    break;
+
   }  
 
   //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
