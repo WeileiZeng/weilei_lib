@@ -242,6 +242,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 									      kron(Gaz,Cbz)
 									      ));
     {
+      //      if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
       int dax=ddax,dbx=ddbx;
       int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
       if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
@@ -373,6 +374,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     }
 
     {
+      //  if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
       int dax=ddax,dbx=ddbx;
       int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
       if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    
@@ -404,6 +406,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
   /*  if (is_quantum_code(Gcx,Gcz) ){
     cout<<"C is a quantum Code."<<endl;
     }*/
+  //  if ( debug ) cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<endl;
   int daz=ddaz,dbz=ddbz;
   int dcz = quantum_dist(Gcx,Gcz,daz*dbz,debug,1);//donot use estimated value ddaz and ddbz
   if (debug) cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<endl;    

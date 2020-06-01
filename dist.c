@@ -150,7 +150,7 @@ GF2mat getC(GF2mat G_x,GF2mat G_z,int flip){
 int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip){//without expected value
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
-  int trialQ=100;//100 is good for not so big codes;permute GQ this max amount of time
+  int trialQ=500;//100 is good for not so big codes;permute GQ this max amount of time
   //  int trialQflag=1;//a falg to control the max amout of permutation
   
   if (flip==1){//flip G_x and G_z
@@ -233,13 +233,9 @@ int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int debug, int flip)
     if (trialQflag) {//adjust the max number of permutation, only do this once
         if (min_wt <= dist_expected){
 	  trialQflag=0;
+	  trialQ = 10*iq;
 	  // continue to run to see if smaller distance can be achieved.
-	  if (iq<3) {
-	    //  cout<<"wt: "<<min_wt<<","<<dist_expected<<endl;
-	    trialQ=10;
-	  } else {
-	    trialQ = 4*iq;
-	  }
+	  trialQ=(trialQ<1000)? 1000:trialQ;
 	  if (debug) cout<<"quantum_dist: reach min distance when iq = "<<iq<<", continue to run with trialQ = "<<trialQ<<endl;
 	}
     }
