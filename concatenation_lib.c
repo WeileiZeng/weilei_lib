@@ -295,7 +295,16 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
     flag_dist_flip=1;
     break;
   }
-
+  if ( debug ){
+    switch ( mode ){
+    case 3:
+      cout<<"mode (3)"<<endl;
+      break;
+    case 4:
+      cout<<"mode (4)"<<endl;
+      break;
+    }
+  }
   if (debug){GF2matPrint(Gcx,"Gcx"); GF2matPrint(Gcz,"Gcz");}
 
   if ( ! (Gcx*Gcz.transpose()).is_zero() ){

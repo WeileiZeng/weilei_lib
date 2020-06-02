@@ -190,7 +190,7 @@ int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip){//without expected value
 int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int debug, int flip){
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
-  int trialQ=50000;//50000;//1000;permute GQ this max amount of time
+  int trialQ=50000;//1000;permute GQ this max amount of time
   int trialQflag=1;//a flag to adjust the max amount of permutation
   
   if (flip==1){//flip G_x and G_z
