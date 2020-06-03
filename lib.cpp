@@ -7,6 +7,7 @@
 #include "lib.h"
 #include <stdio.h>
 #include <itpp/itbase.h>
+#include <chrono> //for time
 using namespace itpp;
 using namespace std;
 
@@ -173,3 +174,25 @@ string blue_text(string str){
   return "\033[1;34m"+str+"\033[0m";
 }
 
+
+int get_time(int mode){
+
+  auto now = std::chrono::system_clock::now();
+  //  auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+  auto value = now.time_since_epoch();
+  long duration = value.count();
+  int t=0;
+  const int DIGIT=1000000000;
+  switch ( mode ){
+  case 1: // seconds
+    t = ( duration / 100000000 ) % DIGIT ;
+    break;
+  case 2: // milli seconds
+    t = (duration / 100000) % DIGIT;
+    break;
+  case 3:
+    t = duration % DIGIT;
+    break;
+  }
+  return t;
+}

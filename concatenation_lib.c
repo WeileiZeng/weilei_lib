@@ -63,6 +63,7 @@ GF2mat remove_col(GF2mat G, int col){
 
 void remove_singleton(GF2mat &Gx, GF2mat &Gz){
   //remove zero columns in Gx and Gz
+  //not in use, just discard code with distance 1, easier solution
   int n = Gx.cols();
   bvec to_remove(n);//1 fro remove, 0 remain  
   for ( int i=0;i<n;i++){
@@ -93,6 +94,9 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   GF2mat T,U; ivec P;
   int rank_of_Gx = Gx.transpose().T_fact(T,U,P);
   GF2mat Q=T.get_submatrix(rank_of_Gx,0,n-1,n-1);
+
+  //  if ( rank_of_Gx < Gx.rows() ) cout<<"getRandomQuantumCode: Gx not full rank"<<endl;
+  //else cout<<"getRandomQuantumCode: Gx is  full rank"<<endl;
   
   //  Q.permute_cols(P,true); no need for T, only need for U which is not used here
   //  GF2matPrint(Q,"Q");
@@ -120,6 +124,7 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2ma
   //repeat multiple times to get the best distance
   GF2mat Gx_temp, Gz_temp,Cx_temp,Cz_temp;
   int search_trial=1000;
+  int flag_find_good_code=0;
   for ( int i =0; i<search_trial; i++){
 
     getRandomQuantumCode( n, Gx_row,Gz_row, Gx_temp, Gz_temp,Cx_temp,Cz_temp);
@@ -128,14 +133,24 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2ma
     if ( dx >1 ){
       int dz = quantum_dist_v2(Gx_temp,Gz_temp,1);
       if (dz >1 ){
-	Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
+	flag_find_good_code=1;
+	//	Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
 	if (debug) cout<<blue_text("get good code when i =")<<i<<endl;
-	return 0;
+	break;
+	//	return 0;
       }
     }
   }
   Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
-  if ( debug) cout<<color_text("didn't find good code after ")<<search_trial<<" trials"<<endl;
+
+  //  if ( flag_find_good_code){
+  if ( debug ) cout<<"Gx 1st row:"<<Gx.get_row(0)<<endl; // for debug the random seed
+  if ( Gx.row_rank() < Gx.rows() ) {
+    if (debug) cout<<"getGoodQuantumCode: Gx not full rank. now make it full rank"<<endl;
+    Gx = make_it_full_rank(Gx);
+  }
+
+  if ( debug) if ( ! flag_find_good_code ) cout<<color_text("didn't find good code after ")<<search_trial<<" trials"<<endl;
   return 0;
 }
 
@@ -342,7 +357,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 	if (dcx > dax*dbx) cout<<"PSEUDO ";
 	cout<<red_text("CASE:")<<" mode ("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
 	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
-	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
+	cout<<"na,nb,nc,"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
 	return 2;
       }
     }
@@ -364,7 +379,7 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
 	if (dcz > daz*dbz) cout<<"PSEUDO ";
 	cout<<red_text("CASE:")<<" mode ("<<mode<<") daz*dbz="<<daz*dbz<<", dcz="<<dcz;
 	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";
-	cout<<"na,nb,nc"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";    
+	cout<<"na,nb,nc,"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";    
 	return 2;
       }
     }

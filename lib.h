@@ -51,4 +51,6 @@ string blue_text(string str);
 //return blue string
 
 
+int get_time(int mode = 1);
+
 #endif

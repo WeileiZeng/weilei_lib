@@ -57,7 +57,7 @@ int rand_dist(GF2mat C, int perm_try){//default perm_try=10
     return min_wt_decoding(C);
   }
   //use random window decoder to find min wt of C
-  RNG_randomize();
+  //  RNG_randomize(); do not use it here. run it in the main program
   bvec row_vec,zero=zeros_b(C.cols());
   int wt,min_wt=C.cols();
   ivec perm;
@@ -191,6 +191,7 @@ int quantum_dist(GF2mat G_x, GF2mat G_z, int dist_expected, int debug, int flip)
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
   int trialQ=50000;//1000;permute GQ this max amount of time
+  if ( dist_expected > 10 ) trialQ = trialQ*2;
   int trialQflag=1;//a flag to adjust the max amount of permutation
   
   if (flip==1){//flip G_x and G_z
