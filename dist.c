@@ -178,7 +178,7 @@ int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip){//without expected value
     C.permute_cols(P,true);//codewords/logical group //not necessary to permute it back here
   
     wt = rand_dist(C);//defauylt permutation = 10
-    trialQ=(wt<min_wt)? max(4*iq,trialQ):trialQ;//make sure this is the true min weight
+    trialQ=(wt<min_wt)? max(10*iq,trialQ):trialQ;//make sure this is the true min weight
     min_wt=(wt<min_wt)? wt:min_wt;
 
     //    cout<<"iq = "<<iq<<", [wt="<<wt<<"] "<<endl;;

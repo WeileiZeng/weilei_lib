@@ -95,6 +95,10 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   int rank_of_Gx = Gx.transpose().T_fact(T,U,P);
   GF2mat Q=T.get_submatrix(rank_of_Gx,0,n-1,n-1);
 
+
+  //  if ( debug ) 
+  //  cout<<"Gx 1st row:"<<Gx.get_row(0)<<endl; // for debug the random seed
+
   //  if ( rank_of_Gx < Gx.rows() ) cout<<"getRandomQuantumCode: Gx not full rank"<<endl;
   //else cout<<"getRandomQuantumCode: Gx is  full rank"<<endl;
   
@@ -116,6 +120,7 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2
   Cx=getC(Gx,Gz);
   Cz=getC(Gx,Gz,1);
   //  if (! is_quantum_code(Gx,Gz,Cx,Cz)) throw "invalid code";
+
   return 0;
 }
 
@@ -356,8 +361,9 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       }else{
 	if (dcx > dax*dbx) cout<<"PSEUDO ";
 	cout<<red_text("CASE:")<<" mode ("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
-	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";    
-	cout<<"na,nb,nc,"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";
+	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<";";    
+	cout<<"na,nb,nc,"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<";";
+	cout<<"ka,kb="<<Cax.rows()<<","<<Cbx.rows()<<";";
 	return 2;
       }
     }
@@ -378,8 +384,9 @@ int product(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int
       }else{
 	if (dcz > daz*dbz) cout<<"PSEUDO ";
 	cout<<red_text("CASE:")<<" mode ("<<mode<<") daz*dbz="<<daz*dbz<<", dcz="<<dcz;
-	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<",";
-	cout<<"na,nb,nc,"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<",";    
+	cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<";";
+	cout<<"na,nb,nc="<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<";";    
+	cout<<"ka,kb="<<Cax.rows()<<","<<Cbx.rows()<<";";
 	return 2;
       }
     }
