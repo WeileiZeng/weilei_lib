@@ -117,3 +117,10 @@ int mat_to_MM(mat G, char * filename){//use this when G is not a binary matrix
   return 0;
 	
 }
+
+
+int mat_to_MM(mat G, string file_name){
+  char temp[file_name.length()+1];
+  strcpy(temp, file_name.c_str());
+  return mat_to_MM(G, temp);
+}
