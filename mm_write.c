@@ -119,6 +119,13 @@ int mat_to_MM(mat G, char * filename){//use this when G is not a binary matrix
 }
 
 
+int GF2mat_to_MM(mat G, string file_name){
+  char temp[file_name.length()+1];
+  strcpy(temp, file_name.c_str());
+  return GF2mat_to_MM(G, temp);
+}
+
+
 int mat_to_MM(mat G, string file_name){
   char temp[file_name.length()+1];
   strcpy(temp, file_name.c_str());

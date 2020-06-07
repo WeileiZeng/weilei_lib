@@ -36,7 +36,14 @@ GF2mat MM_to_GF2mat(string  file_name){
   char cstr[file_name.size()+1];
   strcpy(cstr,file_name.c_str());
   return MM_to_GF2mat(cstr);
-};
+}
+
+mat MM_to_mat(string  file_name){
+  char cstr[file_name.size()+1];
+  strcpy(cstr,file_name.c_str());
+  return MM_to_mat(cstr);
+}
+
 
 GF2mat MM_to_GF2mat(char * file_name)
 {
