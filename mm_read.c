@@ -196,12 +196,12 @@ mat MM_to_mat(char * file_name)
         fprintf(stdout, "%d %d %20.19g\n", I[i]+1, J[i]+1, val[i]);
     */
 
-    //read into GF2mat
+    //read into mat
     mat G(M,N);
+    G.zeros();
     for (int i=0;i<nz;i++){
       G.set(I[i],J[i],val[i]);
     }
-
     return G;
 }
 
@@ -283,6 +283,7 @@ mat dense_MM_to_mat(char * file_name){
 
     //read into mat
     mat G(M,N);
+    G.zeros();
     //    double dd=0,value=100;
     //int index =-1;
     for (int i=0;i<M;i++){
