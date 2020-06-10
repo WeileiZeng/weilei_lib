@@ -173,54 +173,80 @@ void set_submatrix(GF2mat & G, GF2mat sub, int row, int col){
 
 
 // generate all code with size na systematically
-int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int id_Gaz){
+int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz, int debug){
+  //sanity check
+  if (Gaz_row+Gax_row > na-1){
+    cout<<"no logical qubit"<<endl;
+    throw 2;
+  }
+  const int id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -1 ; //maximun all one
+  if ( id_Gax <1 || id_Gax > id_Gax_MAX ) {
+    cout<<"illegal id_Gax: "<<id_Gax<<", id_Gax_MAX = "<<id_Gax_MAX<<endl;
+    throw 2;
+  }
+  const int id_Gaz_MAX = (int) pow(2, Gaz_row*(na - Gax_row)) - 1; //maximun all one
+  if ( id_Gaz < 1 || id_Gaz > id_Gaz_MAX ){
+    cout<<"illegal id_Gaz: "<<id_Gaz<<", id_Gaz_MAX = "<<id_Gaz_MAX<<endl;
+    throw 2;
+  }
+  //remove duplicate cases for id_Gax and id_Gaz
+
+
+  bvec beta_Gaz = dec2bin(Gaz_row*(na-Gax_row),id_Gaz);
+  GF2mat alpha_Gaz(Gaz_row, na-Gax_row);
+  if ( debug ) cout<<"beta_Gaz = "<<beta_Gaz<<endl;
+  for ( int i =0;i<Gaz_row;i++){
+    if (debug) cout<<"set submatrix i = "<<i<<endl<<GF2mat(beta_Gaz, false).get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1)<<endl;
+    set_submatrix(alpha_Gaz, GF2mat(beta_Gaz,false).get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1), i,0);
+  }
+  for ( int i =0;i<Gaz_row-1;i++){
+    if ( bin2dec(alpha_Gaz.get_row(i)) <= bin2dec(alpha_Gaz.get_row(i+1))){
+      if (debug) cout<< "duplicate Gaz with this id_Gaz. no calculation needed.id_Gaz must be in decreasing order"<<endl;
+      return 2;
+    }
+
+  }
+  //finish check
+ 
+
+
   Gax = GF2mat(Gax_row,na);
   // identity matrix in the left part to make it reduce row echelon form.
   set_submatrix(Gax,gf2dense_eye(Gax_row),0,0);
-  cout<<"Gax"<<Gax<<endl;
-  //  for ( int i =0;i<Gax_row; i++) Gax.set(i,i,1) ;
-  //id in (0,2^( (Gax_row * (na-Gax_row) ))
-  // check id_Gax
-  const int id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -2 ;
-  if ( id_Gax <1 || id_Gax > id_Gax_MAX -1 ) {
-    cout<<"illegal id_Gax"<<endl;
-    throw 2;
-  }
+  if (debug) cout<<"Gax"<<Gax<<endl;
+
+
   GF2mat alpha_Gax = GF2mat( dec2bin(Gax_row*(na-Gax_row), id_Gax), false);//false for row vector
-  cout<<"alpha_Gax give the right part of Gax"<<endl<<alpha_Gax<<endl;
+  if (debug) cout<<"alpha_Gax give the right part of Gax"<<endl<<alpha_Gax<<endl;
   for ( int i = 0 ; i < Gax_row; i++){
     set_submatrix(Gax,alpha_Gax.get_submatrix(0, i*(na-Gax_row), 0, (i+1)*(na-Gax_row)-1), i, Gax_row);
-    //    cout<<alpha_Gax.get_submatrix(0, i*(na-Gax_row), 0, (i+1)*(na-Gax_row)-1 )<<endl;
-    //
   }
-  cout<<"Gax"<<Gax<<endl;
-  GF2mat H = nullSpace(Gax);
-  cout<<"nullSpace: H"<<H<<endl;
-  //check id_Gaz
-    const int id_Gaz_MAX = (int) pow(2, na - Gax_row) - 2;
-  if ( id_Gaz < 1 || id_Gaz > id_Gaz_MAX -1 ){
-    cout<<"illegal id_Gaz"<<endl;
-    throw 2;
+  if (debug) cout<<"Gax"<<Gax<<endl;
+
+  //remove duplicate in id_Gax. They could be equal, but permute any two rows give equivalent code, so enfore all rows ( in the right part ) in decreasing order
+  for ( int i =0;i<Gax_row-1;i++){
+    if ( bin2dec(Gax.get_submatrix(0,Gax_row,Gax_row-1,na-1).get_row(i)) 
+	 < bin2dec(Gax.get_submatrix(0,Gax_row,Gax_row-1,na-1).get_row(i+1)) ){
+      //bin2dec(alpha_Gaz.get_row(i+1))){
+      if (debug) cout<< "duplicate Gax with this id_Gax. no calculation needed. id_Gax must be in decreasing order. zero allowed"<<endl;
+      return 2;
     }
-  /*
-  const int id_Gaz_MAX = na - Gax_row;
-  if ( id_Gaz < 0 || id_Gaz > id_Gaz_MAX -1 ){
-    cout<<"illegal id_Gaz"<<endl;
-    throw 2;
   }
-  */
-  //  bvec beta_Gaz(na-Gax_row);
-  //  beta_Gaz.ones();
-  //  beta_Gaz.set(id_Gaz,0);
-  //  GF2mat alpha_Gaz = remove_rows
-  bvec rows_to_remove = dec2bin(na-Gax_row,id_Gaz);
-  cout<<"rows_to_remove: "<<rows_to_remove<<endl;
-  remove_rows(&H, rows_to_remove );
-  Gaz=H;
+
+
+
+  GF2mat H = nullSpace(Gax);
+  if (debug) cout<<"nullSpace: H"<<H<<endl;
+  //check id_Gaz
+
+
+  //  if (debug) cout<<"rows_to_remove: "<<rows_to_remove<<endl;
+  //  remove_rows(&H, rows_to_remove );
+  Gaz=alpha_Gaz*H;
     //GF2mat(dec2bin(), false);
   //  cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
   //  Gaz = alpha_Gaz*H;
-  cout<<"Gaz"<<Gaz<<endl;
+  if (debug) cout<<"Gaz"<<Gaz<<endl;
   return 0;
 }
 

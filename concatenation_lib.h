@@ -20,7 +20,7 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2ma
 
 void set_submatrix(GF2mat & G, GF2mat sub, int row, int col);
 
-int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int id_Gaz);
+int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz, int debug);
 
 //files used in concatenated codes and product codes.
 

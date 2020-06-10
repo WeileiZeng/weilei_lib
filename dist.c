@@ -180,6 +180,7 @@ int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip){//without expected value
     wt = rand_dist(C);//defauylt permutation = 10
     trialQ=(wt<min_wt)? max(10*iq,trialQ):trialQ;//make sure this is the true min weight
     min_wt=(wt<min_wt)? wt:min_wt;
+    if (min_wt ==1) return 1;
 
     //    cout<<"iq = "<<iq<<", [wt="<<wt<<"] "<<endl;;
     //  cout<<"got min wt of logical operator C  = "<<min_wt<<endl;
