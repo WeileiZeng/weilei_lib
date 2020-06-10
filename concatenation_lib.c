@@ -159,9 +159,51 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2ma
   return 0;
 }
 
+void set_submatrix(GF2mat & G, GF2mat sub, int row, int col){
+  //put sub into G, start from (row,col)
+  for ( int i =0 ; i < sub.rows(); i ++)
+    for ( int j = 0; j< sub.cols(); j++ )
+      G.set(i+row, j+col, sub.get(i,j));
+  return;
+}
+
+int check(){
+  return 0;
+}
+
+// generate all code with size na systematically
+int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int id_Gaz){
+  Gax = GF2mat(Gax_row,na);
+  // identity matrix in the left part to make it reduce row echelon form.
+  for ( int i =0;i<Gax_row; i++) Gax.set(i,i,1) ;
+  //id in (0,2^( (Gax_row * (na-Gax_row) ))
+  // check id
+  const id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -2 ;
+  if ( id_Gax <1 || id_Gax > id_Gax_MAX -1 ) {
+    cout<<"illegal id_Gax"<<endl;
+    throw 2;
+  }
+  GF2mat alpha_Gax = GF2mat( dec2bin(Gax_row*(na-Gax_row), i), false);//false for row vector
+  for ( int i = 0 ; i < Gax_row; i++)
+    set_submatrix(Gax,alpha_Gax.get_submatrix(0, i*(na-Gax_row), 0, (i+1)*(na-Gax_row)-1), i, na-Gax_row);
+  GF2mat H = nullSpace(alpha_Gax);
+  //check id_Gaz
+  const id_Gaz_MAX = (int) pow(2, na - Gax_row) - 2;
+  if ( id_Gaz < 1 || id_Gaz > id_Gaz_MAX -1 ){
+    cout<<"illegal id_Gaz"<<endl;
+    throw 2;
+  }
+  GF2mat alpha_Gaz = GF2mat(dec2bin(id_Gaz), false);
+  Gaz = alpha_Gaz*H;
+  
+  return 0;
+}
 
 
 
+
+
+/*
 
 int concatenate(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz){
   //construct code C and calculate the distance; Compare it with the input (estimated) value
@@ -172,19 +214,10 @@ int concatenate(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz
   GF2mat Gcz = kron(Gaz,Cbz).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
   //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
 
-  /*//check Cax
-  if ( (Gaz*Cax.transpose()).is_zero() ){
-      cout<<"Good Cax"<<endl;
-      }*/
+
   GF2mat Gcx=kron(gf2dense_eye(na),Gbx).concatenate_vertical( kron(Gax,Cbx)   );
   //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
-  /*  int daz = quantum_dist(Gax,Gaz,ddaz,1); //no need to check. Must euqal
-  cout<<"daz="<<daz<<",ddaz="<<ddaz<<endl;
-  int dbz = quantum_dist(Gbx,Gbz,ddbz,1);
-  cout<<"dbz="<<dbz<<",ddbz="<<ddbz<<endl;*/
-  /*  if (is_quantum_code(Gcx,Gcz) ){
-    cout<<"C is a quantum Code."<<endl;
-    }*/
+
   int daz=ddaz,dbz=ddbz;
   int dcz = quantum_dist(Gcx,Gcz,daz*dbz,1);//donot use estimated value ddaz and ddbz
   if (dcz == daz*dbz){
@@ -205,23 +238,14 @@ int reduce(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int 
   GF2mat Gcz = kron(Gaz,gf2dense_eye(nb)).concatenate_vertical(kron(gf2dense_eye(na),Gbz));
   //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
   GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
-  /*//check Cax
-  if ( (Gaz*Cax.transpose()).is_zero() ){
-      cout<<"Good Cax"<<endl;
-      }*/
+
   GF2mat Gcx=kron(Gax,Gbx).concatenate_vertical(
        	         kron(Cax,Gbx).concatenate_vertical(
           	     kron(Gax,Cbx)
 								  )
 						);
   //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
-  /*  int daz = quantum_dist(Gax,Gaz,ddaz,1);
-  cout<<"daz="<<daz<<",ddaz="<<ddaz<<endl;
-  int dbz = quantum_dist(Gbx,Gbz,ddbz,1);
-  cout<<"dbz="<<dbz<<",ddbz="<<ddbz<<endl;*/
-  /*  if (is_quantum_code(Gcx,Gcz) ){
-    cout<<"C is a quantum Code."<<endl;
-    }*/
+
   int daz=ddaz,dbz=ddbz;
   int dcz = quantum_dist(Gcx,Gcz,daz*dbz,1);//donot use estimated value ddaz and ddbz
   if (dcz == daz*dbz){
@@ -234,6 +258,7 @@ int reduce(GF2mat Gax, GF2mat Gaz, GF2mat Gbx, GF2mat Gbz,int ddax,int ddaz,int 
   return 0;
   
 }
+*/
 
 
 // a version include both reduce and concatenation
