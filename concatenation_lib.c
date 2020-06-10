@@ -162,40 +162,65 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, GF2mat &Gx,GF2mat &Gz, GF2ma
 void set_submatrix(GF2mat & G, GF2mat sub, int row, int col){
   //put sub into G, start from (row,col)
   for ( int i =0 ; i < sub.rows(); i ++)
-    for ( int j = 0; j< sub.cols(); j++ )
+    for ( int j = 0; j< sub.cols(); j++ ){
+      //      cout<<i+row<<","<< j+col<<","<< sub.get(i,j)<<endl;
       G.set(i+row, j+col, sub.get(i,j));
+    }
+  //  cout<<"G"<<G<<endl;
   return;
 }
 
-int check(){
-  return 0;
-}
+
 
 // generate all code with size na systematically
 int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int id_Gaz){
   Gax = GF2mat(Gax_row,na);
   // identity matrix in the left part to make it reduce row echelon form.
-  for ( int i =0;i<Gax_row; i++) Gax.set(i,i,1) ;
+  set_submatrix(Gax,gf2dense_eye(Gax_row),0,0);
+  cout<<"Gax"<<Gax<<endl;
+  //  for ( int i =0;i<Gax_row; i++) Gax.set(i,i,1) ;
   //id in (0,2^( (Gax_row * (na-Gax_row) ))
-  // check id
-  const id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -2 ;
+  // check id_Gax
+  const int id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -2 ;
   if ( id_Gax <1 || id_Gax > id_Gax_MAX -1 ) {
     cout<<"illegal id_Gax"<<endl;
     throw 2;
   }
-  GF2mat alpha_Gax = GF2mat( dec2bin(Gax_row*(na-Gax_row), i), false);//false for row vector
-  for ( int i = 0 ; i < Gax_row; i++)
-    set_submatrix(Gax,alpha_Gax.get_submatrix(0, i*(na-Gax_row), 0, (i+1)*(na-Gax_row)-1), i, na-Gax_row);
-  GF2mat H = nullSpace(alpha_Gax);
+  GF2mat alpha_Gax = GF2mat( dec2bin(Gax_row*(na-Gax_row), id_Gax), false);//false for row vector
+  cout<<"alpha_Gax give the right part of Gax"<<endl<<alpha_Gax<<endl;
+  for ( int i = 0 ; i < Gax_row; i++){
+    set_submatrix(Gax,alpha_Gax.get_submatrix(0, i*(na-Gax_row), 0, (i+1)*(na-Gax_row)-1), i, Gax_row);
+    //    cout<<alpha_Gax.get_submatrix(0, i*(na-Gax_row), 0, (i+1)*(na-Gax_row)-1 )<<endl;
+    //
+  }
+  cout<<"Gax"<<Gax<<endl;
+  GF2mat H = nullSpace(Gax);
+  cout<<"nullSpace: H"<<H<<endl;
   //check id_Gaz
-  const id_Gaz_MAX = (int) pow(2, na - Gax_row) - 2;
+    const int id_Gaz_MAX = (int) pow(2, na - Gax_row) - 2;
   if ( id_Gaz < 1 || id_Gaz > id_Gaz_MAX -1 ){
     cout<<"illegal id_Gaz"<<endl;
     throw 2;
+    }
+  /*
+  const int id_Gaz_MAX = na - Gax_row;
+  if ( id_Gaz < 0 || id_Gaz > id_Gaz_MAX -1 ){
+    cout<<"illegal id_Gaz"<<endl;
+    throw 2;
   }
-  GF2mat alpha_Gaz = GF2mat(dec2bin(id_Gaz), false);
-  Gaz = alpha_Gaz*H;
-  
+  */
+  //  bvec beta_Gaz(na-Gax_row);
+  //  beta_Gaz.ones();
+  //  beta_Gaz.set(id_Gaz,0);
+  //  GF2mat alpha_Gaz = remove_rows
+  bvec rows_to_remove = dec2bin(na-Gax_row,id_Gaz);
+  cout<<"rows_to_remove: "<<rows_to_remove<<endl;
+  remove_rows(&H, rows_to_remove );
+  Gaz=H;
+    //GF2mat(dec2bin(), false);
+  //  cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
+  //  Gaz = alpha_Gaz*H;
+  cout<<"Gaz"<<Gaz<<endl;
   return 0;
 }
 

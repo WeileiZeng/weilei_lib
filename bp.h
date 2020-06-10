@@ -27,6 +27,7 @@ int check_matrices(GF2mat * G, GF2mat * H, GF2mat *U, GF2mat * W, mat * K);
 //read those matrices in the folder
 int read_matrices_for_partial_sum(char * filename_prefix, char * filename_suffix, GF2mat * G, GF2mat * H, GF2mat *U, GF2mat * W, mat * K);
 
+int remove_rows(GF2mat *G, bvec rows_to_remove);
 
 #endif
 
