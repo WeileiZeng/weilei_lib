@@ -198,14 +198,54 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
   for ( int i =0;i<Gaz_row;i++){
     if (debug) cout<<"set submatrix i = "<<i<<endl<<GF2mat(beta_Gaz, false).get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1)<<endl;
     set_submatrix(alpha_Gaz, GF2mat(beta_Gaz,false).get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1), i,0);
-  }
+  } 
+  if (debug) cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
   for ( int i =0;i<Gaz_row-1;i++){
     if ( bin2dec(alpha_Gaz.get_row(i)) <= bin2dec(alpha_Gaz.get_row(i+1))){
       if (debug) cout<< "duplicate Gaz with this id_Gaz. no calculation needed.id_Gaz must be in decreasing order"<<endl;
       return 2;
     }
-
   }
+  //make sure alpa_Gaz is in reduce row echelon form, to remove duplicate cases. return 2 if not in the form
+  //this duplicate the check to make sure alpha_Gaz is in decreasing order
+  //check it column by column, from bottom to top
+  int get_one=0; //flag on if hit one in that column
+  int position_one=-1;//position for one in that column
+  int columns_one=0;//columns has a single one. exit for loop when reach alpha_Gaz.rows()
+  for ( int i = 0; i<alpha_Gaz.cols();i++){
+    get_one=0;
+    for ( int j = alpha_Gaz.rows()-1; j > -1; j--){
+      if (alpha_Gaz.get(j,i)){
+	if (get_one){
+	  //get one twice in that column
+	  if (debug) cout<<"get one twice in that column i="<<i<<endl;
+	  //	  cout<<"*";
+	  return 2;
+	}else{
+	  if (j <= position_one){
+	    //skip this column, this column is not independent
+	    if (debug) cout<<"break the inner for loop for dependent column i = "<<i<<endl;
+	    continue;
+	  }else {
+	    get_one=1;
+	    position_one=j;
+	    columns_one++;
+	  }
+	}
+      }
+    }
+    if (debug) cout<<"broke the inner for loop"<<endl;
+    if ( columns_one == alpha_Gaz.rows() ){
+      break;
+    }
+  }
+  if ( columns_one < alpha_Gaz.rows() ){
+    if (debug) cout<<"columns_one:"<<columns_one<<" is not full rank"<<alpha_Gaz.rows()<<endl;
+    //    cout<<"*";
+    return 2;
+  }
+
+
   //finish check
  
 
@@ -242,9 +282,10 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
 
   //  if (debug) cout<<"rows_to_remove: "<<rows_to_remove<<endl;
   //  remove_rows(&H, rows_to_remove );
+  if (debug) cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
   Gaz=alpha_Gaz*H;
     //GF2mat(dec2bin(), false);
-  //  cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
+  
   //  Gaz = alpha_Gaz*H;
   if (debug) cout<<"Gaz"<<Gaz<<endl;
   return 0;
