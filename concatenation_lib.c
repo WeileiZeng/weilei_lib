@@ -192,6 +192,7 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
   //remove duplicate cases for id_Gax and id_Gaz
 
 
+
   bvec beta_Gaz = dec2bin(Gaz_row*(na-Gax_row),id_Gaz);
   GF2mat alpha_Gaz(Gaz_row, na-Gax_row);
   if ( debug ) cout<<"beta_Gaz = "<<beta_Gaz<<endl;
@@ -202,7 +203,7 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
   if (debug) cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
   for ( int i =0;i<Gaz_row-1;i++){
     if ( bin2dec(alpha_Gaz.get_row(i)) <= bin2dec(alpha_Gaz.get_row(i+1))){
-      if (debug) cout<< "duplicate Gaz with this id_Gaz. no calculation needed.id_Gaz must be in decreasing order"<<endl;
+      if (debug) cout<< "duplicate Gaz with this id_Gaz. no calculation needed. alpha_Gaz/id_Gaz must be in decreasing order"<<endl;
       return 2;
     }
   }

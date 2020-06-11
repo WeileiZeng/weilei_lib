@@ -11,6 +11,13 @@
 using namespace itpp;
 using namespace std;
 
+
+int min_wt_decoding(GF2mat C);
+
+//G for gauge operators, and C for bare logical operators
+//code word c = alpha_C*C+alpha_G*G, where alpha_C \neq 0
+int min_wt_decoding(GF2mat C,GF2mat G);
+
 int save_dist(int d, char * filename);
 
 int rand_dist(GF2mat C, int perm_try=10);

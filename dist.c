@@ -26,7 +26,7 @@ int min_wt_decoding(GF2mat C){
   bvec zero = zeros_b(C.cols());
   //  cout<<"min_wt_decodnig"<<endl;
   //  cout<<"max = "<<max<<endl<<C.rows()<<endl;
-  bvec min_codeword=zero;
+  //  bvec min_codeword=zero;
   for ( int i =1;i<max;i++){
     //    dec2bin(i,alpha);
     alpha = dec2bin(C.rows(),i);
@@ -35,12 +35,44 @@ int min_wt_decoding(GF2mat C){
     //    cout<<"alpha = "<<alpha<<endl;
     codeword=(alphaM*C).get_row(0);
     wt = BERC::count_errors(zero,codeword);
-    if ( wt < min_wt ) min_codeword=codeword;
+    //    if ( wt < min_wt ) min_codeword=codeword;
     min_wt = (wt<min_wt)? wt : min_wt;
+    if ( min_wt == 1) return 1;
   }
   //  cout<<"min wt codeword: "<<min_codeword<<endl;
   return min_wt;    
 }
+
+//G for gauge operators, and C for bare logical operators
+//code word c = alpha_C*C+alpha_G*G, where alpha_C \neq 0
+int min_wt_decoding(GF2mat C,GF2mat G){
+  //  cout<<"call min_wt_decoding"<<endl;
+  // make sure G and C are full rank before calling this function. Otherwise it is a waste of computing power.
+  int C_rows=C.rows(), G_rows=G.rows();
+  int dec_C=(int) pow(2, C_rows);
+  int dec_G=(int) pow(2, G_rows);
+  int N=C.cols();
+  bvec bvec_C;
+  bvec bvec_zero=zeros_b(N);
+  GF2mat alpha_C(1,C_rows), alpha_G(1,G_rows);
+  int wt=N, min_wt=N;
+  //I should save a static copy of this alpha matrix, instead of generate it in two for loops every time.
+  for ( int i = 1; i < dec_C ; i++){
+    alpha_C.set_row(0,dec2bin(C_rows,i));
+    for ( int j = 0; j < dec_G; j++){
+      alpha_G.set_row(0,dec2bin(G_rows,j));
+      bvec_C = (alpha_C * C + alpha_G * G).get_row(0);
+      //    cout<<bvec_C<<endl;
+      wt = BERC::count_errors(bvec_zero,bvec_C);
+      //      if ( wt < min_wt ) min_codeword=codeword;
+      min_wt = (wt<min_wt)? wt : min_wt;      
+      if ( min_wt == 1 ) return 1;
+    }
+  }
+  //  cout<<"                          finish min_wt_decoding"<<endl;
+  return min_wt;
+}
+
 
 int save_dist(int d,char * filename){
   mat mat_d(1,1);
@@ -157,10 +189,18 @@ int quantum_dist_v2(GF2mat G_x, GF2mat G_z, int flip){//without expected value
     GF2mat temp=G_x;    G_x=G_z;    G_z=temp;
   }
 
+
+
   GF2mat T,U;  ivec P;
   int rank_of_G_z =   G_z.transpose().T_fact(T,U,P);
-  GF2mat Q=T.get_submatrix(rank_of_G_z,0,G_z.cols()-1,G_z.cols()-1);//Q include G_x and C_x/L_x
 
+  // for small code, use min_wt_decoding to return X distance
+  if (G_z.cols() - rank_of_G_z < 11){
+    return min_wt_decoding(getC(G_x, G_z), G_x);
+  } 
+
+
+  GF2mat Q=T.get_submatrix(rank_of_G_z,0,G_z.cols()-1,G_z.cols()-1);//Q include G_x and C_x/L_x
   GF2mat GQ=G_x.concatenate_vertical(Q);
   int min_wt=GQ.cols(),wt;
 
