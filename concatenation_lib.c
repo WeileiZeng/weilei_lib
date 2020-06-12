@@ -172,43 +172,7 @@ void set_submatrix(GF2mat & G, GF2mat sub, int row, int col){
 
 
 
-// generate all code with size na systematically
-int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz, int debug){
-  //sanity check
-  if (Gaz_row+Gax_row > na-1){
-    cout<<"no logical qubit"<<endl;
-    throw 2;
-  }
-  const int id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -1 ; //maximun all one
-  if ( id_Gax <1 || id_Gax > id_Gax_MAX ) {
-    cout<<"illegal id_Gax: "<<id_Gax<<", id_Gax_MAX = "<<id_Gax_MAX<<endl;
-    throw 2;
-  }
-  const int id_Gaz_MAX = (int) pow(2, Gaz_row*(na - Gax_row)) - 1; //maximun all one
-  if ( id_Gaz < 1 || id_Gaz > id_Gaz_MAX ){
-    cout<<"illegal id_Gaz: "<<id_Gaz<<", id_Gaz_MAX = "<<id_Gaz_MAX<<endl;
-    throw 2;
-  }
-  //remove duplicate cases for id_Gax and id_Gaz
-
-
-
-  bvec beta_Gaz = dec2bin(Gaz_row*(na-Gax_row),id_Gaz);
-  GF2mat alpha_Gaz(Gaz_row, na-Gax_row);
-  if ( debug ) cout<<"beta_Gaz = "<<beta_Gaz<<endl;
-  for ( int i =0;i<Gaz_row;i++){
-    if (debug) cout<<"set submatrix i = "<<i<<endl<<GF2mat(beta_Gaz, false).get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1)<<endl;
-    set_submatrix(alpha_Gaz, GF2mat(beta_Gaz,false).get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1), i,0);
-  } 
-  if (debug) cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
-  for ( int i =0;i<Gaz_row-1;i++){
-    if ( bin2dec(alpha_Gaz.get_row(i)) <= bin2dec(alpha_Gaz.get_row(i+1))){
-      if (debug) cout<< "duplicate Gaz with this id_Gaz. no calculation needed. alpha_Gaz/id_Gaz must be in decreasing order"<<endl;
-      return 2;
-    }
-  }
-  //make sure alpa_Gaz is in reduce row echelon form, to remove duplicate cases. return 2 if not in the form
-  //this duplicate the check to make sure alpha_Gaz is in decreasing order
+int is_row_reduced_echelon_form(GF2mat & alpha_Gaz, int debug = 0){
   //check it column by column, from bottom to top
   int get_one=0; //flag on if hit one in that column
   int position_one=-1;//position for one in that column
@@ -221,7 +185,7 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
 	  //get one twice in that column
 	  if (debug) cout<<"get one twice in that column i="<<i<<endl;
 	  //	  cout<<"*";
-	  return 2;
+	  return 0;
 	}else{
 	  if (j <= position_one){
 	    //skip this column, this column is not independent
@@ -243,8 +207,50 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
   if ( columns_one < alpha_Gaz.rows() ){
     if (debug) cout<<"columns_one:"<<columns_one<<" is not full rank"<<alpha_Gaz.rows()<<endl;
     //    cout<<"*";
-    return 2;
+    return 0;
   }
+  return 1;
+}
+
+// generate all code with size na systematically
+int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz, int debug){
+  //sanity check
+  if (Gaz_row+Gax_row > na-1){
+    cout<<"no logical qubit"<<endl;
+    throw 2;
+  }
+  const int id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -1 ; //maximun all one
+  if ( id_Gax <1 || id_Gax > id_Gax_MAX ) {
+    cout<<"illegal id_Gax: "<<id_Gax<<", id_Gax_MAX = "<<id_Gax_MAX<<endl;
+    throw 2;
+  }
+  const int id_Gaz_MAX = (int) pow(2, Gaz_row*(na - Gax_row)) - 1; //maximun all one
+  if ( id_Gaz < 1 || id_Gaz > id_Gaz_MAX ){
+    cout<<"illegal id_Gaz: "<<id_Gaz<<", id_Gaz_MAX = "<<id_Gaz_MAX<<endl;
+    throw 2;
+  }
+  //remove duplicate cases for id_Gax and id_Gaz
+
+
+
+  GF2mat beta_Gaz = GF2mat(dec2bin(Gaz_row*(na-Gax_row),id_Gaz),false);
+  GF2mat alpha_Gaz(Gaz_row, na-Gax_row);
+  if ( debug ) cout<<"beta_Gaz = "<<beta_Gaz<<endl;
+  for ( int i =0;i<Gaz_row;i++){
+    if (debug) cout<<"set submatrix i = "<<i<<endl<<beta_Gaz.get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1)<<endl;
+    set_submatrix(alpha_Gaz, beta_Gaz.get_submatrix(0,i*(na-Gax_row),0, (i+1)*(na-Gax_row)-1), i,0);
+  } 
+  if (debug) cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
+  /* decreasing order is ensured in reduced row echelon form, hence not checked here
+  for ( int i =0;i<Gaz_row-1;i++){
+    if ( bin2dec(alpha_Gaz.get_row(i)) <= bin2dec(alpha_Gaz.get_row(i+1))){
+      if (debug) cout<< "duplicate Gaz with this id_Gaz. no calculation needed. alpha_Gaz/id_Gaz must be in decreasing order"<<endl;
+      return 2;
+    }
+    }*/
+  //make sure alpa_Gaz is in reduce row echelon form, to remove duplicate cases. return 2 if not in the form
+  //this duplicate the check to make sure alpha_Gaz is in decreasing order
+  if ( ! is_row_reduced_echelon_form( alpha_Gaz, debug) ) return 2;
 
 
   //finish check
@@ -254,7 +260,7 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
   Gax = GF2mat(Gax_row,na);
   // identity matrix in the left part to make it reduce row echelon form.
   set_submatrix(Gax,gf2dense_eye(Gax_row),0,0);
-  if (debug) cout<<"Gax"<<Gax<<endl;
+  //  if (debug) cout<<"Gax"<<Gax<<endl;
 
 
   GF2mat alpha_Gax = GF2mat( dec2bin(Gax_row*(na-Gax_row), id_Gax), false);//false for row vector
@@ -263,6 +269,7 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
     set_submatrix(Gax,alpha_Gax.get_submatrix(0, i*(na-Gax_row), 0, (i+1)*(na-Gax_row)-1), i, Gax_row);
   }
   if (debug) cout<<"Gax"<<Gax<<endl;
+
 
   //remove duplicate in id_Gax. They could be equal, but permute any two rows give equivalent code, so enfore all rows ( in the right part ) in decreasing order
   for ( int i =0;i<Gax_row-1;i++){
@@ -273,11 +280,29 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
       return 2;
     }
   }
-
-
+  //check singleton in Gax: row weight = 1
+  bvec bvec_zero = zeros_b(na);
+  for ( int i = 0; i < Gax_row; i++){
+    if ( BERC::count_errors(bvec_zero, Gax.get_row(i)) == 1){
+      //      cout<<".";
+      return 2;
+    }
+  }
 
   GF2mat H = nullSpace(Gax);
   if (debug) cout<<"nullSpace: H"<<H<<endl;
+
+  //check singleton in H: row weight = 1 
+  for ( int i = 0; i < na - Gax_row; i++){
+    if ( BERC::count_errors(bvec_zero, H.get_row(i)) == 1){
+      //      cout<<"+";
+      return 2;
+    }
+  }
+
+
+
+
   //check id_Gaz
 
 
@@ -286,6 +311,19 @@ int generate_code(GF2mat & Gax, GF2mat & Gaz, int na, int Gax_row, int id_Gax, i
   if (debug) cout<<"alpha_Gaz"<<alpha_Gaz<<endl;
   Gaz=alpha_Gaz*H;
     //GF2mat(dec2bin(), false);
+
+
+  //check singleton in Gaz: col weight = 0
+  //  GF2mat Haz = nullSpace(Gaz);
+  bvec bvec_zero_col=zeros_b(Gaz.rows());
+  for ( int i = 0; i < Gaz.cols(); i++){
+    if ( BERC::count_errors(bvec_zero_col, Gaz.get_col(i)) == 0){
+      //      cout<<"+";
+      return 2;
+    }
+  }
+
+
   
   //  Gaz = alpha_Gaz*H;
   if (debug) cout<<"Gaz"<<Gaz<<endl;
