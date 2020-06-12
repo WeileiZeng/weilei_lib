@@ -190,7 +190,8 @@ int is_row_reduced_echelon_form(GF2mat & alpha_Gaz, int debug = 0){
 	  if (j <= position_one){
 	    //skip this column, this column is not independent
 	    if (debug) cout<<"break the inner for loop for dependent column i = "<<i<<endl;
-	    continue;
+	    break;
+	    //	    continue;
 	  }else {
 	    get_one=1;
 	    position_one=j;
@@ -199,7 +200,7 @@ int is_row_reduced_echelon_form(GF2mat & alpha_Gaz, int debug = 0){
 	}
       }
     }
-    if (debug) cout<<"broke the inner for loop"<<endl;
+    //if (debug) cout<<"broke the inner for loop"<<endl;
     if ( columns_one == alpha_Gaz.rows() ){
       break;
     }
