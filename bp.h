@@ -6,7 +6,7 @@
 #include <itpp/itbase.h>
 #include <itpp/itcomm.h>
 #include <stdio.h>
-#include "my_lib.h"
+#include "weilei_lib.h"
 using namespace itpp;
 using namespace std;
 

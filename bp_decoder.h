@@ -6,8 +6,9 @@
 #include <itpp/itbase.h>
 #include <itpp/itcomm.h>
 #include <stdio.h>
-#include "my_lib.h"
+#include "weilei_lib.h"
 #include <cmath>
+#include <stdexcept> //for invalid argument
 //using namespace itpp;
 //using namespace std;
 

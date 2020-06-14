@@ -8,6 +8,7 @@
 #include<fstream>
 #include <stdio.h>
 #include <itpp/itbase.h>
+#include "weilei_lib.h"
 using namespace itpp;
 using namespace std;
 
