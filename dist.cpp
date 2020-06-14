@@ -4,10 +4,14 @@
 
 //#include "weilei_lib/my_lib.h"
 #include "dist.h"
+#include "lib.h"
+#include "mm_read.h"
+#include "mm_write.h"
+
+//#include "weilei_lib.h"
 #include <itpp/itbase.h>
 #include <itpp/itcomm.h>
 #include <stdio.h>
-//#include "my_lib.h"
 #include <string>
 using namespace itpp;
 using namespace std;

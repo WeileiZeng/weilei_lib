@@ -4,10 +4,12 @@
 #include<iostream>
 #include<sstream>
 //#include "my_lib.h"
-#include "lib.h"
 #include <stdio.h>
 #include <itpp/itbase.h>
 #include <chrono> //for time
+
+#include "lib.h"
+#include "mm_read.h"
 using namespace itpp;
 using namespace std;
 
