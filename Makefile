@@ -18,15 +18,15 @@ command=$(CXX) $(START) -o $@ $< $(word 2,$^) $(word 4, $^) $(word 6, $^) $(word
 
 
 
-all: cpp head
+all: morehead head cpp
 cpp: mmio.o mm_read.o mm_write.o dist.o bp.o lib.o product.o
 head: bp_decoder.h.gch weilei_lib.h.gch
-
+morehead: mmio.h.gch mm_read.h.gch mm_write.h.gch dist.h.gch bp.h.gch lib.h.gch product.h.gch
 #compile object file for cpp 
-%.o:%.cpp %.h
+%.o:%.cpp %.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
 #compile object file for headfile
-%.h.gch:%.h
+%.h.gch:%.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
 
 

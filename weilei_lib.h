@@ -11,10 +11,12 @@
 #include "product.h"
 #include "bp.h"
 
-#include <math.h> //sqrt
+//#include <math.h> //sqrt
 
 //#include "bp_decoder.h"
 
+
+//these two constant should not be here
 const int MAX_M=6;//maximum of the length of the complex chain
 const int INF=999;//infinity distance
 //const double INF_BP = 1000000;

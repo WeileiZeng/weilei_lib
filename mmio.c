@@ -7,10 +7,7 @@
 */
 
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
+
 
 #include "mmio.h"
 /*hide by weilei on Dec 2019. reason: this function is not used anywhere.

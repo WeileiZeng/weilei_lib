@@ -5,13 +5,14 @@
 //recomend file format for Matrix Market file is .mm
 //the segmentation fault is finally solved by reserve memory for I,J and Vval. May 2018
 //trouble shooting: segmentation fault:  directory not exist; wrong folder name
+
+#include "mmio.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "mmio.h"
 #include <fstream> //ofstream ifstream
 #include <itpp/itbase.h>
 using namespace itpp;
-
 using namespace std;
 
 //int GF2mat_to_MM(GF2mat G, char* file_name="mm_temp.dat")
