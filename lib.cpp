@@ -1,36 +1,35 @@
 //Weilei Zeng. Some small functions for use
-#include <fstream>
-#include<string>
-#include<iostream>
-#include<sstream>
+//#include <fstream>
+//#include<string>
+//#include<iostream>
+//#include<sstream>
 //#include "my_lib.h"
-#include <stdio.h>
+//#include <stdio.h>
 #include <itpp/itbase.h>
 #include <chrono> //for time
 
 #include "lib.h"
 #include "mm_read.h"
-using namespace itpp;
-using namespace std;
 
-bool is_quantum_code(GF2mat G_x, GF2mat G_z){
+
+bool is_quantum_code(itpp::GF2mat G_x, itpp::GF2mat G_z){
   //check if the code is quantum or not
   if (G_x.row_rank()+G_z.row_rank() < G_x.cols()){
     if ( (G_x*G_z.transpose()).is_zero()){
       return true;
     }
-    cout<<"Not a quantum code:pertation relation is not satisfied."<<endl;
+    std::cout<<"Not a quantum code:pertation relation is not satisfied."<<std::endl;
     return false;
   }else{
-    cout<<"Not a quantum code: zero rank for codeword space."<<endl;
+    std::cout<<"Not a quantum code: zero rank for codeword space."<<std::endl;
     return false;
   }    
 }
 
-GF2mat make_it_full_rank(GF2mat fat){
+itpp::GF2mat make_it_full_rank(itpp::GF2mat fat){
   //reduce a fat matrix with degenerate rows to a thin matrix with full rank; remove the dependent rows
-  GF2mat thin, T,U;
-  ivec P;
+  itpp::GF2mat thin, T,U;
+  itpp::ivec P;
   int rank = fat.T_fact(T,U,P);
   if (rank == fat.rows()){ //if it is already full rank //this was only = but not ==, weilei changed on Dec 13, 2019, much later than the program was runned.
     return fat;
@@ -41,62 +40,62 @@ GF2mat make_it_full_rank(GF2mat fat){
 }
 
 /*
-int GF2matPrint(GF2mat &G,char * name){
+int itpp::GF2matPrint(itpp::GF2mat &G,char * name){
   //print brief information of G
-  cout<<"GF2mat "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<"), density = "
-      <<G.density()<<endl;
+  std::cout<<"GF2mat "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<"), density = "
+      <<G.density()<<std::endl;
   return 0;
 }
 */
-int GF2matPrint(GF2mat &G, string name){
+int GF2matPrint(itpp::GF2mat &G, std::string name){
   //print brief information of G
   //GF2matPrint(G, name.c_str());
-    cout<<"GF2mat "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<"), density = "
-    <<G.density()<<endl;
+    std::cout<<"GF2mat "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<"), density = "
+    <<G.density()<<std::endl;
   return 0;
 }
 
 
-int matPrint(mat G,char * name){
+int matPrint(itpp::mat G,char * name){
   //print brief information of G
-  cout<<"mat    "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<")"<<endl;
+  std::cout<<"mat    "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<")"<<std::endl;
   return 0;
 }
 
-GF2mat kron(GF2mat B, GF2mat A){//Kroneker tensor product of B x A
+itpp::GF2mat kron(itpp::GF2mat B, itpp::GF2mat A){//Kroneker tensor product of B x A
   //how could I define this in the wrong way?
   //although I define it in the wrong way, I dont think it will affect the result
   //but in any later calculation, use the right definition. May 26, 2018
-  GF2mat G(1,1+A.cols()*B.cols());//an empty row; delete it finally
-  GF2mat zero(A.rows(),A.cols());
+  itpp::GF2mat G(1,1+A.cols()*B.cols());//an empty row; delete it finally
+  itpp::GF2mat zero(A.rows(),A.cols());
   for (int i=0;i<B.rows();i++){
-    GF2mat G_row(A.rows(),1);//an empty column, delete it finally
+    itpp::GF2mat G_row(A.rows(),1);//an empty column, delete it finally
     for (int j=0;j<B.cols();j++){
-      //cout<<"debug: j = "<<j<<endl;
+      //std::cout<<"debug: j = "<<j<<std::endl;
       if (B.get(i,j)){//1,set A
 	G_row = G_row.concatenate_horizontal(A);
       }else{//0, set zero
 	G_row = G_row.concatenate_horizontal(zero);
       }
     }
-    //    cout<<G<<endl<<G_row<<endl;
+    //    std::cout<<G<<std::endl<<G_row<<std::endl;
     G = G.concatenate_vertical(G_row);
   }
   
-  //  cout<<G<<endl<<"debug"<<endl;
+  //  std::cout<<G<<std::endl<<"debug"<<std::endl;
   G=G.get_submatrix(1,1,G.rows()-1,G.cols()-1);
-  //cout<<G<<endl;
+  //std::cout<<G<<std::endl;
   return G;
 }
 
-string NumberToString(int pNumber) //not used anywhere. 
+std::string NumberToString(int pNumber) //not used anywhere. 
 {
-  ostringstream o;
+  std::ostringstream o;
   o<<pNumber;
   return o.str();
 }
 
-GF2mat append_vector(GF2mat G,bvec b){
+itpp::GF2mat append_vector(itpp::GF2mat G,itpp::bvec b){
   //append a row vector to the GF2mat G
   //used when saving error vectors for decoding
   G.set_size(G.rows()+1,G.cols(),true);
@@ -104,21 +103,21 @@ GF2mat append_vector(GF2mat G,bvec b){
   return G;
 }
 
-GF2mat get_GF2mat(char * filename_prefix, char * filename_suffix){
+itpp::GF2mat get_GF2mat(char * filename_prefix, char * filename_suffix){
   char filename[255];
   sprintf(filename,"%s%s",filename_prefix,filename_suffix);
-  GF2mat E=MM_to_GF2mat(filename);
+  itpp::GF2mat E=MM_to_GF2mat(filename);
   return E;
 }
 
-GF2mat get_GF2mat(char * parent_folder, char * folder,  char *filename){
+itpp::GF2mat get_GF2mat(char * parent_folder, char * folder,  char *filename){
   char filename_full[255];
   sprintf(filename_full,"%s/%s/%s",parent_folder, folder, filename);
-  GF2mat E=MM_to_GF2mat(filename_full);
+  itpp::GF2mat E=MM_to_GF2mat(filename_full);
   return E;
 }
 
-double get_error_density(GF2mat E){
+double get_error_density(itpp::GF2mat E){
   //fisrt row is zero
   //remove first row and return density of the remained submatrix
   double w;
@@ -131,7 +130,7 @@ double get_error_density(GF2mat E){
 }
 
 //save mat into gnuplot data file, with a custom comment as header
-int mat2gnudata(mat data, string filename, string header){
+int mat2gnudata(itpp::mat data, std::string filename, std::string header){
   FILE *fout;//file to save the data
   //char filename_out[255];
   //sprintf(filename_out,"%s/gnuplot/rate_versus_p_size_%d_weight_%d.gnudat",error_folder,size,weight);
@@ -161,17 +160,17 @@ white        37         47
 */
 
 
-string color_text(string str){
+std::string color_text(std::string str){
   //return text in red color
   return red_text(str);
 }
 
-string red_text(string str){
+std::string red_text(std::string str){
   //return text in red color
   return "\033[1;31m"+str+"\033[0m";
 }
 
-string blue_text(string str){
+std::string blue_text(std::string str){
   //return text in blue color
   return "\033[1;34m"+str+"\033[0m";
 }

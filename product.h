@@ -5,11 +5,10 @@
 
 #include "dist.h"
 #include <itpp/itbase.h>
-#include <itpp/itcomm.h>
-#include <stdio.h>
+//#include <itpp/itcomm.h>
+//#include <stdio.h>
 #include "weilei_lib.h"
-//using namespace itpp;
-//using namespace std;
+
 
 const int MAX_M=6;//maximum of the length of the complex chain
 //const int INF=999;//infinity distance

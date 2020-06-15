@@ -3,8 +3,7 @@
 
 #include <itpp/itbase.h>
 //#include <string>
-//using namespace std;
-//using namespace itpp;
+
 
 
 itpp::GF2mat MM_to_GF2mat(char *  file_name);

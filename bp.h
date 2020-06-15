@@ -8,8 +8,7 @@
 //#include <stdio.h>
 //#include "weilei_lib.h"
 //#include "lib.h"
-//using namespace itpp;
-//using namespace std;
+
 
 
 itpp::bvec reduce_weight(itpp::bvec e, itpp::GF2mat G);

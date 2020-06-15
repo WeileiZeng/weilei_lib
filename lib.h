@@ -10,8 +10,7 @@
 #include <itpp/itbase.h>
 
 //#include "weilei_lib.h"
-//using namespace itpp;
-//using namespace std;
+
 
 bool is_quantum_code(itpp::GF2mat G_x, itpp::GF2mat G_z);
   //check if the code is quantum or not   

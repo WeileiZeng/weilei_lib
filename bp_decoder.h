@@ -4,13 +4,12 @@
 //#include "weilei_lib/my_lib.h"
 #include "dist.h"
 #include <itpp/itbase.h>
-#include <itpp/itcomm.h>
-#include <stdio.h>
-#include "weilei_lib.h"
+//#include <itpp/itcomm.h>
+//#include <stdio.h>
+//#include "weilei_lib.h"
 //#include <cmath>
 #include <stdexcept> //for invalid argument
-//using namespace itpp;
-//using namespace std;
+
 
 int summation(itpp::bvec u){
   int result = 0;
