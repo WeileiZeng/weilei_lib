@@ -9,7 +9,7 @@
 #include "mm_write.h"
 
 
-int min_wt_decoding(itpp::GF2mat C){
+int common::min_wt_decoding(itpp::GF2mat C){
   //  std::cout<<C<<endl;
   //when C is not so large, we can apply the true min weight decoding
   //  int rowC=C.rows();
@@ -41,7 +41,7 @@ int min_wt_decoding(itpp::GF2mat C){
 
 //G for gauge operators, and C for bare logical operators
 //code word c = alpha_C*C+alpha_G*G, where alpha_C \neq 0
-int min_wt_decoding(itpp::GF2mat C,itpp::GF2mat G){
+int common::min_wt_decoding(itpp::GF2mat C,itpp::GF2mat G){
   //  std::cout<<"call min_wt_decoding"<<std::endl;
   // make sure G and C are full rank before calling this function. Otherwise it is a waste of computing power.
   int C_rows=C.rows(), G_rows=G.rows();
@@ -70,7 +70,7 @@ int min_wt_decoding(itpp::GF2mat C,itpp::GF2mat G){
 }
 
 
-int save_dist(int d,char * filename){
+int common::save_dist(int d,char * filename){
   itpp::mat mat_d(1,1);
   mat_d.set(0,0,d);
   mat_to_MM(mat_d,filename);
@@ -79,7 +79,7 @@ int save_dist(int d,char * filename){
 
 
 
-int rand_dist(itpp::GF2mat C, int perm_try){//default perm_try=10
+int common::rand_dist(itpp::GF2mat C, int perm_try){//default perm_try=10
   //  return min wt of rows in C
   if (C.rows()<7){ //for small codes, use true min wt decoding
     return min_wt_decoding(C);
@@ -110,7 +110,7 @@ int rand_dist(itpp::GF2mat C, int perm_try){//default perm_try=10
   }
   return min_wt;
 }
-int classical_dist(itpp::GF2mat G){
+int common::classical_dist(itpp::GF2mat G){
   //return distance of a classical code GH^t=0
   //G is parity check matrix
   itpp::GF2mat T,U;
@@ -129,7 +129,7 @@ int classical_dist(itpp::GF2mat G){
 
 
 //return H such that GH^T = 0, and rank G + rank H = n = full rank
-itpp::GF2mat nullSpace(itpp::GF2mat G){
+itpp::GF2mat common::nullSpace(itpp::GF2mat G){
   itpp::GF2mat T,U; itpp::ivec P;
   int n=G.cols();
   int rank_of_G = G.transpose().T_fact(T,U,P);
@@ -139,7 +139,7 @@ itpp::GF2mat nullSpace(itpp::GF2mat G){
 }
 
 
-itpp::GF2mat getC(itpp::GF2mat G_x,itpp::GF2mat G_z,int flip){
+itpp::GF2mat common::getC(itpp::GF2mat G_x,itpp::GF2mat G_z,int flip){
   //return C_x
   //flip=1 to get C_z
   if (flip==1){
@@ -175,7 +175,7 @@ itpp::GF2mat getC(itpp::GF2mat G_x,itpp::GF2mat G_z,int flip){
 }
 
 
-int quantum_dist_v2(itpp::GF2mat G_x, itpp::GF2mat G_z, int flip){//without expected value
+int common::quantum_dist_v2(itpp::GF2mat G_x, itpp::GF2mat G_z, int flip){//without expected value
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
   int trialQ=500;//100 is good for not so big codes;permute GQ this max amount of time
@@ -224,7 +224,7 @@ int quantum_dist_v2(itpp::GF2mat G_x, itpp::GF2mat G_z, int flip){//without expe
   }
   return min_wt;
 }
-int quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, int debug, int flip){
+int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, int debug, int flip){
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
   int trialQ=50000;//1000;permute GQ this max amount of time
@@ -281,7 +281,7 @@ int quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, int debu
   return min_wt;
 }
 
-int hypergraph_dist(itpp::GF2mat Aj, itpp::GF2mat Ajplus,int dist_expected,int flip){
+int common::hypergraph_dist(itpp::GF2mat Aj, itpp::GF2mat Ajplus,int dist_expected,int flip){
   //left distance of (Aj,Ajplus^T)
   //right distance of (G_x,G_z)
   //flip left and right if flip = 1
@@ -381,7 +381,7 @@ int hypergraph_dist(itpp::GF2mat Aj, itpp::GF2mat Ajplus,int dist_expected,int f
 
 
 
-int draw_toric_x_error(itpp::bvec error_bits){
+int common::draw_toric_x_error(itpp::bvec error_bits){
   //  std::cout<<"draw with weight = "<<weight(error_bits)<<std::endl;
   //  if (true) return 0 ;
   
@@ -431,14 +431,14 @@ int draw_toric_x_error(itpp::bvec error_bits){
   return 0;
 }
 
-int draw_toric_x_error(itpp::bvec error_bits, std::string header){
+int common::draw_toric_x_error(itpp::bvec error_bits, std::string header){
   std::cout<<header.c_str()<<std::endl;
   draw_toric_x_error(error_bits);
   return 0;
   
 }
 
-itpp::bvec find_error(itpp::bvec e_in, itpp::GF2mat H){
+itpp::bvec common::find_error(itpp::bvec e_in, itpp::GF2mat H){
   //input: original error and parity check matrix
   //output: an error with same syndrome
   //for principle, see random window decoder
@@ -463,7 +463,7 @@ itpp::bvec find_error(itpp::bvec e_in, itpp::GF2mat H){
 }
 
 
-itpp::GF2mat get_check_code734(int L){//L=7n
+itpp::GF2mat common::get_check_code734(int L){//L=7n
   //return check matrix code code [7,3,4], find definition in research note.pdf
   itpp::GF2mat G(L,L);
   for ( int i=0;i<L;i++){
@@ -482,7 +482,7 @@ itpp::GF2mat get_check_code734(int L){//L=7n
   return G;
 }
 
-itpp::GF2mat get_check_code743(int L){//L=7n
+itpp::GF2mat common::get_check_code743(int L){//L=7n
   //return check matrix code code [7,4,3], find definition in research note.pdf
   itpp::GF2mat G(L,L);
   for ( int i=0;i<L;i++){
@@ -505,7 +505,7 @@ itpp::GF2mat get_check_code743(int L){//L=7n
   }
   return G;
 }
-itpp::GF2mat get_check_rept(int L){//return circulant check matrix for repetition code of length L
+itpp::GF2mat common::get_check_rept(int L){//return circulant check matrix for repetition code of length L
   itpp::GF2mat a(L,L);
   for (int i=0;i<L-1;i++){//construct a : circulant check matrix for repetition code
     a.set(i,i,1);
@@ -516,7 +516,7 @@ itpp::GF2mat get_check_rept(int L){//return circulant check matrix for repetitio
   //std::cout<<"circulant check matrix for repetition code : a = "<<a<<std::endl;
   return a;
 }
-itpp::GF2mat get_check(int generator_flag, int L){
+itpp::GF2mat common::get_check(int generator_flag, int L){
   //return check matric a for generating toric code, cubic code and hypercubic code.
   switch(generator_flag){
   case 1: return get_check_rept(L);break;
@@ -542,7 +542,7 @@ itpp::LDPC_Code get_test_LDPC_Code(){
   return C;
   }*/
 
-itpp::LDPC_Code GF2mat_to_LDPC_Code(itpp::GF2mat G){
+itpp::LDPC_Code common::GF2mat_to_LDPC_Code(itpp::GF2mat G){
   itpp::GF2mat_sparse Gs=G.sparsify();
   itpp::GF2mat_sparse_alist Gsa;
   Gsa.from_sparse(Gs);
@@ -551,7 +551,7 @@ itpp::LDPC_Code GF2mat_to_LDPC_Code(itpp::GF2mat G){
   return C;
 }
   
-itpp::LDPC_Code MM_to_LDPC_Code(char * filename){
+itpp::LDPC_Code common::MM_to_LDPC_Code(char * filename){
   //convert itpp::GF2mat saved in .mm file to itpp::LDPC_Code
   itpp::GF2mat G=MM_to_GF2mat(filename);
   return  GF2mat_to_LDPC_Code(G);

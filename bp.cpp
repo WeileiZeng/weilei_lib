@@ -74,11 +74,11 @@ int check_matrices(itpp::GF2mat * G, itpp::GF2mat * H, itpp::GF2mat *U, itpp::GF
   //it seems that H has some weight 1 column, which is not permited in H. bugs find when weight =7, size =9 or 13
   std::cout<<"debug read matrices by checking some relation of the output matrices"<<std::endl;
   //  GF2matPrint(*G,"G");
-  GF2matPrint(*G,(char *) "G");
-  GF2matPrint(*H,(char *) "H");
-  GF2matPrint(*U,(char *) "U");
-  GF2matPrint(*W,(char *) "W");
-  matPrint(*K,(char *) "K");
+  common::GF2matPrint(*G,(char *) "G");
+  common::GF2matPrint(*H,(char *) "H");
+  common::GF2matPrint(*U,(char *) "U");
+  common::GF2matPrint(*W,(char *) "W");
+  common::matPrint(*K,(char *) "K");
   
   std::cout<<"if G*H is zero? ->"<<( ( *G *  (*H).transpose()).is_zero() ?"yes":"no" )<<std::endl;
 
@@ -108,7 +108,7 @@ int check_matrices(itpp::GF2mat * G, itpp::GF2mat * H, itpp::GF2mat *U, itpp::GF
   std::cout<<H -> rows()<<"  row   rank "<<H->row_rank()<<std::endl;
 
   //check min weight of G
-  int d = rand_dist(*G);
+  int d = common::rand_dist(*G);
   std::cout<< "min weight of G: "<<d<<std::endl;
   std::cout<<"finish checking matrices"<<std::endl;
   return 0;

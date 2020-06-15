@@ -19,9 +19,10 @@ command=$(CXX) $(START) -o $@ $< $(word 2,$^) $(word 4, $^) $(word 6, $^) $(word
 
 
 all: morehead head cpp
-cpp: mmio.o mm_read.o mm_write.o dist.o bp.o lib.o product.o
+morehead: mmio.h.gch mm_read.h.gch mm_write.h.gch dist.h.gch bp.h.gch lib.h.gch product_lib.h.gch
+cpp: mmio.o mm_read.o mm_write.o dist.o bp.o lib.o product_lib.o
 head: bp_decoder.h.gch weilei_lib.h.gch
-morehead: mmio.h.gch mm_read.h.gch mm_write.h.gch dist.h.gch bp.h.gch lib.h.gch product.h.gch
+
 #not sure why mmio rebuild every time, but it works fine with `make mmio.o`
 #mmio:mmio.c mmio.h
 #	gcc -c $< -o mmio.o
@@ -47,5 +48,5 @@ test.out:test.c $(files)
 
 clean:
 	rm *.o
-	rm *.out
 	rm *.h.gch
+	rm *.out

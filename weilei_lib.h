@@ -12,7 +12,7 @@
 #include "dist.h" //random window method to clculate distance
 
 //#include "concatenation_lib.h"
-#include "product.h"
+#include "product_lib.h"
 #include "bp.h"
 
 //#include <math.h> //sqrt

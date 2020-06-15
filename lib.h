@@ -12,8 +12,29 @@
 //#include "weilei_lib.h"
 
 
-bool is_quantum_code(itpp::GF2mat G_x, itpp::GF2mat G_z);
+namespace common{
+  //general cpp util functions
+  std::string color_text(std::string str);
+  //return red std::string. same as red_text
+
+  std::string red_text(std::string str);
+  //return red std::string
+
+  std::string blue_text(std::string str);
+  //return blue std::string
+
+  int get_time(int mode = 1);
+
+  //itpp based
+
+  bool is_quantum_code(itpp::GF2mat & G_x, itpp::GF2mat & G_z);
   //check if the code is quantum or not   
+  //this function is also defined elsewhere
+
+  //moved from product.h
+bool is_quantum_code(itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz);
+
+
 itpp::GF2mat make_it_full_rank(itpp::GF2mat fat);
   //reduce a fat matrix with degenerate rows to a thin matrix with full rank; remove the dependent rows 
 
@@ -43,16 +64,6 @@ double get_error_density(itpp::GF2mat E);
 int mat2gnudata(itpp::mat data, std::string filename, std::string header);
 
 
-std::string color_text(std::string str);
-//return red std::string. same as red_text
-
-std::string red_text(std::string str);
-//return red std::string
-
-std::string blue_text(std::string str);
-//return blue std::string
-
-
-int get_time(int mode = 1);
+}
 
 #endif

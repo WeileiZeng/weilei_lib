@@ -1,7 +1,7 @@
 //#ifndef CONCATENATION_LIB_H
 //#define CONCATENATION_LIB_H
-#ifndef PRODUCT_H
-#define PRODUCT_H
+#ifndef PRODUCT_LIB_H
+#define PRODUCT_LIB_H
 
 #include "dist.h"
 #include <itpp/itbase.h>
@@ -13,8 +13,7 @@
 const int MAX_M=6;//maximum of the length of the complex chain
 //const int INF=999;//infinity distance
 
-// same functionis also defined in lib.h
-bool is_quantum_code(itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz);
+
 
 
 int getRandomQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz);
@@ -42,4 +41,4 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
 
 
 
-#endif //PRODUCT_H
+#endif //PRODUCT_LIB_H

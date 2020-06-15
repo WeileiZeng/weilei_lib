@@ -9,40 +9,9 @@
 #include <stdio.h>
 //#include "my_lib.h"
 //#include "concatenation_lib.h"
-#include "product.h"
+#include "product_lib.h"
+//using namespace common;
 
-
-
-
-bool is_quantum_code(itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz){
-  if (!(Gx*Gz.transpose()).is_zero()){
-    std::cout<<"(Gx*Gz.transpose()) is not zero"<<std::endl;
-    //    throw "(Gx*Gz.transpose()) is not zero";
-    return false;
-  }
-  if (!(Gx*Cz.transpose()).is_zero()){
-    //    throw "(Gx*Cz.transpose()) is not zero";
-    std::cout<<"(Gx*Cz.transpose()) is not zero"<<std::endl;return false;
-  }
-  if (!(Gz*Cx.transpose()).is_zero()){
-    //    throw "(Gz*Cx.transpose()) is not zero";
-    std::cout<<"(Gz*Cx.transpose()) is not zero"<<std::endl;return false;
-  }
-  int rank_of_Gx=Gx.row_rank();
-  int rank_of_Gz=Gz.row_rank();
-  int rank_of_Cx=Cx.row_rank();
-  int rank_of_Cz=Cz.row_rank();
-  int n=Gx.cols();
-  if (rank_of_Gx+rank_of_Gz+rank_of_Cx != n){
-    std::cout<<"(rank_of_Gx+rank_of_Gz+rank_of_Cx != n)"<<std::endl;
-    return false;
-  }
-  if(rank_of_Cx != rank_of_Cz){
-    std::cout<<"(rank_of_Cx != rank_of_Cz)"<<std::endl;return false;
-  }
-  //  std::cout<<"is_quantum_code(): It is a quantum code!"<<std::endl;
-  return true;
-}
 
 /*int getRandomQuantumCode(itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz){
   int n=21;//sample input
@@ -76,8 +45,8 @@ void remove_singleton(itpp::GF2mat &Gx, itpp::GF2mat &Gz){
 	Gz=remove_col(Gz,n-i-1);
       }
   }
-  Gx=make_it_full_rank(Gx);
-  Gz=make_it_full_rank(Gz);
+  Gx=common::make_it_full_rank(Gx);
+  Gz=common::make_it_full_rank(Gz);
   std::cout<<"singleton removed"<<std::endl;
   return;
 }
@@ -117,8 +86,8 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2
   //Gx = nullSpace(Gz).get_submatrix(0,0,Gx_row-1,n-1);
   //Gz = nullSpace(Gx).get_submatrix(0,0,Gz_row-1,n-1);
   //  remove_singleton(Gx,Gz);
-  Cx=getC(Gx,Gz);
-  Cz=getC(Gx,Gz,1);
+  Cx=common::getC(Gx,Gz);
+  Cz=common::getC(Gx,Gz,1);
   //  if (! is_quantum_code(Gx,Gz,Cx,Cz)) throw "invalid code";
 
   return 0;
@@ -134,13 +103,13 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2ma
 
     getRandomQuantumCode( n, Gx_row,Gz_row, Gx_temp, Gz_temp,Cx_temp,Cz_temp);
     //check distance and update if get larger distance
-    int dx = quantum_dist_v2(Gx_temp,Gz_temp);
+    int dx = common::quantum_dist_v2(Gx_temp,Gz_temp);
     if ( dx >1 ){
-      int dz = quantum_dist_v2(Gx_temp,Gz_temp,1);
+      int dz = common::quantum_dist_v2(Gx_temp,Gz_temp,1);
       if (dz >1 ){
 	flag_find_good_code=1;
 	//	Gx = Gx_temp; Gz = Gz_temp; Cx = Cx_temp; Cz = Cz_temp;
-	if (debug) std::cout<<blue_text("get good code when i =")<<i<<std::endl;
+	if (debug) std::cout<<common::blue_text("get good code when i =")<<i<<std::endl;
 	break;
 	//	return 0;
       }
@@ -152,10 +121,10 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2ma
   if ( debug ) std::cout<<"Gx 1st row:"<<Gx.get_row(0)<<std::endl; // for debug the random seed
   if ( Gx.row_rank() < Gx.rows() ) {
     if (debug) std::cout<<"getGoodQuantumCode: Gx not full rank. now make it full rank"<<std::endl;
-    Gx = make_it_full_rank(Gx);
+    Gx = common::make_it_full_rank(Gx);
   }
 
-  if ( debug) if ( ! flag_find_good_code ) std::cout<<color_text("didn't find good code after ")<<search_trial<<" trials"<<std::endl;
+  if ( debug) if ( ! flag_find_good_code ) std::cout<<common::color_text("didn't find good code after ")<<search_trial<<" trials"<<std::endl;
   return 0;
 }
 
@@ -290,7 +259,7 @@ int generate_code(itpp::GF2mat & Gax, itpp::GF2mat & Gaz, int na, int Gax_row, i
     }
   }
 
-  itpp::GF2mat H = nullSpace(Gax);
+  itpp::GF2mat H = common::nullSpace(Gax);
   if (debug) std::cout<<"nullSpace: H"<<H<<std::endl;
 
   //check singleton in H: row weight = 1 
@@ -343,11 +312,11 @@ int concatenate(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2m
   int na=Gax.cols();//,nb=Gbx.cols();//,nc=na*nb;//size of the codes
   itpp::GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
   itpp::GF2mat Caz=getC(Gax,Gaz,1),Cbz=getC(Gbx,Gbz,1);//This line doesn't allow C to be empty  
-  itpp::GF2mat Gcz = kron(Gaz,Cbz).concatenate_vertical(kron(itpp::gf2dense_eye(na),Gbz));
+  itpp::GF2mat Gcz = common::kron(Gaz,Cbz).concatenate_vertical(common::kron(itpp::gf2dense_eye(na),Gbz));
   //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
 
 
-  itpp::GF2mat Gcx=kron(itpp::gf2dense_eye(na),Gbx).concatenate_vertical( kron(Gax,Cbx)   );
+  itpp::GF2mat Gcx=common::kron(itpp::gf2dense_eye(na),Gbx).concatenate_vertical( common::kron(Gax,Cbx)   );
   //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
 
   int daz=ddaz,dbz=ddbz;
@@ -367,13 +336,13 @@ int reduce(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat Gb
   //construct code C and calculate the distance; Compare it with the input (estimated) value
   std::cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<std::endl;
   int na=Gax.cols(),nb=Gbx.cols();//,nc=na*nb;//size of the codes
-  itpp::GF2mat Gcz = kron(Gaz,itpp::gf2dense_eye(nb)).concatenate_vertical(kron(itpp::gf2dense_eye(na),Gbz));
+  itpp::GF2mat Gcz = common::kron(Gaz,itpp::gf2dense_eye(nb)).concatenate_vertical(common::kron(itpp::gf2dense_eye(na),Gbz));
   //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
   itpp::GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
 
-  itpp::GF2mat Gcx=kron(Gax,Gbx).concatenate_vertical(
-       	         kron(Cax,Gbx).concatenate_vertical(
-          	     kron(Gax,Cbx)
+  itpp::GF2mat Gcx=common::kron(Gax,Gbx).concatenate_vertical(
+       	         common::kron(Cax,Gbx).concatenate_vertical(
+          	     common::kron(Gax,Cbx)
 								  )
 						);
   //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
@@ -401,8 +370,8 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
   //construct code C and calculate the distance; Compare it with the input (estimated) value
   int na=Gax.cols(),nb=Gbx.cols();//,nc=na*nb;//size of the codes
 
-  itpp::GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
-  itpp::GF2mat Caz=getC(Gax,Gaz,1),Cbz=getC(Gbx,Gbz,1);//This line doesn't allow C to be empty  
+  itpp::GF2mat Cax = common::getC(Gax,Gaz),  Cbx = common::getC(Gbx,Gbz);//This line doesn't allow C to be empty
+  itpp::GF2mat Caz = common::getC(Gax,Gaz,1),Cbz = common::getC(Gbx,Gbz,1);//This line doesn't allow C to be empty  
   
   //  Gcz=make_it_full_rank(Gcz);//not needed for calculating distance
   itpp::GF2mat Gcx,Gcz;
@@ -410,46 +379,46 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
   switch ( mode ){
   case 0://reduce/subsystem product, x distance
     
-    Gcx = kron(Gax,itpp::gf2dense_eye(nb)).concatenate_vertical(kron(itpp::gf2dense_eye(na),Gbx));
-    Gcz=kron(Gaz,Gbz).concatenate_vertical(
-					   kron(Caz,Gbz)
-					   .concatenate_vertical(kron(Gaz,Cbz))
+    Gcx = common::kron(Gax,itpp::gf2dense_eye(nb)).concatenate_vertical(common::kron(itpp::gf2dense_eye(na),Gbx));
+    Gcz=common::kron(Gaz,Gbz).concatenate_vertical(
+					   common::kron(Caz,Gbz)
+					   .concatenate_vertical(common::kron(Gaz,Cbz))
 					   );
     break;
   case 1://reduce/subsystem product, z distance
-    Gcz = kron(Gaz,itpp::gf2dense_eye(nb)).concatenate_vertical(kron(itpp::gf2dense_eye(na),Gbz));
-    Gcx=kron(Gax,Gbx)
+    Gcz = common::kron(Gaz,itpp::gf2dense_eye(nb)).concatenate_vertical(common::kron(itpp::gf2dense_eye(na),Gbz));
+    Gcx=common::kron(Gax,Gbx)
       .concatenate_vertical(
-			    kron(Cax,Gbx)
-			    .concatenate_vertical(kron(Gax,Cbx))
+			    common::kron(Cax,Gbx)
+			    .concatenate_vertical(common::kron(Gax,Cbx))
 			    );
     break;
   case 2://concatenation
-    Gcz = kron(Gaz,Cbz).concatenate_vertical(kron(itpp::gf2dense_eye(na),Gbz));
-    Gcx=kron(itpp::gf2dense_eye(na),Gbx).concatenate_vertical( kron(Gax,Cbx)   );
+    Gcz = common::kron(Gaz,Cbz).concatenate_vertical(common::kron(itpp::gf2dense_eye(na),Gbz));
+    Gcx=common::kron(itpp::gf2dense_eye(na),Gbx).concatenate_vertical( common::kron(Gax,Cbx)   );
     break;
   case 3:
     // chain complex to two CSS codes.
   case 4:
     {
     // chain complex to two CSS codes.
-    Gcx=kron(Gaz.transpose(), itpp::gf2dense_eye(Gbx.rows()))
-      .concatenate_horizontal(kron(itpp::gf2dense_eye(Gax.cols()),Gbx))
-      .concatenate_horizontal(kron(itpp::GF2mat(Gax.cols(),Gax.rows()),itpp::GF2mat(Gbx.rows(),Gbz.rows())));
+    Gcx=common::kron(Gaz.transpose(), itpp::gf2dense_eye(Gbx.rows()))
+      .concatenate_horizontal(common::kron(itpp::gf2dense_eye(Gax.cols()),Gbx))
+      .concatenate_horizontal(common::kron(itpp::GF2mat(Gax.cols(),Gax.rows()),itpp::GF2mat(Gbx.rows(),Gbz.rows())));
     Gcx = Gcx
       .concatenate_vertical(
-			    kron(itpp::GF2mat(Gax.rows(),Gaz.rows()),itpp::GF2mat(Gbx.cols(),Gbx.rows()))
-			    .concatenate_horizontal(kron(Gax, itpp::gf2dense_eye(Gbx.cols())))
-			    .concatenate_horizontal(kron(itpp::gf2dense_eye(Gax.rows()),Gbz.transpose()))
+			    common::kron(itpp::GF2mat(Gax.rows(),Gaz.rows()),itpp::GF2mat(Gbx.cols(),Gbx.rows()))
+			    .concatenate_horizontal(common::kron(Gax, itpp::gf2dense_eye(Gbx.cols())))
+			    .concatenate_horizontal(common::kron(itpp::gf2dense_eye(Gax.rows()),Gbz.transpose()))
 			    );
-    Gcz=kron(itpp::gf2dense_eye(Gaz.rows()), Gbx.transpose())
-      .concatenate_horizontal(kron(Gaz,itpp::gf2dense_eye(Gbx.cols())))
-      .concatenate_horizontal(kron(itpp::GF2mat(Gaz.rows(),Gax.rows()),itpp::GF2mat(Gbz.cols(),Gbz.rows())));
+    Gcz=common::kron(itpp::gf2dense_eye(Gaz.rows()), Gbx.transpose())
+      .concatenate_horizontal(common::kron(Gaz,itpp::gf2dense_eye(Gbx.cols())))
+      .concatenate_horizontal(common::kron(itpp::GF2mat(Gaz.rows(),Gax.rows()),itpp::GF2mat(Gbz.cols(),Gbz.rows())));
     Gcz=Gcz
       .concatenate_vertical(
-			    kron(itpp::GF2mat( Gaz.cols(),Gaz.rows() ), itpp::GF2mat( Gbz.rows(),Gbx.rows() ))
-			    .concatenate_horizontal(kron(itpp::gf2dense_eye(Gaz.cols()),Gbz))
-			    .concatenate_horizontal(kron(Gax.transpose(),itpp::gf2dense_eye(Gbz.rows())))
+			    common::kron(itpp::GF2mat( Gaz.cols(),Gaz.rows() ), itpp::GF2mat( Gbz.rows(),Gbx.rows() ))
+			    .concatenate_horizontal(common::kron(itpp::gf2dense_eye(Gaz.cols()),Gbz))
+			    .concatenate_horizontal(common::kron(Gax.transpose(),itpp::gf2dense_eye(Gbz.rows())))
 			    );
     
     }
@@ -482,7 +451,7 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
       break;
     }
   }
-  if (debug){GF2matPrint(Gcx,"Gcx"); GF2matPrint(Gcz,"Gcz");}
+  if (debug){common::GF2matPrint(Gcx,"Gcx"); common::GF2matPrint(Gcz,"Gcz");}
 
   if ( ! (Gcx*Gcz.transpose()).is_zero() ){
     std::cout<<"concatenation_lib: not a quantum code "<<std::endl;
@@ -507,17 +476,17 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
     {
       //  if ( debug ) std::cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<std::endl;
       int dax=ddax,dbx=ddbx;
-      int dcx = quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
+      int dcx = common::quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
       if (debug) std::cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<std::endl;    
       if (dcx == dax*dbx){
 	if (debug) std::cout<<"dcx = dax*dbx = "<<dcx<<std::endl;
 	return 0;
-      }else if(dcx == INF) {
+      }else if(dcx == common::INF) {
 	if (debug) std::cout<<"dcx = "<<dcx<<", dax = "<<dax<<", dbx = "<<dbx<<std::endl;
 	return 1;
       }else{
 	if (dcx > dax*dbx) std::cout<<"PSEUDO ";
-	std::cout<<red_text("CASE:")<<" mode ("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
+	std::cout<<common::red_text("CASE:")<<" mode ("<<mode<<") dax*dbx="<<dax*dbx<<", dcx="<<dcx;
 	std::cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<";";    
 	std::cout<<"na,nb,nc,"<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<";";
 	std::cout<<"ka,kb="<<Cax.rows()<<","<<Cbx.rows()<<";";
@@ -530,17 +499,17 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
     //z distance
     {
       int daz=ddaz,dbz=ddbz;
-      int dcz = quantum_dist(Gcx,Gcz,daz*dbz,debug,1);//donot use estimated value ddaz and ddbz
+      int dcz = common::quantum_dist(Gcx,Gcz,daz*dbz,debug,1);//donot use estimated value ddaz and ddbz
       if (debug) std::cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<std::endl;    
       if (dcz == daz*dbz){
 	if (debug) std::cout<<"dcz = daz*dbz = "<<dcz<<std::endl;
 	return 0;
-      }else if(dcz == INF) {
+      }else if(dcz == common::INF) {
 	if (debug) std::cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<std::endl;
 	return 1;
       }else{
 	if (dcz > daz*dbz) std::cout<<"PSEUDO ";
-	std::cout<<red_text("CASE:")<<" mode ("<<mode<<") daz*dbz="<<daz*dbz<<", dcz="<<dcz;
+	std::cout<<common::red_text("CASE:")<<" mode ("<<mode<<") daz*dbz="<<daz*dbz<<", dcz="<<dcz;
 	std::cout<<". dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<";";
 	std::cout<<"na,nb,nc="<<Gax.cols()<<","<<Gbx.cols()<<","<<Gcx.cols()<<";";    
 	std::cout<<"ka,kb="<<Cax.rows()<<","<<Cbx.rows()<<";";

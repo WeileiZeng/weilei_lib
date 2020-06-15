@@ -11,6 +11,7 @@
 #include <itpp/itcomm.h> //LDPC_Code
 //#include <stdio.h>
 
+namespace common {
 
 //const int MAX_M=6;//maximum of the length of the complex chain
 const int INF=999;//infinity distance
@@ -80,5 +81,6 @@ itpp::LDPC_Code MM_to_LDPC_Code(char * filename);
   //convert GF2mat saved in .mm file to LDPC_Code  
     
 
+} //namespace common
 #endif
 
