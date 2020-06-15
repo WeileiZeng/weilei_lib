@@ -3,10 +3,10 @@
 
 #ifndef LIB_H
 #define LIB_H
-#include <string>
-#include <iostream>
-#include<fstream>
-#include <stdio.h>
+#include <string> //string is already included in itpp
+//#include <iostream>
+//#include<fstream>
+//#include <stdio.h>
 #include <itpp/itbase.h>
 
 //#include "weilei_lib.h"

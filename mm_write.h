@@ -1,8 +1,8 @@
 #ifndef MM_WRITE_H
 #define MM_WRITE_H
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 //#include <fstream> //ofstream ifstream
 #include <itpp/itbase.h>
 //using namespace itpp;

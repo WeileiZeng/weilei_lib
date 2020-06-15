@@ -25,7 +25,7 @@ morehead: mmio.h.gch mm_read.h.gch mm_write.h.gch dist.h.gch bp.h.gch lib.h.gch 
 #compile object file for cpp 
 %.o:%.cpp %.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
-#compile object file for headfile
+#compile object file for headfile; this can have errors, as long as the .o file can be built without error
 %.h.gch:%.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
 

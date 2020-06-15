@@ -3,10 +3,11 @@
 //Weilei Zeng, April 4, 2020
 
 
-#include <itpp/itbase.h>
-#include <itpp/itcomm.h>
-#include <stdio.h>
-#include "weilei_lib.h"
+//#include <itpp/itbase.h>
+#include <itpp/itcomm.h> //qllr_to_bvec
+//#include <stdio.h>
+//#include "weilei_lib.h"
+//#include "lib.h"
 //using namespace itpp;
 //using namespace std;
 

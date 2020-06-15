@@ -4,10 +4,13 @@
 
 //#include "weilei_lib/my_lib.h"
 //#include "weilei_lib.h"
-#include <itpp/itbase.h>
-#include <itpp/itcomm.h>
-#include <stdio.h>
-#include <string>
+
+
+//#include <string> //already inlcuded in itbase.h
+//#include <itpp/itbase.h> //already included in itcomm.h
+#include <itpp/itcomm.h> //LDPC_Code
+//#include <stdio.h>
+
 //using namespace itpp;
 //using namespace std;
 

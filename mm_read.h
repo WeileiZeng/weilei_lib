@@ -2,7 +2,7 @@
 #define MM_READ_H
 
 #include <itpp/itbase.h>
-#include <string>
+//#include <string>
 //using namespace std;
 //using namespace itpp;
 

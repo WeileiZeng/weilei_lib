@@ -217,9 +217,9 @@ void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
       schedule_mode_str ="random purterbation of of mode 2, using bp_flexible()";
       //random permutate
       int permutation=2*nedge;//number of swaps
-      RNG_randomize();//get randome seed 
-      itpp::ivec source=randi(permutation,0,nedge*2-1);
-      itpp::ivec target=randi(permutation,0,nedge*2-1);
+      itpp::RNG_randomize();//get randome seed 
+      itpp::ivec source=itpp::randi(permutation,0,nedge*2-1);
+      itpp::ivec target=itpp::randi(permutation,0,nedge*2-1);
       for ( int i =0; i< permutation; i++){
 	schedule.swap_rows(source(i),target(i));
       }
@@ -231,7 +231,7 @@ void BP_Decoder::set_schedule_mode(int schedule_mode_temp){
       schedule.set_size(2*nedge,3);
       schedule.zeros();
       s=0;
-      std::std::cout<<"start updating schedule"<<std::endl;
+      std::cout<<"start updating schedule"<<std::endl;
       for ( int j = 0; j<nvar; j ++){
 	for ( int i =0; i<ncheck; i++ ){	
 	  if (H(i,j)){
@@ -281,7 +281,7 @@ int BP_Decoder::decode( itpp::bvec syndrome,  const itpp::vec & LLRin, itpp::vec
 
 bool BP_Decoder::match_syndrome(itpp::vec LLR, itpp::bvec syndrome){
   itpp::bvec  error = LLR < 0;
-  return GF2mat(H*error - syndrome).is_zero();
+  return itpp::GF2mat(H*error - syndrome).is_zero();
 }
 
 //int BP_Decoder::bp_syndrome_llr(const GF2mat H,  itpp::bvec syndrome,  itpp::vec & LLRin, itpp::vec   & LLRout, int exit_iteration, int decode_mode){
@@ -294,7 +294,7 @@ int BP_Decoder::bp_syndrome_llr( itpp::bvec syndrome,  const itpp::vec & LLRin, 
   // bits_out = LLRout < 0;
   //output: number of iteration, negative if not converge.
 
-  if ( GF2mat(syndrome).is_zero() ){
+  if ( itpp::GF2mat(syndrome).is_zero() ){
     //return zero error vector, which is the default input for LLRout
     return 1;
   }
@@ -303,7 +303,7 @@ int BP_Decoder::bp_syndrome_llr( itpp::bvec syndrome,  const itpp::vec & LLRin, 
   //initialize
   //int nvar = H.cols(), ncheck = H.rows();
   if (debug) std::cout<<"nvar = "<<nvar <<", ncheck = "<<ncheck<<std::endl;
-  mat llrs = zeros(ncheck, nvar), LLRs=zeros(ncheck, nvar);  
+  itpp::mat llrs = itpp::zeros(ncheck, nvar), LLRs = itpp::zeros(ncheck, nvar);  
   //LLRout.set_size(nvar);should be the same size
   //  bool match_syndrome = false;// a flag to indicate whether the syndrome has been satisfied
   
@@ -337,11 +337,11 @@ int BP_Decoder::bp_syndrome_llr( itpp::bvec syndrome,  const itpp::vec & LLRin, 
 	      if ( H(i,k) ){
 		if ( k != j ) {
 		  prod = prod * tanh( llrs(i,k)/2 );
-		  str += to_string(i)+",";
-		  str += to_string(j)+",";
-		  str += to_string(k)+",";
-		  str += to_string(prod)+",";
-		  str += to_string(llrs(i,k))+",";
+		  str += std::to_string(i)+",";
+		  str += std::to_string(j)+",";
+		  str += std::to_string(k)+",";
+		  str += std::to_string(prod)+",";
+		  str += std::to_string(llrs(i,k))+",";
 		  //if (debug) std::cout<<",prod = "<<prod<<" i="<<i <<std::endl;
 		}
 	      }
@@ -373,14 +373,14 @@ int BP_Decoder::bp_syndrome_llr( itpp::bvec syndrome,  const itpp::vec & LLRin, 
 		    llr = -llrs(i,k);
 		    sign = -sign;
 		  }
-		  prod = min( prod, llr);
+		  prod = (llr < prod) ? llr: prod;//min( prod, llr);
 			      
 		    //		  prod = prod * tanh( llrs(i,k)/2 );
-		    /*str += to_string(i)+",";
-		  str += to_string(j)+",";
-		  str += to_string(k)+",";
-		  str += to_string(prod)+",";
-		  str += to_string(llrs(i,k))+",";*/
+		    /*str += std::to_string(i)+",";
+		  str += std::to_string(j)+",";
+		  str += std::to_string(k)+",";
+		  str += std::to_string(prod)+",";
+		  str += std::to_string(llrs(i,k))+",";*/
 		  //if (debug) std::cout<<",prod = "<<prod<<" i="<<i <<std::endl;
 		}
 	      }
@@ -471,7 +471,7 @@ int BP_Decoder::bp_schedule( itpp::bvec syndrome,  const itpp::vec & LLRin, itpp
   // bits_out = LLRout < 0;
   //output: number of iteration, negative if not converge.
 
-  if ( GF2mat(syndrome).is_zero() ){
+  if ( itpp::GF2mat(syndrome).is_zero() ){
     //return zero error vector, which is the default input for LLRout
     return 1;
   }
@@ -480,7 +480,7 @@ int BP_Decoder::bp_schedule( itpp::bvec syndrome,  const itpp::vec & LLRin, itpp
   //initialize
   //int nvar = H.cols(), ncheck = H.rows();
   if (debug) std::cout<<"nvar = "<<nvar <<", ncheck = "<<ncheck<<std::endl;
-  itpp::mat llrs = zeros(ncheck, nvar), LLRs=zeros(ncheck, nvar);  
+  itpp::mat llrs = itpp::zeros(ncheck, nvar), LLRs = itpp::zeros(ncheck, nvar);  
   //LLRout.set_size(nvar);should be the same size
   //  bool match_syndrome = false;// a flag to indicate whether the syndrome has been satisfied
   
@@ -514,11 +514,11 @@ int BP_Decoder::bp_schedule( itpp::bvec syndrome,  const itpp::vec & LLRin, itpp
 	      if ( H(i,k) ){
 		if ( k != j ) {
 		  prod = prod * tanh( llrs(i,k)/2 );
-		  /*str += to_string(i)+",";
-		  str += to_string(j)+",";
-		  str += to_string(k)+",";
-		  str += to_string(prod)+",";
-		  str += to_string(llrs(i,k))+",";*/
+		  /*str += std::to_string(i)+",";
+		  str += std::to_string(j)+",";
+		  str += std::to_string(k)+",";
+		  str += std::to_string(prod)+",";
+		  str += std::to_string(llrs(i,k))+",";*/
 		  //if (debug) std::cout<<",prod = "<<prod<<" i="<<i <<std::endl;
 		}
 	      }
@@ -605,12 +605,12 @@ int BP_Decoder::bp_flexible( itpp::bvec syndrome,  const itpp::vec & LLRin, itpp
   // bits_out = LLRout < 0;
   //output: number of iteration, negative if not converge.
 
-  if ( GF2mat(syndrome).is_zero() )     return 1;
+  if ( itpp::GF2mat(syndrome).is_zero() )     return 1;
     //return zero error vector, which is the default input for LLRout
   
   //initialize
   if (debug) std::cout<<"nvar = "<<nvar <<", ncheck = "<<ncheck<<std::endl;
-  itpp::mat llrs = zeros(ncheck, nvar), LLRs=zeros(ncheck, nvar);  
+  itpp::mat llrs = itpp::zeros(ncheck, nvar), LLRs = itpp::zeros(ncheck, nvar);  
   //LLRout.set_size(nvar);should be the same size
   
   for ( int i = 0; i< ncheck ; i++){
@@ -675,7 +675,7 @@ int BP_Decoder::bp_flexible( itpp::bvec syndrome,  const itpp::vec & LLRin, itpp
 		      llr = -llrs(i,k);
 		      sign = -sign;
 		    }
-		    prod = min( prod, llr);
+		    prod = (llr<prod) ? llr:prod;//min( prod, llr);
 		  }
 		}
 	      }
