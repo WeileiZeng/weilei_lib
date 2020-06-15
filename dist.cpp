@@ -110,6 +110,7 @@ int common::rand_dist(itpp::GF2mat C, int perm_try){//default perm_try=10
   }
   return min_wt;
 }
+
 int common::classical_dist(itpp::GF2mat G){
   //return distance of a classical code GH^t=0
   //G is parity check matrix
@@ -281,10 +282,14 @@ int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, 
   return min_wt;
 }
 
+/** 
+ *\details
+ *left distance of (Aj,Ajplus^T),
+ *right distance of (G_x,G_z),
+ *flip left and right if flip = 1,
+ *TODO::This should be implemented as a wrapper of quantum_dist()
+ */
 int common::hypergraph_dist(itpp::GF2mat Aj, itpp::GF2mat Ajplus,int dist_expected,int flip){
-  //left distance of (Aj,Ajplus^T)
-  //right distance of (G_x,G_z)
-  //flip left and right if flip = 1
   
   itpp::GF2mat G_z = Aj;
   itpp::GF2mat G_x = Ajplus.transpose();

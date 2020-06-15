@@ -1,4 +1,6 @@
-//this file links all other headfiles in this folder.
+/** \file weilei_lib.h
+ *\brief this file links all other headfiles in this folder.
+ */
 
 #ifndef WEILEI_LIB_H
 #define WEILEI_LIB_H

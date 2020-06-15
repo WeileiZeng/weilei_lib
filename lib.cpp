@@ -1,3 +1,8 @@
+/**\file lib.cpp
+ *\author Weilei Zeng
+ *\brief implementation of lib.h
+ */
+
 //Weilei Zeng. Some small functions for use
 //#include <fstream>
 //#include<string>
@@ -10,6 +15,63 @@
 
 #include "lib.h"
 #include "mm_read.h"
+
+/**
+ * currently return red color as default; more color to be implemented
+|     |    foreground| background|
+|---|---|---|
+|black        |30         |40|
+|red          |31         |41|
+|green        |32         |42|
+|yellow       |33         |43|
+|blue         |34         |44|
+|magenta      |35         |45|
+|cyan         |36         |46|
+|white        |37         |47|
+ */
+std::string common::color_text(std::string str){
+  //return text in red color
+  return red_text(str);
+}
+
+std::string common::red_text(std::string str){
+  //return text in red color
+  return "\033[1;31m"+str+"\033[0m";
+}
+
+std::string common::blue_text(std::string str){
+  //return text in blue color
+  return "\033[1;34m"+str+"\033[0m";
+}
+
+
+/**
+ * @param mode=1 secs (default)
+ * @param mode=2 millisecs, \f$ 10 ^{-3} \f$
+ * @param mode=3 10 nano secs = \f$10^{-8}\f$ sec
+ */
+int common::get_time(int mode){
+
+  auto now = std::chrono::system_clock::now();
+  //  auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+  auto value = now.time_since_epoch();
+  long duration = value.count();
+  int t=0;
+  const int DIGIT=1000000000;
+  switch ( mode ){
+  case 1: // seconds
+    t = ( duration / 100000000 ) % DIGIT ;
+    break;
+  case 2: // milli seconds
+    t = (duration / 100000) % DIGIT;
+    break;
+  case 3:
+    t = duration % DIGIT;
+    break;
+  }
+  return t;
+}
+
 
 
 bool common::is_quantum_code(itpp::GF2mat & G_x, itpp::GF2mat & G_z){
@@ -87,17 +149,27 @@ int common::GF2matPrint(itpp::GF2mat &G, std::string name){
   return 0;
 }
 
-
+/** should change char to string */
 int common::matPrint(itpp::mat G,char * name){
   //print brief information of G
   std::cout<<"mat    "<<name<<", size = ("<<G.rows()<<","<<G.cols()<<")"<<std::endl;
   return 0;
 }
 
-itpp::GF2mat common::kron(itpp::GF2mat B, itpp::GF2mat A){//Kroneker tensor product of B x A
+/** 
+ *\warning: The implementation is confusing, but should works as the conventional Kronecker product defined in the wikipedia page
+ */
+itpp::GF2mat common::kron(itpp::GF2mat A, itpp::GF2mat B){//Kroneker tensor product of A x B
   //how could I define this in the wrong way?
   //although I define it in the wrong way, I dont think it will affect the result
   //but in any later calculation, use the right definition. May 26, 2018
+
+  //switch A B
+  itpp::GF2mat  temp;
+  temp = A;
+  A=B;
+  B=temp;
+  
   itpp::GF2mat G(1,1+A.cols()*B.cols());//an empty row; delete it finally
   itpp::GF2mat zero(A.rows(),A.cols());
   for (int i=0;i<B.rows();i++){
@@ -179,53 +251,4 @@ int common::mat2gnudata(itpp::mat data, std::string filename, std::string header
   return 0;	      
 }
 
-/*
-         foreground background
-black        30         40
-red          31         41
-green        32         42
-yellow       33         43
-blue         34         44
-magenta      35         45
-cyan         36         46
-white        37         47
-*/
 
-
-std::string common::color_text(std::string str){
-  //return text in red color
-  return red_text(str);
-}
-
-std::string common::red_text(std::string str){
-  //return text in red color
-  return "\033[1;31m"+str+"\033[0m";
-}
-
-std::string common::blue_text(std::string str){
-  //return text in blue color
-  return "\033[1;34m"+str+"\033[0m";
-}
-
-
-int common::get_time(int mode){
-
-  auto now = std::chrono::system_clock::now();
-  //  auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-  auto value = now.time_since_epoch();
-  long duration = value.count();
-  int t=0;
-  const int DIGIT=1000000000;
-  switch ( mode ){
-  case 1: // seconds
-    t = ( duration / 100000000 ) % DIGIT ;
-    break;
-  case 2: // milli seconds
-    t = (duration / 100000) % DIGIT;
-    break;
-  case 3:
-    t = duration % DIGIT;
-    break;
-  }
-  return t;
-}
