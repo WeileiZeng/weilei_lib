@@ -22,30 +22,31 @@
 *      when reading doubles, otherwise errors will occur.
 */
 //Weilei: read from the file and return GF2mat
-#include <stdio.h>//cout
-#include <stdlib.h> //fprintf?
+//#include <stdio.h>//cout
+//#include <stdlib.h> //fprintf?
 #include "mmio.h" //for MM format
 #include <itpp/itbase.h>
 //#include <string>
 #include "mm_read.h"
-//#include "my_lib.h"
-using namespace std;
-using namespace itpp;
 
-GF2mat MM_to_GF2mat(string  file_name){
+
+
+
+
+itpp::GF2mat MM_to_GF2mat(std::string  file_name){
   char cstr[file_name.size()+1];
   strcpy(cstr,file_name.c_str());
   return MM_to_GF2mat(cstr);
 }
 
-mat MM_to_mat(string  file_name){
+itpp::mat MM_to_mat(std::string  file_name){
   char cstr[file_name.size()+1];
   strcpy(cstr,file_name.c_str());
   return MM_to_mat(cstr);
 }
 
 
-GF2mat MM_to_GF2mat(char * file_name)
+itpp::GF2mat MM_to_GF2mat(char * file_name)
 {
     int ret_code;
     MM_typecode matcode;
@@ -55,7 +56,7 @@ GF2mat MM_to_GF2mat(char * file_name)
     double *val;
 
     if ((f = fopen(file_name, "r")) == NULL) {
-      cout<<"file open fail:"<<file_name<<endl;
+      std::cout<<"file open fail:"<<file_name<<std::endl;
       exit(1);}
     if (mm_read_banner(f, &matcode) != 0)
     {
@@ -113,7 +114,7 @@ GF2mat MM_to_GF2mat(char * file_name)
     */
 
     //read into GF2mat
-    GF2mat G(M,N);
+    itpp::GF2mat G(M,N);
     for (int i=0;i<nz;i++){
       G.set(I[i],J[i],val[i]);
     }
@@ -122,9 +123,9 @@ GF2mat MM_to_GF2mat(char * file_name)
     return G;
 }
 
-mat MM_to_mat(char * file_name)
+itpp::mat MM_to_mat(char * file_name)
 {
-  //  cout<<"debug: MM_to_mat"<<endl;
+  //  std::cout<<"debug: MM_to_mat"<<std::endl;
     int ret_code;
     MM_typecode matcode;
     FILE *f;
@@ -133,7 +134,7 @@ mat MM_to_mat(char * file_name)
     double *val;
 
     if ((f = fopen(file_name, "r")) == NULL) {
-      cout<<"file open fail:"<<file_name<<endl;
+      std::cout<<"file open fail:"<<file_name<<std::endl;
       exit(1);}
     if (mm_read_banner(f, &matcode) != 0)
     {
@@ -197,7 +198,7 @@ mat MM_to_mat(char * file_name)
     */
 
     //read into mat
-    mat G(M,N);
+    itpp::mat G(M,N);
     G.zeros();
     for (int i=0;i<nz;i++){
       G.set(I[i],J[i],val[i]);
@@ -205,9 +206,9 @@ mat MM_to_mat(char * file_name)
     return G;
 }
 
-mat dense_MM_to_mat(char * file_name){
+itpp::mat dense_MM_to_mat(char * file_name){
   //this is design for dense matrix set in column fashion
-  //  cout<<"debug: dense_MM_to_mat"<<endl;
+  //  std::cout<<"debug: dense_MM_to_mat"<<std::endl;
 
     int ret_code;
     MM_typecode matcode;
@@ -217,7 +218,7 @@ mat dense_MM_to_mat(char * file_name){
     double *val;
 
     if ((f = fopen(file_name, "r")) == NULL) {
-      cout<<"file open fail:"<<file_name<<endl;
+      std::cout<<"file open fail:"<<file_name<<std::endl;
       exit(1);}
     if (mm_read_banner(f, &matcode) != 0)
     {
@@ -225,7 +226,7 @@ mat dense_MM_to_mat(char * file_name){
         exit(1);
     }
 
-    //    cout<<matcode<<endl;
+    //    std::cout<<matcode<<std::endl;
     /*  This is how one can screen matrix types if their application */
     /*  only supports a subset of the Matrix Market data types.      */
 
@@ -265,7 +266,7 @@ mat dense_MM_to_mat(char * file_name){
 	}
 	
 	/*if ( val[i] < min_value){
-	  cout<< val[i]<<endl;
+	  std::cout<< val[i]<<std::endl;
 	  min_value = val[i];
 	  min_index = i;
 	  
@@ -273,39 +274,39 @@ mat dense_MM_to_mat(char * file_name){
         //I[i]--;  /* adjust from 1-based to 0-based */
         //J[i]--;
     }
-    // cout<<M<<" M N "<<N<<endl;
-    //cout<<min_value <<"value  index " <<min_index<<endl;
-    //cout<<"val[2190] = "<<val[2190]<<endl;
+    // std::cout<<M<<" M N "<<N<<std::endl;
+    //std::cout<<min_value <<"value  index " <<min_index<<std::endl;
+    //std::cout<<"val[2190] = "<<val[2190]<<std::endl;
 
     if (f !=stdin) fclose(f);
 
 
 
     //read into mat
-    mat G(M,N);
+    itpp::mat G(M,N);
     G.zeros();
     //    double dd=0,value=100;
     //int index =-1;
     for (int i=0;i<M;i++){
       for ( int j=0;j<N;j++){
 	//	dd=val[j*M+i];
-	//cout<<j*N+i<<endl;
+	//std::cout<<j*N+i<<std::endl;
 	  G.set(i,j,val[j*M+i]);
 	  /*if ( val[j*N+i] < value){
 	    value = val[j*N+i];
 	    index = j*N+i;
-	    cout<<value <<" value  index," <<index<<endl;
-	    //	    cout<< val[j*N+i]<<","<<G(i,j)<<endl;
+	    std::cout<<value <<" value  index," <<index<<std::endl;
+	    //	    std::cout<< val[j*N+i]<<","<<G(i,j)<<std::endl;
 	  }
 	  if ( G(i,j)==0){	    
-	    //    cout<<i<<" i,j "<<j<<", val = "<<val[j*N+i]<<endl;
+	    //    std::cout<<i<<" i,j "<<j<<", val = "<<val[j*N+i]<<std::endl;
 	  }
 	  */
-	  // cout<<"test "<<endl;;
+	  // std::cout<<"test "<<std::endl;;
       }
     }
-    //cout<<M<<" M N "<<N<<endl;
-    //cout<<G.rows()<<"  row  col "<<G.cols()<<endl;
+    //std::cout<<M<<" M N "<<N<<std::endl;
+    //std::cout<<G.rows()<<"  row  col "<<G.cols()<<std::endl;
     return G;
 }
 

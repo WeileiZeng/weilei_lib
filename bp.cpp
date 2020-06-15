@@ -9,8 +9,7 @@
 #include <stdio.h>
 #include "weilei_lib.h"
 #include <cmath>
-//using namespace itpp;
-//using namespace std;
+
 
 
 

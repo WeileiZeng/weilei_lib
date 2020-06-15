@@ -11,9 +11,19 @@
 #include <itpp/itcomm.h> //LDPC_Code
 //#include <stdio.h>
 
-
 //const int MAX_M=6;//maximum of the length of the complex chain
 const int INF=999;//infinity distance
+
+///a parser for CSS codes
+class CSS{
+  CSS(itpp::GF2mat G_x, itpp::GF2mat G_z);
+  CSS(itpp::GF2mat G_x, itpp::GF2mat G_z, itpp::GF2mat C_x, itpp::GF2mat C_z);
+  itpp::GF2mat G_x; /* X type parity check matrix */
+  itpp::GF2mat G_z;
+  itpp::GF2mat C_x;
+  itpp::GF2mat C_z;
+}
+
 
 
 int min_wt_decoding(itpp::GF2mat C);

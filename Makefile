@@ -22,6 +22,9 @@ all: morehead head cpp
 cpp: mmio.o mm_read.o mm_write.o dist.o bp.o lib.o product.o
 head: bp_decoder.h.gch weilei_lib.h.gch
 morehead: mmio.h.gch mm_read.h.gch mm_write.h.gch dist.h.gch bp.h.gch lib.h.gch product.h.gch
+#not sure why mmio rebuild every time, but it works fine with `make mmio.o`
+#mmio:mmio.c mmio.h
+#	gcc -c $< -o mmio.o
 #compile object file for cpp 
 %.o:%.cpp %.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
@@ -29,10 +32,6 @@ morehead: mmio.h.gch mm_read.h.gch mm_write.h.gch dist.h.gch bp.h.gch lib.h.gch 
 %.h.gch:%.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
 
-
-
-#mmio:mmio.c mmio.h
-#	$(CXX) $(ITPP) -c $<
 #mm_read:mm_read.c mm_read.h mmio.c mmio.h
 #	$(CXX) $(ITPP) -c $<
 #mm_write:mm_write.c mm_write.h mmio.c mmio.h
@@ -43,29 +42,10 @@ morehead: mmio.h.gch mm_read.h.gch mm_write.h.gch dist.h.gch bp.h.gch lib.h.gch 
 #	$(CXX) $(ITPP) -c $<
 
 
-gnuplot_dist.out:gnuplot_dist.c $(files)
-	$(command)
-random_concatenation.out:random_concatenation.c $(files)
-	$(command)
-counter_concatenation.out:counter_concatenation.c $(files)
-	$(command)
-product.out:product.c $(files)
-	$(command) -fopenmp
-concatenation.out:concatenation.c $(files)
-	$(command)
-hypergraph.out:hypergraph.c $(files)
-	$(command)
-
 test.out:test.c $(files)
 	$(command)
 
 clean:
-	rm  *~
-	rm \#*
-
-sbatch-dry-run:
-	sbatch --test run_prod.sh
-sbatch:
-	sbatch run_prod.sh
-pkill-product:
-	pkill .product
+	rm *.o
+	rm *.out
+	rm *.h.gch
