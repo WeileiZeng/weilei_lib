@@ -6,9 +6,6 @@
 #define DIST_H
 //Weilei Zeng, April 28
 
-//#include "weilei_lib/my_lib.h"
-//#include "weilei_lib.h"
-
 
 //#include <string> //already inlcuded in itbase.h
 //#include <itpp/itbase.h> //already included in itcomm.h
@@ -17,7 +14,7 @@
 
 namespace common {
 
-//const int MAX_M=6;//maximum of the length of the complex chain
+  //const int MAX_M=6;//maximum of the length of the complex chain
 
   const int INF=999;/**< Infinite distance in random window decoder*/
 
@@ -25,11 +22,7 @@ namespace common {
    * @param C codeword generating matrix
    * @return min weight of all codewords (any combination of rows in the generating matrix)
    */
-int min_wt_decoding(itpp::GF2mat C);
-
-//G for gauge operators, and C for bare logical operators
-//code word c = alpha_C*C+alpha_G*G, where alpha_C \neq 0
-
+  int min_wt_decoding(itpp::GF2mat C);
 
   /** min weight decoder for CSS code
    * distance The distance between \f$ y=ax^2+b \f$ 
@@ -94,17 +87,16 @@ int min_wt_decoding(itpp::GF2mat C);
    *@param Aj
    *@param Ajplus
    *@param dist_expected use expected distance to control number of trials
-   *@param flip=0 (default) or 1
+   *@param flip=0 (default) or 1, flip left and right if flip=1
+   *@return left distance of CSS code (Aj,Ajplus^T) 
    */
-int hypergraph_dist(itpp::GF2mat Aj, itpp::GF2mat Ajplus,int dist_expected,int flip=0);
-//return left distance of CSS code (Aj,Ajplus^T)
-//flip left and right if flip=1
+  int hypergraph_dist(itpp::GF2mat Aj, itpp::GF2mat Ajplus,int dist_expected,int flip=0);
 
 
-//following functions for bp_new, Belief Propagation decoder.
+  //following functions for bp_new, Belief Propagation decoder.
 
 
-/** draw the lattice, with error bond in red */
+  /** draw the lattice, with error bond in red */
   int draw_toric_x_error(itpp::bvec error_bits);
 
   /** a wrapper of draw_toric_x_error, with an extra header*/
@@ -131,10 +123,10 @@ int hypergraph_dist(itpp::GF2mat Aj, itpp::GF2mat Ajplus,int dist_expected,int f
 
   /** return check matrix
    *@param L size of the code
-switch(generator_flag){
-  case 1: return get_check_rept(L);break;
-  case 2: return get_check_code734(L);break;
-  case 3: return get_check_code743(L);break;
+   switch(generator_flag){
+   case 1: return get_check_rept(L);break;
+   case 2: return get_check_code734(L);break;
+   case 3: return get_check_code743(L);break;
   */  
   itpp::GF2mat get_check(int generator_flag, int L);
 
@@ -147,5 +139,6 @@ switch(generator_flag){
     
 
 } //namespace common
-#endif
+
+#endif //#ifndef DIST_H
 
