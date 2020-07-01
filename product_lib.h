@@ -13,6 +13,32 @@
 const int MAX_M=6;//maximum of the length of the complex chain
 //const int INF=999;//infinity distance
 
+/** a wrapper of data for a CSS code */
+class CSSCode{
+public:
+  itpp::GF2mat Gx; /* X type parity check matrix */
+  itpp::GF2mat Gz;
+  itpp::GF2mat Cx;
+  itpp::GF2mat Cz;
+  int n;
+  int Gx_row, Gz_row;
+  int id_Gx, id_Gz;   /** id used when enumerating all cases*/
+};
+
+/** a wrapper of data for a product of two CSS codes. */
+class SubsystemProductCode{
+public:
+  //  string title_str, string note, int mode, int sub_mode_A, int sub_mode_B,     //general info
+  // int n_low, int n_high, int k_low, int k_high, int debug,                     //for random simulation
+  int na;
+  int Gax_row; int id_Gax; int Gaz_row; int id_Gaz;   //for enumarating all cases
+  int Gbx_row; int id_Gbx; int Gbz_row; int id_Gbz;   //for enumarating all cases
+  
+  CSSCode codeA, codeB;
+
+  
+
+};
 
 
 
