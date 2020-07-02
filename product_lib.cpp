@@ -13,6 +13,18 @@
 //using namespace common;
 
 
+
+CSSCode::CSSCode(){}
+CSSCode::CSSCode(int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz){
+    n=na;Gx_row=Gax_row; id_Gx=id_Gax;
+    Gz_row=Gaz_row;id_Gz=id_Gaz;
+    is_defined=1;
+}
+int CSSCode::generate_by_id(int debug){
+    return generate_code(Gx, Gz, n, Gx_row, id_Gx, Gz_row, id_Gz, debug);
+}
+
+
 /*int getRandomQuantumCode(itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz){
   int n=21;//sample input
   int Gx_row=8;
@@ -184,9 +196,10 @@ int is_row_reduced_echelon_form(itpp::GF2mat & alpha_Gaz, int debug = 0){
 
 // generate all code with size na systematically
 int generate_code(itpp::GF2mat & Gax, itpp::GF2mat & Gaz, int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz, int debug){
+  if (debug) std::cout<<na<<","<<Gax_row<<","<<Gaz_row<<std::endl;
   //sanity check
   if (Gaz_row+Gax_row > na-1){
-    std::cout<<"no logical qubit"<<std::endl;
+    std::cout<<"generate_code: no logical qubit"<<std::endl;
     throw 2;
   }
   const int id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -1 ; //maximun all one
@@ -292,8 +305,6 @@ int generate_code(itpp::GF2mat & Gax, itpp::GF2mat & Gaz, int na, int Gax_row, i
       return 2;
     }
   }
-
-
   
   //  Gaz = alpha_Gaz*H;
   if (debug) std::cout<<"Gaz"<<Gaz<<std::endl;
