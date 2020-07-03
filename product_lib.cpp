@@ -24,14 +24,15 @@ int CSSCode::generate_by_id(int debug){
     return generate_code(Gx, Gz, n, Gx_row, id_Gx, Gz_row, id_Gz, debug);
 }
 
+/** the G matrices may not be full rank*/
+int CSSCode::getRandomCode(){
+  return getRandomQuantumCode(n, Gx_row, Gz_row, Gx, Gz, Cx, Cz);
+}
 
-/*int getRandomQuantumCode(itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz){
-  int n=21;//sample input
-  int Gx_row=8;
-  int Gz_row=8;
-  getRandomQuantumCode(n,Gx_row,Gz_row,Gx,Gz,Cx,Cz);
-  return 0;
-  }*/
+int CSSCode::getGoodCode(int debug){
+  return getGoodQuantumCode(n, Gx_row, Gz_row, Gx, Gz, Cx, Cz, debug);
+}
+
 
 itpp::GF2mat remove_col(itpp::GF2mat G, int col){
   int n = G.cols();

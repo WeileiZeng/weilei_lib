@@ -23,19 +23,23 @@ public:
   itpp::GF2mat Gz;
   itpp::GF2mat Cx;
   itpp::GF2mat Cz;
+  itpp::bvec min_weight_codeword;
   int n;
   int Gx_row, Gz_row;
   int id_Gx, id_Gz;   /** id used when enumerating all cases*/
   int is_defined=0;
 
   CSSCode();
+  /**
+   *@param id_Gax see definition in generate_code()
+   *@param id_Gaz see definition in generate_code()
+   */
   CSSCode(int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz);
   int generate_by_id(int debug);
+  int getRandomCode();
+  int getGoodCode(int debug);
 };
  
-
- 
-
 
 /** a wrapper of data for a product of two CSS codes. */
 class SubsystemProductCode{
