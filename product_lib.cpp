@@ -131,12 +131,25 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2ma
 
   //  if ( flag_find_good_code){
   if ( debug ) std::cout<<"Gx 1st row:"<<Gx.get_row(0)<<std::endl; // for debug the random seed
+  //make sure both Gx and Gz are full rank
   if ( Gx.row_rank() < Gx.rows() ) {
-    if (debug) std::cout<<"getGoodQuantumCode: Gx not full rank. now make it full rank"<<std::endl;
+    if (debug ) std::cout<<"getGoodQuantumCode: Gx not full rank. now make it full rank"<<std::endl;
     Gx = common::make_it_full_rank(Gx);
+  }  
+  if ( Gz.row_rank() < Gz.rows() ) {
+    if (debug) std::cout<<"getGoodQuantumCode: Gz not full rank. now make it full rank"<<std::endl;
+    Gz = common::make_it_full_rank(Gz);
   }
 
   if ( debug) if ( ! flag_find_good_code ) std::cout<<common::color_text("didn't find good code after ")<<search_trial<<" trials"<<std::endl;
+
+  //check rank. It is full rank here
+  /*
+  if (Gx.row_rank() < Gx.rows())
+    std::cout<<common::red_text("Gx not full rank")<<std::endl;
+  if (Gz.row_rank() < Gz.rows())
+    std::cout<<common::red_text("Gz not full rank")<<std::endl;
+  */
   return 0;
 }
 
