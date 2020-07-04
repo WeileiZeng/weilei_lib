@@ -13,13 +13,117 @@
 //using namespace common;
 
 
-/*int getRandomQuantumCode(itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz){
-  int n=21;//sample input
-  int Gx_row=8;
-  int Gz_row=8;
-  getRandomQuantumCode(n,Gx_row,Gz_row,Gx,Gz,Cx,Cz);
-  return 0;
-  }*/
+  //constructor
+
+ClassicalCode::ClassicalCode(){
+}
+ClassicalCode::ClassicalCode(itpp::GF2mat G, itpp::GF2mat H){
+  G=G;H=H;
+  return;
+}
+
+//distance estimator
+int ClassicalCode::dist(){
+  return rand_dist();
+}
+int ClassicalCode::min_weight_dist(){
+  return common::min_wt_decoding(G);
+}
+int ClassicalCode::rand_dist(){
+  return common::rand_dist(G);
+}
+
+
+
+//function
+void ClassicalCode::info(){
+  std::cout<<"Classical code: n = "<<n<<std::endl
+	   <<"codeword generating matrix G"<<G
+	   <<"parity check matrix H"<<H<<std::endl;
+  return;
+}
+ClassicalCode ClassicalCode::dual(){
+  ClassicalCode dual_code(H,G);
+  return dual_code;
+}
+
+void ClassicalCode::full_rank(){
+  G = common::make_it_full_rank(G);
+  H = common::make_it_full_rank(H);
+}
+
+//generate sample code
+void ClassicalCode::get_repetition_code(){
+  H =  common::get_check_rept(n);
+  G = itpp::GF2mat(itpp::ones_b(n), false);
+  return;
+}
+void ClassicalCode::get_743_code(){
+  H =  common::get_check_code743(n);
+  G =  common::get_check_code734(n);
+  return;
+}
+void ClassicalCode::get_734_code(){
+  H =  common::get_check_code734(n);
+  G =  common::get_check_code743(n);
+  return;
+}
+
+
+
+CSSCode::CSSCode(){}
+CSSCode::CSSCode(int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz){
+    n=na;Gx_row=Gax_row; id_Gx=id_Gax;
+    Gz_row=Gaz_row;id_Gz=id_Gaz;
+    is_defined=1;
+}
+int CSSCode::generate_by_id(int debug){
+    return generate_code(Gx, Gz, n, Gx_row, id_Gx, Gz_row, id_Gz, debug);
+}
+
+/** the G matrices may not be full rank*/
+int CSSCode::getRandomCode(){
+  return getRandomQuantumCode(n, Gx_row, Gz_row, Gx, Gz, Cx, Cz);
+}
+
+int CSSCode::getGoodCode(int debug){
+  return getGoodQuantumCode(n, Gx_row, Gz_row, Gx, Gz, Cx, Cz, debug);
+}
+
+bool CSSCode::is_valid(){
+  if ( is_C_defined ) {
+    return common::is_quantum_code(Gx, Gz, Cx, Cz);
+  }
+  return common::is_quantum_code(Gx, Gz);
+}
+
+void CSSCode::dist(){
+  dx = rand_dist_x();
+  dz = rand_dist_z();
+  return;
+}
+
+int CSSCode::min_weight_dist_x(){
+  return  common::min_wt_decoding(Cx, Gx);
+}
+int CSSCode::min_weight_dist_z(){
+  return  common::min_wt_decoding(Cz, Gz);
+}
+
+int CSSCode::rand_dist_x(){
+  return common::quantum_dist_v2(Gx, Gz);
+}
+int CSSCode::rand_dist_z(){
+  return common::quantum_dist_v2(Gx, Gz, 1);
+}
+
+void CSSCode::get_713_code(){
+  Gx=common::get_check_code743(n);
+  Gz=common::get_check_code743(n);
+  return;
+
+}
+
 
 itpp::GF2mat remove_col(itpp::GF2mat G, int col){
   int n = G.cols();
@@ -65,27 +169,11 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2
   itpp::GF2mat Q=T.get_submatrix(rank_of_Gx,0,n-1,n-1);
 
 
-  //  if ( debug ) 
-  //  std::cout<<"Gx 1st row:"<<Gx.get_row(0)<<std::endl; // for debug the random seed
-
-  //  if ( rank_of_Gx < Gx.rows() ) std::cout<<"getRandomQuantumCode: Gx not full rank"<<std::endl;
-  //else std::cout<<"getRandomQuantumCode: Gx is  full rank"<<std::endl;
-  
-  //  Q.permute_cols(P,true); no need for T, only need for U which is not used here
-  //  itpp::GF2matPrint(Q,"Q");
   itpp::GF2mat alpha(Gz_row,Q.rows()); //a random binary matrix to select G_z
   for ( int i=0;i<Gz_row;i++){
     alpha.set_row(i,itpp::randb(Q.rows()));
   }
   Gz=alpha*Q;
-  //  Gz=Q.get_submatrix(0,0,Gz_row-1,n-1);
-  //Cz=Q.get_submatrix(Gz_row,0,Q.rows()-1,n-1);
-  //  GF2matPrint(Gz,"Gz");
-  //  GF2matPrint(Cz,"Cz");
-  // the following 2 are bad trials, which make distance 1 always
-  //Gx = nullSpace(Gz).get_submatrix(0,0,Gx_row-1,n-1);
-  //Gz = nullSpace(Gx).get_submatrix(0,0,Gz_row-1,n-1);
-  //  remove_singleton(Gx,Gz);
   Cx=common::getC(Gx,Gz);
   Cz=common::getC(Gx,Gz,1);
   //  if (! is_quantum_code(Gx,Gz,Cx,Cz)) throw "invalid code";
@@ -119,12 +207,19 @@ int getGoodQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2ma
 
   //  if ( flag_find_good_code){
   if ( debug ) std::cout<<"Gx 1st row:"<<Gx.get_row(0)<<std::endl; // for debug the random seed
+  //make sure both Gx and Gz are full rank
   if ( Gx.row_rank() < Gx.rows() ) {
-    if (debug) std::cout<<"getGoodQuantumCode: Gx not full rank. now make it full rank"<<std::endl;
+    if (debug ) std::cout<<"getGoodQuantumCode: Gx not full rank. now make it full rank"<<std::endl;
     Gx = common::make_it_full_rank(Gx);
+  }  
+  if ( Gz.row_rank() < Gz.rows() ) {
+    if (debug) std::cout<<"getGoodQuantumCode: Gz not full rank. now make it full rank"<<std::endl;
+    Gz = common::make_it_full_rank(Gz);
   }
 
   if ( debug) if ( ! flag_find_good_code ) std::cout<<common::color_text("didn't find good code after ")<<search_trial<<" trials"<<std::endl;
+
+
   return 0;
 }
 
@@ -132,13 +227,10 @@ void set_submatrix(itpp::GF2mat & G, itpp::GF2mat sub, int row, int col){
   //put sub into G, start from (row,col)
   for ( int i =0 ; i < sub.rows(); i ++)
     for ( int j = 0; j< sub.cols(); j++ ){
-      //      std::cout<<i+row<<","<< j+col<<","<< sub.get(i,j)<<std::endl;
       G.set(i+row, j+col, sub.get(i,j));
     }
-  //  std::cout<<"G"<<G<<std::endl;
   return;
 }
-
 
 
 int is_row_reduced_echelon_form(itpp::GF2mat & alpha_Gaz, int debug = 0){
@@ -184,9 +276,10 @@ int is_row_reduced_echelon_form(itpp::GF2mat & alpha_Gaz, int debug = 0){
 
 // generate all code with size na systematically
 int generate_code(itpp::GF2mat & Gax, itpp::GF2mat & Gaz, int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz, int debug){
+  if (debug) std::cout<<na<<","<<Gax_row<<","<<Gaz_row<<std::endl;
   //sanity check
   if (Gaz_row+Gax_row > na-1){
-    std::cout<<"no logical qubit"<<std::endl;
+    std::cout<<"generate_code: no logical qubit"<<std::endl;
     throw 2;
   }
   const int id_Gax_MAX = (int) pow(2,  Gax_row * (na-Gax_row) ) -1 ; //maximun all one
@@ -200,8 +293,6 @@ int generate_code(itpp::GF2mat & Gax, itpp::GF2mat & Gaz, int na, int Gax_row, i
     throw 2;
   }
   //remove duplicate cases for id_Gax and id_Gaz
-
-
 
   itpp::GF2mat beta_Gaz = itpp::GF2mat(itpp::dec2bin(Gaz_row*(na-Gax_row),id_Gaz),false);
   itpp::GF2mat alpha_Gaz(Gaz_row, na-Gax_row);
@@ -292,8 +383,6 @@ int generate_code(itpp::GF2mat & Gax, itpp::GF2mat & Gaz, int na, int Gax_row, i
       return 2;
     }
   }
-
-
   
   //  Gaz = alpha_Gaz*H;
   if (debug) std::cout<<"Gaz"<<Gaz<<std::endl;
@@ -301,65 +390,11 @@ int generate_code(itpp::GF2mat & Gax, itpp::GF2mat & Gaz, int na, int Gax_row, i
 }
 
 
-
-
-
-/*
-
-int concatenate(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz){
-  //construct code C and calculate the distance; Compare it with the input (estimated) value
-  std::cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<std::endl;
-  int na=Gax.cols();//,nb=Gbx.cols();//,nc=na*nb;//size of the codes
-  itpp::GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
-  itpp::GF2mat Caz=getC(Gax,Gaz,1),Cbz=getC(Gbx,Gbz,1);//This line doesn't allow C to be empty  
-  itpp::GF2mat Gcz = common::kron(Gaz,Cbz).concatenate_vertical(common::kron(itpp::gf2dense_eye(na),Gbz));
-  //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
-
-
-  itpp::GF2mat Gcx=common::kron(itpp::gf2dense_eye(na),Gbx).concatenate_vertical( common::kron(Gax,Cbx)   );
-  //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
-
-  int daz=ddaz,dbz=ddbz;
-  int dcz = quantum_dist(Gcx,Gcz,daz*dbz,1);//donot use estimated value ddaz and ddbz
-  if (dcz == daz*dbz){
-    std::cout<<"dcz = daz*dbz = "<<dcz<<std::endl;
-  }else if(dcz == INF) {
-    std::cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<std::endl;
-  }else{
-    std::cout<<"---------------------------------------------------------------------CASE: daz*dbz="<<daz*dbz<<", dcz="<<dcz<<std::endl;
+int generate_code(CSSCode & code, int debug){
+  return generate_code(code.Gx, code.Gz, code.n, code.Gx_row, code.id_Gx, code.Gz_row, code.id_Gz, debug);
   }
-  return 0;
-  
-}
 
-int reduce(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz){
-  //construct code C and calculate the distance; Compare it with the input (estimated) value
-  std::cout<<"estimate value of dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<std::endl;
-  int na=Gax.cols(),nb=Gbx.cols();//,nc=na*nb;//size of the codes
-  itpp::GF2mat Gcz = common::kron(Gaz,itpp::gf2dense_eye(nb)).concatenate_vertical(common::kron(itpp::gf2dense_eye(na),Gbz));
-  //  Gcz=make_it_full_rank(Gcz);//not sure if I need it here
-  itpp::GF2mat Cax=getC(Gax,Gaz),Cbx=getC(Gbx,Gbz);//This line doesn't allow C to be empty
 
-  itpp::GF2mat Gcx=common::kron(Gax,Gbx).concatenate_vertical(
-       	         common::kron(Cax,Gbx).concatenate_vertical(
-          	     common::kron(Gax,Cbx)
-								  )
-						);
-  //  Gcx=make_it_full_rank(Gcx);//not sure if I need it here
-
-  int daz=ddaz,dbz=ddbz;
-  int dcz = quantum_dist(Gcx,Gcz,daz*dbz,1);//donot use estimated value ddaz and ddbz
-  if (dcz == daz*dbz){
-    std::cout<<"dcz = daz*dbz = "<<dcz<<std::endl;
-  }else if(dcz == INF) {
-    std::cout<<"dcz = "<<dcz<<", daz = "<<daz<<", dbz = "<<dbz<<std::endl;
-  }else{
-    std::cout<<"-------------------------------------------------------------counter example CASE: daz*dbz="<<daz*dbz<<", dcz="<<dcz<<std::endl;
-  }
-  return 0;
-  
-}
-*/
 
 
 // a version include both reduce and concatenation
