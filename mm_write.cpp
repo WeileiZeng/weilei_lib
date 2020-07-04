@@ -1,7 +1,8 @@
-/* Weilei Zeng
-*   revised from Matrix Market I/O example program
-*   (See http://math.nist.gov/MatrixMarket for details.)
-*/
+/** \file mm_write.cpp
+ *\author Weilei Zeng
+ *   revised from Matrix Market I/O example program
+ *   (See http://math.nist.gov/MatrixMarket for details.)
+ */
 //recomend file format for Matrix Market file is .mm
 //the segmentation fault is finally solved by reserve memory for I,J and Vval. May 2018
 //trouble shooting: segmentation fault:  directory not exist; wrong folder name
@@ -21,7 +22,7 @@ int GF2mat_to_MM(itpp::GF2mat G, char* file_name, int debug)
   //this could be fixed by seperate int[] into smaller ones, but in this case the matrix is already too bigfor any calculation
   // std::cout<<"density of GF2mat: "<<G.density()<<endl;
   nt=floor(1+nt*(G.density()+0.001)  );
-  MM_typecode matcode;
+
   int *I, *J;
   I = (int *) malloc(nt * sizeof(int));
   J = (int *) malloc(nt * sizeof(int));
@@ -45,6 +46,7 @@ int GF2mat_to_MM(itpp::GF2mat G, char* file_name, int debug)
     }
     int nz=pos;//number of nonzero elements
     //std::cout<<"number of ones in the matrix is nz= "<<nz<<std::endl;
+    MM_typecode matcode;
     mm_initialize_typecode(&matcode);
     mm_set_matrix(&matcode);
     mm_set_coordinate(&matcode);

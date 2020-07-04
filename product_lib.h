@@ -14,15 +14,17 @@ const int MAX_M=6;//maximum of the length of the complex chain
 //const int INF=999;//infinity distance
 
 
-/** 
- *@param G, codeword generating matrix
- *@param H, parity check matrix
+/** \class ClassicalCode
+ * a classical binary code
  */
 class ClassicalCode{
 public:
-  itpp::GF2mat G, H;
-  int n, k,d;
-  int is_defined=0;
+  itpp::GF2mat G; ///< codeword generating matrix
+  itpp::GF2mat H; ///< parity check matrix
+  int n; ///< Number of bits
+  int k ///< number of encoded bits
+  int d; ///< distance 
+  int is_defined=0; ///< if G and H has been defined
 
   //constructor
   ClassicalCode();

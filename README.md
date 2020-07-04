@@ -1,8 +1,11 @@
 ## weilei-lib v0.1
 
+[![CodeFactor](https://www.codefactor.io/repository/github/weileizeng/weilei_lib/badge/master)](https://www.codefactor.io/repository/github/weileizeng/weilei_lib/overview/master)
+
+
 Jun 14, 2020
 
-weilei-lib v0.1
+
 
 TODO:
 
