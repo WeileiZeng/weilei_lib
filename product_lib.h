@@ -22,7 +22,7 @@ public:
   itpp::GF2mat G; ///< codeword generating matrix
   itpp::GF2mat H; ///< parity check matrix
   int n; ///< Number of bits
-  int k ///< number of encoded bits
+  int k; ///< number of encoded bits
   int d; ///< distance 
   int is_defined=0; ///< if G and H has been defined
 

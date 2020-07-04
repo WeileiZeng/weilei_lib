@@ -4,6 +4,7 @@ MAKEFLAGS += --no-print-directory
 INC_DIR=.
 #INC_DIR=~/working/weilei_lib
 CXX=g++ -O3 -Wall -std=c++11
+#-fPIC for dynamic lib
 ### -O2 -O5 -Os
 #g++ `pkg-config --cflags itpp` -o hello.out hello.cpp `pkg-config --libs itpp`
 
@@ -27,8 +28,8 @@ cpp: mmio.o mm_read.o mm_write.o dist.o bp.o lib.o product_lib.o
 head: bp_decoder.h.gch weilei_lib.h.gch
 
 #not sure why mmio rebuild every time, but it works fine with `make mmio.o`
-#mmio:mmio.c mmio.h
-#	gcc -c $< -o mmio.o
+mmio.o:mmio.c mmio.h
+	$(CXX) -c $< -o mmio.o
 #compile object file for cpp 
 %.o:%.cpp %.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
@@ -36,15 +37,28 @@ head: bp_decoder.h.gch weilei_lib.h.gch
 %.h.gch:%.h weilei_lib.h
 	$(CXX) $(ITPP) -c $<
 
-
+#test the lib
 test:
 	make all
 	make test_lib.o
 	make test_lib.out
 	./test_lib.out
-
 test_lib.out:test_lib.o $(object_files)
 	$(CXX) $(ITPP) -o $@ $< $(object_files)
+
+#build dynamic lib
+# require -fPIC option
+LIB_WEILEI_PATH=/rhome/wzeng002/.local/lib
+libweilei.so:$(object_files)
+	make all
+	$(CXX) $(ITPP) -shared -o $@ $(object_files)
+	cp libweilei.so $(LIB_WEILEI_PATH)
+#    $(CXX) -fPIC -c shared.cpp -o shared.o
+#    $(CXX) -shared  -Wl,-soname,libshared.so -o libshared.so shared.o
+dynamic_lib:libweilei.so test_lib.o
+	make libweilei.so
+	$(CXX) $(ITPP) -o test_dynamic_lib.out  test_lib.o -L$(LIB_WEILEI_PATH) -lweilei
+	./test_dynamic_lib.out
 
 clean:
 	rm *.o
