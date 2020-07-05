@@ -19,12 +19,15 @@
 /** Print information for CSS code*/
 template <class CodeType>
 std::ostream& print_code(std::ostream& os, const CodeType& code){
-  os<<"print_code():---"<< code.type<<"---, [n,k,dx,dz]=["<<code.n<<","<<code.k<<","<<code.dx<<","<<code.dz<<"]";
+  os<<code.title<<"("<< code.type<<"): "
+    <<"[n,k,dx,dz]=["<<code.n<<","<<code.k<<","<<code.dx<<","<<code.dz<<"]";
   return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const ClassicalCode& code){
-  os<<"print_code():---"<< code.type<<"---, [n,k,d]=["<<code.n<<","<<code.k<<","<<code.d<<"]";
+  //  os<<"---"<< code.type<<":"<<code.title
+  os<<code.title<<"("<< code.type<<"): "
+    <<" [n,k,d]=["<<code.n<<","<<code.k<<","<<code.d<<"]";
   return os;
   //  return print_code(os, code);
 }

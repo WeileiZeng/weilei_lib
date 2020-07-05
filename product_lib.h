@@ -26,8 +26,8 @@ public:
   int k=-1; ///< number of encoded bits
   int d=-1; ///< distance 
   int is_defined=0; ///< if G and H has been defined
-  std::string title;
-  const std::string type="ClassicalCode";
+  std::string title="no title";
+  std::string type="ClassicalCode";
   //constructor
   ClassicalCode();
   /**
@@ -54,8 +54,11 @@ public:
   void full_rank();
 
   //generate sample code
+  /** generate repetition code*/
   void get_repetition_code();
+  /** generate [7,4,3] code according to code.n, which needs to be a multiple of 7*/
   void get_743_code();
+  /** generate [7,3,4] code according to code.n, which needs to be a multiple of 7*/
   void get_734_code();
 };
 
@@ -67,17 +70,20 @@ class CSSCode{
 public:
   itpp::GF2mat Gx; ///< X type parity check matrix 
   itpp::GF2mat Gz; ///< Z type parity check matrix 
-  itpp::GF2mat Cx;
-  itpp::GF2mat Cz;
-  itpp::bvec min_weight_codeword_x;
-  itpp::bvec min_weight_codeword_z;
-  int n=-1,k=-1;
+  itpp::GF2mat Cx; ///< X type codeword generating matrix
+  itpp::GF2mat Cz; ///< Z type codeword generating matrix
+  itpp::bvec min_weight_codeword_x;  ///< If decoded, the min weight codeword of type X will be saved 
+  itpp::bvec min_weight_codeword_z;  ///< If decoded, the min weight codeword of type Z will be saved 
+  int n=-1; ///< code size, number of qubits
+  int k=-1; ///< encoded qubits
   int Gx_row, Gz_row;
-  int id_Gx, id_Gz;   /** id used when enumerating all cases*/
-  std::string title;
+  int id_Gx;   ///< id used when enumerating all cases, see definition in generate_by_id()
+  int id_Gz;   ///< id used when enumerating all cases, see definition in generate_by_id()
+  std::string title="no title";
   std::string type="CSSCode";
-  int d=-1; ///< d=min(dx,dz)
-  int dx=-1,dz=-1;
+  int d=-1;   ///< d=min(dx,dz)
+  int dx=-1;  ///< X type min distance
+  int dz=-1;  ///< Z type min distance
   int is_defined=0, is_C_defined=0;
   
   //constructor
@@ -88,21 +94,20 @@ public:
    */
   CSSCode(int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz);
 
-  //generating code
+  //generate code
+  /**generating code by unique id*/
   int generate_by_id(int debug);
+  /** get a random code*/
   int getRandomCode();
+  /** get a random code with distance > 1*/
   int getGoodCode(int debug);
 
   //sanity check
-  bool is_valid();
-  void full_rank();
-  void info();
-  friend std::ostream& operator<<(std::ostream& os, const CSSCode& code);
-  /*virtual std::ostream& print(std::ostream& out) const
-  {
-    out <<" virtual: "<<type;
-    return out;
-    }*/
+  bool is_valid();   ///< check if the code is valid
+  void full_rank();  ///< make matrices full rank. Not implemented yet
+  void info();   ///< not in use. similar to operator<<()
+  friend std::ostream& operator<<(std::ostream& os, const CSSCode& code);  ///< print basic info
+
 
   //distance estimation
   /** call rand_dist to estimate dx and dz*/
@@ -125,10 +130,10 @@ public:
 
   std::string type="ProductCSSCode";
   ProductCSSCode(){
-    //    type="ProductCSSCode";
   }
   ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp);
   void product(); ///< generate the product code from codeA and codeB, to be impelmented in each derived class
+
   friend std::ostream& operator<<(std::ostream& os, const ProductCSSCode& code);
 };
 
@@ -141,10 +146,9 @@ public:
   std::string      type="SubsytemProductCSSCode";
   //  SubsystemProductCode();
   SubsystemProductCSSCode(){
-    //  const std::string 
-
   }
   SubsystemProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode( codeA_temp, codeB_temp){}
+
   friend std::ostream& operator<<(std::ostream& os, const SubsystemProductCSSCode& code);
 };
 
@@ -152,15 +156,14 @@ class ConcatenatedProductCSSCode: public ProductCSSCode {
 public: 
   std::string     type="ConcatenatedProductCSSCode";
   ConcatenatedProductCSSCode(){
- 
 }
   ConcatenatedProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode( codeA_temp, codeB_temp){}
+
   friend std::ostream& operator<<(std::ostream& os, const ConcatenatedProductCSSCode& code);
 };
 
 
-
-
+//   ------------------------ finish class definition ----------------------
 
 
 int getRandomQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2mat &Gz, itpp::GF2mat &Cx,itpp::GF2mat &Cz);
