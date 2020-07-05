@@ -15,31 +15,42 @@ const int MAX_M=6;//maximum of the length of the complex chain
 
 
 /** \class ClassicalCode
- * a classical binary code
+ * a classical binary code. It is similar to itpp::LDPC_Code
+ * Note not all function are robust against dimension and rank. Those are not implemented for faster speed. One should do sanity check if needed.
  */
 class ClassicalCode{
 public:
   itpp::GF2mat G; ///< codeword generating matrix
   itpp::GF2mat H; ///< parity check matrix
-  int n; ///< Number of bits
-  int k; ///< number of encoded bits
-  int d; ///< distance 
+  int n=-1; ///< Number of bits
+  int k=-1; ///< number of encoded bits
+  int d=-1; ///< distance 
   int is_defined=0; ///< if G and H has been defined
-
+  std::string title;
+  const std::string type="ClassicalCode";
   //constructor
   ClassicalCode();
+  /**
+   *@param G codeword generating matrix
+   *@param H parity check matrix
+   */
   ClassicalCode(itpp::GF2mat G, itpp::GF2mat H);
 
   //distance estimator
+  /**@returns distance of the code */
   int dist();
+  /** min weight decoder */
   int min_weight_dist();
+  /** random window decoder */
   int rand_dist();
 
-
   //function
+  /** print basic infomation */
   void info();
+  friend std::ostream& operator<<(std::ostream& os, const ClassicalCode& code);
   /** return dual code */
   ClassicalCode dual();
+  /** make G and H full rank */
   void full_rank();
 
   //generate sample code
@@ -50,19 +61,23 @@ public:
 
 
 
-/** a wrapper of data for a CSS code */
+/** \class CSSCode
+ *a wrapper of data for a CSS code */
 class CSSCode{
 public:
-  itpp::GF2mat Gx; /* X type parity check matrix */
-  itpp::GF2mat Gz;
+  itpp::GF2mat Gx; ///< X type parity check matrix 
+  itpp::GF2mat Gz; ///< Z type parity check matrix 
   itpp::GF2mat Cx;
   itpp::GF2mat Cz;
-  itpp::bvec min_weight_codeword;
-  int n;
+  itpp::bvec min_weight_codeword_x;
+  itpp::bvec min_weight_codeword_z;
+  int n=-1,k=-1;
   int Gx_row, Gz_row;
   int id_Gx, id_Gz;   /** id used when enumerating all cases*/
-
-  int dx,dz;
+  std::string title;
+  std::string type="CSSCode";
+  int d=-1; ///< d=min(dx,dz)
+  int dx=-1,dz=-1;
   int is_defined=0, is_C_defined=0;
   
   //constructor
@@ -80,6 +95,14 @@ public:
 
   //sanity check
   bool is_valid();
+  void full_rank();
+  void info();
+  friend std::ostream& operator<<(std::ostream& os, const CSSCode& code);
+  /*virtual std::ostream& print(std::ostream& out) const
+  {
+    out <<" virtual: "<<type;
+    return out;
+    }*/
 
   //distance estimation
   /** call rand_dist to estimate dx and dz*/
@@ -99,8 +122,14 @@ public:
 class ProductCSSCode: public CSSCode{
 public:
   CSSCode codeA, codeB;
-  ProductCSSCode(){}
+
+  std::string type="ProductCSSCode";
+  ProductCSSCode(){
+    //    type="ProductCSSCode";
+  }
   ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp);
+  void product(); ///< generate the product code from codeA and codeB, to be impelmented in each derived class
+  friend std::ostream& operator<<(std::ostream& os, const ProductCSSCode& code);
 };
 
 
@@ -109,24 +138,26 @@ class SubsystemProductCSSCode : public ProductCSSCode {
 public:
   //  string title_str, string note, int mode, int sub_mode_A, int sub_mode_B,     //general info
   // int n_low, int n_high, int k_low, int k_high, int debug,                     //for random simulation
-  //  int na;
-  //  int Gax_row; int id_Gax; int Gaz_row; int id_Gaz;   //for enumarating all cases
-  //  int Gbx_row; int id_Gbx; int Gbz_row; int id_Gbz;   //for enumarating all cases
-  //  int is_defined=0;
-
-  //  CSSCode codeA, codeB;
+  std::string      type="SubsytemProductCSSCode";
   //  SubsystemProductCode();
-  SubsystemProductCSSCode(){}
-  SubsystemProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp){
-    codeA=codeA_temp;
-    codeB=codeB_temp;
-    //    std::cout<<" get codeA with codeA.n = "<< codeA_temp.n<<std::endl;
-    if ( codeA.is_defined && codeB.is_defined ){
-      //      std::cout<<"both code A and code B are defined"<<std::endl;
-      is_defined=1;
-    }
+  SubsystemProductCSSCode(){
+    //  const std::string 
+
   }
+  SubsystemProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode( codeA_temp, codeB_temp){}
+  friend std::ostream& operator<<(std::ostream& os, const SubsystemProductCSSCode& code);
 };
+
+class ConcatenatedProductCSSCode: public ProductCSSCode {
+public: 
+  std::string     type="ConcatenatedProductCSSCode";
+  ConcatenatedProductCSSCode(){
+ 
+}
+  ConcatenatedProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode( codeA_temp, codeB_temp){}
+  friend std::ostream& operator<<(std::ostream& os, const ConcatenatedProductCSSCode& code);
+};
+
 
 
 

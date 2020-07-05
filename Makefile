@@ -19,6 +19,8 @@ ITPP=`pkg-config --cflags itpp` `pkg-config --libs itpp`
 ###include all weilei-written headfiles into weilei_lib.h
 
 
+header_files=bp.h      bp_decoder.h      dist.h      lib.h      mm_read.h      mm_write.h      mmio.h      product_lib.h      weilei_lib.h
+
 object_files=$(INC_DIR)/mm_read.o $(INC_DIR)/mmio.o $(INC_DIR)/mm_write.o $(INC_DIR)/lib.o $(INC_DIR)/dist.o $(INC_DIR)/product_lib.o $(INC_DIR)/bp.o 
 
 
@@ -38,6 +40,8 @@ mmio.o:mmio.c mmio.h
 	$(CXX) $(ITPP) -c $<
 
 #test the lib
+test_lib.o:test_lib.cpp weilei_lib.h $(header_files)
+	$(CXX) $(ITPP) -c $<
 test:
 	make all
 	make test_lib.o

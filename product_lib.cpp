@@ -3,6 +3,7 @@
 //to implement quantum concatenated codes. There are several ways of concatenation, see hypergraph_product_code.pdf
 
 
+
 #include "dist.h"
 #include <itpp/itbase.h>
 #include <itpp/itcomm.h>
@@ -10,11 +11,40 @@
 //#include "my_lib.h"
 //#include "concatenation_lib.h"
 #include "product_lib.h"
+#include<typeinfo> //for typeid(a).name()
 //using namespace common;
 
 
-  //constructor
 
+/** Print information for CSS code*/
+template <class CodeType>
+std::ostream& print_code(std::ostream& os, const CodeType& code){
+  os<<"print_code():---"<< code.type<<"---, [n,k,dx,dz]=["<<code.n<<","<<code.k<<","<<code.dx<<","<<code.dz<<"]";
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const ClassicalCode& code){
+  os<<"print_code():---"<< code.type<<"---, [n,k,d]=["<<code.n<<","<<code.k<<","<<code.d<<"]";
+  return os;
+  //  return print_code(os, code);
+}
+std::ostream& operator<<(std::ostream& os, const CSSCode& code){
+  return print_code(os, code);
+}
+std::ostream& operator<<(std::ostream& os, const ProductCSSCode& code){
+  return print_code(os, code);
+}
+std::ostream& operator<<(std::ostream& os, const SubsystemProductCSSCode& code){
+  return print_code(os, code);
+}
+std::ostream& operator<<(std::ostream& os, const ConcatenatedProductCSSCode& code){
+  return print_code(os, code);
+}
+
+
+
+
+  //constructor
 ClassicalCode::ClassicalCode(){
 }
 ClassicalCode::ClassicalCode(itpp::GF2mat G, itpp::GF2mat H){
@@ -50,6 +80,13 @@ ClassicalCode ClassicalCode::dual(){
 void ClassicalCode::full_rank(){
   G = common::make_it_full_rank(G);
   H = common::make_it_full_rank(H);
+  n = G.cols();
+  k = G.rows();
+  if (k + H.rows() != n) {
+    std::cout<<"ClassicalCode: This code is not valid"<<std::endl;
+    throw 2;
+  }
+  return;
 }
 
 //generate sample code
@@ -97,6 +134,30 @@ bool CSSCode::is_valid(){
   return common::is_quantum_code(Gx, Gz);
 }
 
+void CSSCode::full_rank(){
+  Gx = common::make_it_full_rank(Gx);
+  Gz = common::make_it_full_rank(Gz);
+  Cx = common::make_it_full_rank(Cx);
+  Cz = common::make_it_full_rank(Cz);
+  n = Gx.cols();
+  k = Cx.rows();
+  if (Gz.cols()==n && Cx.cols()==n && Cz.cols()==n \
+      && Cz.rows()==k \
+      && Gx.rows()+Gz.rows()+k ==n){
+  }else{
+    std::cout<<"CSSCode: This code is not valid"<<std::endl;
+    throw 2;
+  }
+  return;
+}
+
+/** operator<< is better than this function*/
+void CSSCode::info(){
+  //  std::cout<<"info()"<<this<<std::endl;
+  std::cout<<"info():"<<"[n,k,dx,dz]=["<<n<<","<<k<<","<<dx<<","<<dz<<"]"<<std::endl;
+  return;
+}
+
 void CSSCode::dist(){
   dx = rand_dist_x();
   dz = rand_dist_z();
@@ -123,6 +184,24 @@ void CSSCode::get_713_code(){
   return;
 
 }
+
+
+
+ProductCSSCode::ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp){
+  //  SubsystemProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp){
+    codeA=codeA_temp;
+    codeB=codeB_temp;
+    //    std::cout<<" get codeA with codeA.n = "<< codeA_temp.n<<std::endl;
+    if ( codeA.is_defined && codeB.is_defined ){
+      //      std::cout<<"both code A and code B are defined"<<std::endl;
+      is_defined=1;
+    }
+  
+}
+
+/*SubsystemProductCSSCode::SubsystemProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode::ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp){
+  }*/
+
 
 
 itpp::GF2mat remove_col(itpp::GF2mat G, int col){
