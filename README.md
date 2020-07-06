@@ -27,3 +27,8 @@ a makefile should be provided
 git clone ...
 make test
 ```
+
+### realted projects
+- [schifra](http://www.schifra.com/index.html) RS code decoder in C++
+
+- [Galois Field Arithmetic Library](http://www.partow.net/projects/galois/index.html) in C++
