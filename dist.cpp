@@ -229,6 +229,8 @@ int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, 
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
   int trialQ=50000;//1000;permute GQ this max amount of time
+  const int trialQ_min = 10;//100;
+  const int RAND_DIST_PERM = 3; // default 10
   if ( dist_expected > 10 ) trialQ = trialQ*2;
   int trialQflag=1;//a flag to adjust the max amount of permutation
   
@@ -259,7 +261,7 @@ int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, 
     C.permute_cols(P,true);//codewords/logical group //not necessary to permute it back here
     //Question 1: does the row in C include some stabilizer generators which may increase its weight?
   
-    wt = rand_dist(C);//defauylt permutation = 10
+    wt = rand_dist(C, RAND_DIST_PERM);//default permutation = 10
     min_wt=(wt<min_wt)? wt:min_wt;
     //std::cout<<"iq = "<<iq<<", [wt="<<wt<<"] "<<std::endl;;
     //  std::cout<<"got min wt of logical operator C  = "<<min_wt<<std::endl;
@@ -274,7 +276,7 @@ int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, 
 	  trialQflag=0;
 	  trialQ = 10*iq;
 	  // continue to run to see if smaller distance can be achieved.
-	  trialQ=(trialQ<1000)? 1000:trialQ;
+	  trialQ=(trialQ<trialQ_min)? trialQ_min:trialQ;
 	  if (debug) std::cout<<"quantum_dist: reach min distance when iq = "<<iq<<", continue to run with trialQ = "<<trialQ<<std::endl;
 	}
     }
