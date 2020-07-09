@@ -55,11 +55,12 @@ public:
 
   //generate sample code
   /** generate repetition code*/
-  void get_repetition_code();
+  void get_repetition_code(int L);
   /** generate [7,4,3] code according to code.n, which needs to be a multiple of 7*/
-  void get_743_code();
+  void get_743_code(int L);
   /** generate [7,3,4] code according to code.n, which needs to be a multiple of 7*/
-  void get_734_code();
+  void get_734_code(int L);
+
 };
 
 

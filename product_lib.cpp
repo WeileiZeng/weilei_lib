@@ -93,17 +93,23 @@ void ClassicalCode::full_rank(){
 }
 
 //generate sample code
-void ClassicalCode::get_repetition_code(){
+void ClassicalCode::get_repetition_code(int L){
+  n=L;
   H =  common::get_check_rept(n);
   G = itpp::GF2mat(itpp::ones_b(n), false);
   return;
 }
-void ClassicalCode::get_743_code(){
+
+void ClassicalCode::get_743_code(int L){
+  n = L;
   H =  common::get_check_code743(n);
   G =  common::get_check_code734(n);
+  //  std::cout<<"check \n"<<G<<H;
   return;
 }
-void ClassicalCode::get_734_code(){
+
+void ClassicalCode::get_734_code(int L){
+  n=L;
   H =  common::get_check_code734(n);
   G =  common::get_check_code743(n);
   return;
@@ -118,7 +124,12 @@ CSSCode::CSSCode(int na, int Gax_row, int id_Gax, int Gaz_row, int id_Gaz){
     is_defined=1;
 }
 int CSSCode::generate_by_id(int debug){
-    return generate_code(Gx, Gz, n, Gx_row, id_Gx, Gz_row, id_Gz, debug);
+
+  int temp = generate_code(Gx, Gz, n, Gx_row, id_Gx, Gz_row, id_Gz, debug);
+  if ( temp == 2){
+    if ( true ) std::cout<<"Duplicate code for this ID, cod enot generated"<<std::endl;
+  }
+  return temp;
 }
 
 /** the G matrices may not be full rank*/

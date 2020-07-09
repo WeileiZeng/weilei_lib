@@ -99,6 +99,7 @@ int common::rand_dist(itpp::GF2mat C, int perm_try){//default perm_try=10
     perm = sort_index( itpp::randu(C.rows()) );
     C.permute_rows(perm,false);
     C.T_fact(T,U,P);
+    //estimate weight of all row vectors
     for (int i = 0;i<C.rows();i++){
       row_vec = C.get_row(i);
       wt = itpp::BERC::count_errors(zero,row_vec);
@@ -165,8 +166,10 @@ itpp::GF2mat common::getC(itpp::GF2mat G_x,itpp::GF2mat G_z,int flip){
     std::cout<<"empty code space"<<std::endl;
     throw "empty code space";
   }
-  //  itpp::GF2matPrint(G_x,"G_x");
-  //  itpp::GF2matPrint(U,"U");
+  //  common::GF2matPrint(G_x,"G_x");
+  //  common::GF2matPrint(U,"U");
+  //  std::cout<<"U"<<U<<std::endl;
+  //C exist here because U is in upper triangle form. Because the G part is full rank, hence G is on top and the remained nontrivial part gives C
   itpp::GF2mat C = U.get_submatrix(rank_of_G_x,0,rank_of_Q-1,G_x.cols()-1 );
   
   C.permute_cols(P,true);//codewords/logical group 
@@ -215,7 +218,7 @@ int common::quantum_dist_v2(itpp::GF2mat G_x, itpp::GF2mat G_z, int flip){//with
     C.permute_cols(P,true);//codewords/logical group //not necessary to permute it back here
   
     wt = rand_dist(C);//defauylt permutation = 10
-    trialQ=(wt<min_wt)? ( (10*iq > trialQ)? 10*iq : trialQ ):trialQ;//make sure this is the true min weight
+    trialQ=(wt<min_wt)? ( (10*iq > trialQ)? 10*iq : trialQ ):trialQ;//make sure this is the true min weight by adding 10 times of more trials after the new min weight is encountered.
     min_wt=(wt<min_wt)? wt:min_wt;
     if (min_wt ==1) return 1;
 
@@ -472,6 +475,12 @@ itpp::bvec common::find_error(itpp::bvec e_in, itpp::GF2mat H){
 
 itpp::GF2mat common::get_check_code734(int L){//L=7n
   //return check matrix code code [7,3,4], find definition in research note.pdf
+  //check L;
+  if ( (L < 0) || (L % 7 != 0) ){
+    std::cout<<"get_check_code743: invalid code size L = "<<L<<std::endl;
+    throw "invalid code size";
+  }
+
   itpp::GF2mat G(L,L);
   for ( int i=0;i<L;i++){
     G.set(i,i,1);
@@ -491,6 +500,11 @@ itpp::GF2mat common::get_check_code734(int L){//L=7n
 
 itpp::GF2mat common::get_check_code743(int L){//L=7n
   //return check matrix code code [7,4,3], find definition in research note.pdf
+  //check L;
+  if ( (L < 0) || (L % 7 != 0) ){
+    std::cout<<"get_check_code743: invalid code size L = "<<L<<std::endl;
+    throw "invalid code size";
+  }
   itpp::GF2mat G(L,L);
   for ( int i=0;i<L;i++){
     G.set(i,i,1);

@@ -1,4 +1,45 @@
 #include "weilei_lib.h"
+void test_getC();
+
+
+void test_CSS_code();
+
+void test_classical_code();
+
+int main(){
+  std::cout<<"begin test"<<std::endl;
+
+  //  test_getC();
+  //  test_classical_code();
+  test_CSS_code();
+
+  std::cout<<"finish test"<<std::endl;
+  return 0;
+}
+
+
+
+
+
+// ============    implementations   ==============
+
+
+void test_getC(){
+  ClassicalCode code;
+  code.get_743_code(7);
+  code.dist();
+  itpp::GF2mat H = code.H;
+  std::cout<<"H"<<H<<std::endl;
+
+  itpp::GF2mat G = H;//common::nullSpace(H);
+  std::cout<<"G"<<G<<std::endl;
+  if ( ( G*H.transpose() ).is_zero() ){
+    std::cout<<"G*H^T=0\n";
+  }
+  itpp::GF2mat C = common::getC(G,H);
+  std::cout<<"C"<<C<<std::endl;
+  return;
+}
 
 
 void test_classical_code(){
@@ -12,8 +53,8 @@ void test_classical_code(){
   }
 
   //Hamming code
-  code.n = 7;
-  code.get_743_code();
+  //  code.n = 7;
+  code.get_743_code(7);
   code.full_rank();
   code.title="Hamming code";
   code.info();
@@ -22,7 +63,7 @@ void test_classical_code(){
 
   //repetition code
   code.title="repetition code";
-  code.get_repetition_code();
+  code.get_repetition_code(7);
   code.full_rank();
   //  code.info();
   code.d = code.dist();
@@ -49,6 +90,22 @@ void test_CSS_code(){
   std::cout<<"finish test for CSSCode"<<std::endl;
   std::cout<<"begin test for ProductCSSCode"<<std::endl;
 
+  //random CSS code
+  CSSCode codeR;
+  codeR.title="random code";
+  codeR.n=7;
+  codeR.Gx_row=3;
+  codeR.Gz_row=3;
+  codeR.id_Gx=3511;
+  codeR.id_Gz=2657;
+  codeR.generate_by_id(0);
+  codeR.dist();
+
+  std::cout<<codeR<<std::endl;
+  std::cout<<codeR.Gx<<std::endl;
+  std::cout<<codeR.Gz<<std::endl;
+
+
   ProductCSSCode codeP;
   codeP.n=10;
   codeP.title="some codeP";
@@ -65,18 +122,10 @@ void test_CSS_code(){
   codeSP=codeSP2;
   std::cout<<codeSP<<std::endl;
   //  codeSP.info();
+
+
+
   std::cout<<"finish test for ProductCSSCode"<<std::endl;
   return;
 }
 
-
-
-int main(){
-  std::cout<<"begin test"<<std::endl;
-
-  test_classical_code();
-  test_CSS_code();
-
-  std::cout<<"finish test"<<std::endl;
-  return 0;
-}
