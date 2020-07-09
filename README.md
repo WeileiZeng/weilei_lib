@@ -3,6 +3,10 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/weileizeng/weilei_lib/badge/master)](https://www.codefactor.io/repository/github/weileizeng/weilei_lib/overview/master)
 
 
+see [documentation](https://qec-pages.github.io/product-codes/html/annotated.html) and [test](https://qec-pages.github.io/product-codes/html/test__lib_8cpp_source.html)
+
+here 
+
 Jun 14, 2020
 
 
