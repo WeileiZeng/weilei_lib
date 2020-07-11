@@ -198,7 +198,6 @@ int common::quantum_dist_v2(itpp::GF2mat G_x, itpp::GF2mat G_z, int flip){//with
   }
 
 
-
   itpp::GF2mat T,U;  itpp::ivec P;
   int rank_of_G_z =   G_z.transpose().T_fact(T,U,P);
 
@@ -212,16 +211,18 @@ int common::quantum_dist_v2(itpp::GF2mat G_x, itpp::GF2mat G_z, int flip){//with
   itpp::GF2mat GQ=G_x.concatenate_vertical(Q);
   int min_wt=GQ.cols(),wt;
 
+  int rank_of_G_x = G_x.row_rank();
+  int rank_of_Q = Q.rows();
+
+  if (rank_of_G_x == rank_of_Q){
+    return INF;//999 for infinity
+  }
+
   for ( int iq=0;iq<trialQ;iq++){
     itpp::ivec perm = sort_index(  itpp::randu( GQ.cols()  ));//random permutation
     GQ.permute_cols(perm,false);
     GQ.T_fact(T,U,P);
-    int rank_of_G_x = G_x.row_rank();
-    int rank_of_Q = Q.rows();
 
-    if (rank_of_G_x == rank_of_Q){
-      return INF;//999 for infinity
-    }
     itpp::GF2mat C = U.get_submatrix(rank_of_G_x,0,rank_of_Q-1,G_x.cols()-1 );
     C.permute_cols(P,true);//codewords/logical group //not necessary to permute it back here
   
