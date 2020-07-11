@@ -3,7 +3,7 @@
  *   revised from Matrix Market I/O example program
  *   (See http://math.nist.gov/MatrixMarket for details.)
  */
-//recomend file format for Matrix Market file is .mm
+//recomend file format for Matrix Market file is .mm or .mtx
 //the segmentation fault is finally solved by reserve memory for I,J and Vval. May 2018
 //trouble shooting: segmentation fault:  directory not exist; wrong folder name
 

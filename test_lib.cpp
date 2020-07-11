@@ -1,19 +1,23 @@
 #include "weilei_lib.h"
-void test_getC();
 
+void test_mmio();
+
+void test_getC();
 
 void test_CSS_code();
 
 void test_classical_code();
 
+
+
 int main(){
-  std::cout<<"begin test"<<std::endl;
+  std::cout<<" --------------------- begin test"<<std::endl;
 
   //  test_getC();
   //  test_classical_code();
-  test_CSS_code();
-
-  std::cout<<"finish test"<<std::endl;
+  //  test_CSS_code();
+  test_mmio();
+  std::cout<<" --------------------- finish test"<<std::endl;
   return 0;
 }
 
@@ -24,7 +28,18 @@ int main(){
 // ============    implementations   ==============
 
 
+
+
+void test_mmio(){
+  itpp::GF2mat G = common::get_check_code743(7);
+  GF2mat_to_MM(G, "tmp/G.mm");
+  itpp::GF2mat H = MM_to_GF2mat("tmp/G.mm");
+  std::cout<<H<<std::endl;
+  return;
+}
+
 void test_getC(){
+  std::cout<<"---------------------- begin test for getC()"<<std::endl;
   ClassicalCode code;
   code.get_743_code(7);
   code.dist();
