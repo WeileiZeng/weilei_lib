@@ -21,13 +21,13 @@ int GF2mat_to_MM(itpp::GF2mat G, char* file_name, int debug)
   //make nt smaller; the size of int[] should be less than about 2000000+; otherwise it creat segmentation fault
   //this could be fixed by seperate int[] into smaller ones, but in this case the matrix is already too bigfor any calculation
   // std::cout<<"density of GF2mat: "<<G.density()<<endl;
-  nt=floor(1+nt*(G.density()+0.001)  );
+  nt=floor(1+nt*(G.density()+0.001)  ); //minimize total number of entry "nt" to reduce memery usage
 
   int *I, *J;
   I = (int *) malloc(nt * sizeof(int));
   J = (int *) malloc(nt * sizeof(int));
-  double * val;
-  val = (double *) malloc(nt * sizeof(double));
+  int * val;
+  val = (int *) malloc(nt * sizeof(int));
   
   //  int I[nt],J[nt];//the location of nonzero elements
   //usually nt is much larger than nz, where nz/nt is the density of the code. There is some wasted memory here.
@@ -50,7 +50,9 @@ int GF2mat_to_MM(itpp::GF2mat G, char* file_name, int debug)
     mm_initialize_typecode(&matcode);
     mm_set_matrix(&matcode);
     mm_set_coordinate(&matcode);
-    mm_set_real(&matcode);
+    //    mm_set_real(&matcode);
+    mm_set_integer(&matcode);
+    mm_set_sparse(&matcode);
 
     //create a file and wrote into it.
     FILE *fout;
@@ -63,7 +65,7 @@ int GF2mat_to_MM(itpp::GF2mat G, char* file_name, int debug)
 
     //it is not necessary to seperate the reading and writing in 2 loops
     for (int i=0; i<nz; i++)
-        fprintf(fout, "%d %d %10.3g\n", I[i]+1, J[i]+1, val[i]);
+        fprintf(fout, "%d %d %d\n", I[i]+1, J[i]+1, val[i]);
 
     fclose(fout);
     if ( debug )   std::cout<<"wrote the matrix (density:"<<G.density()<<") into file "<<file_name<<std::endl;

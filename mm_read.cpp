@@ -53,7 +53,7 @@ itpp::GF2mat MM_to_GF2mat(char * file_name)
     FILE *f;
     int M, N, nz;   
     int i, *I, *J;
-    double *val;
+    int *val;
 
     if ((f = fopen(file_name, "r")) == NULL) {
       std::cout<<"file open fail:"<<file_name<<std::endl;
@@ -66,14 +66,16 @@ itpp::GF2mat MM_to_GF2mat(char * file_name)
 
     /*  This is how one can screen matrix types if their application */
     /*  only supports a subset of the Matrix Market data types.      */
-
-    if (mm_is_complex(matcode) && mm_is_matrix(matcode) && 
-            mm_is_sparse(matcode) )
-    {
+    if ( mm_is_matrix(matcode) && mm_is_coordinate(matcode) &&	\
+	 ( mm_is_real(matcode) || mm_is_integer(matcode) )
+	 ){
+      // valid format
+    }else{
         printf("Sorry, this application does not support ");
         printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
         exit(1);
     }
+
 
     /* find out size of sparse matrix .... */
 
@@ -84,7 +86,7 @@ itpp::GF2mat MM_to_GF2mat(char * file_name)
 
     I = (int *) malloc(nz * sizeof(int));
     J = (int *) malloc(nz * sizeof(int));
-    val = (double *) malloc(nz * sizeof(double));
+    val = (int *) malloc(nz * sizeof(int));
 
 
     /* NOTE: when reading in doubles, ANSI C requires the use of the "l"  */
@@ -93,7 +95,7 @@ itpp::GF2mat MM_to_GF2mat(char * file_name)
 
     for (i=0; i<nz; i++)
     {
-      if ( fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]) !=3 ){
+      if ( fscanf(f, "%d %d %d\n", &I[i], &J[i], &val[i]) !=3 ){
 	fprintf( stderr, "Expected at least three numbers as input\n");
 	exit(1);
       }
@@ -118,14 +120,11 @@ itpp::GF2mat MM_to_GF2mat(char * file_name)
     for (int i=0;i<nz;i++){
       G.set(I[i],J[i],val[i]);
     }
-    //    GF2matPrint(G);
-
     return G;
 }
 
 itpp::mat MM_to_mat(char * file_name)
 {
-  //  std::cout<<"debug: MM_to_mat"<<std::endl;
     int ret_code;
     MM_typecode matcode;
     FILE *f;
@@ -147,7 +146,7 @@ itpp::mat MM_to_mat(char * file_name)
 
     if (! mm_is_sparse(matcode)){
       if (f !=stdin) fclose(f);
-      //a dense matrix is saved in column format insteead of coordinate format.
+      //a dense matrix is saved in column format instead of coordinate format.
       return dense_MM_to_mat(file_name);
     }
     
@@ -239,15 +238,11 @@ itpp::mat dense_MM_to_mat(char * file_name){
     }
 
     /* find out size of sparse matrix .... */
-
     if ((ret_code = mm_read_mtx_array_size(f, &M, &N)	!=0))
         exit(1);
     nz=M*N;
-    /* reseve memory for matrices */
 
-    //    I = (int *) malloc(nz * sizeof(int));
-    //J = (int *) malloc(nz * sizeof(int));
-    
+    /* reserve memory for matrices */
     val = (double *) malloc(nz * sizeof(double));
 
 
@@ -264,45 +259,17 @@ itpp::mat dense_MM_to_mat(char * file_name){
 	  fprintf( stderr, "Expected at least one numbers as input\n");
 	  exit(1);
 	}
-	
-	/*if ( val[i] < min_value){
-	  std::cout<< val[i]<<std::endl;
-	  min_value = val[i];
-	  min_index = i;
-	  
-	  }*/
-        //I[i]--;  /* adjust from 1-based to 0-based */
-        //J[i]--;
     }
-    // std::cout<<M<<" M N "<<N<<std::endl;
-    //std::cout<<min_value <<"value  index " <<min_index<<std::endl;
-    //std::cout<<"val[2190] = "<<val[2190]<<std::endl;
 
     if (f !=stdin) fclose(f);
-
 
 
     //read into mat
     itpp::mat G(M,N);
     G.zeros();
-    //    double dd=0,value=100;
-    //int index =-1;
     for (int i=0;i<M;i++){
       for ( int j=0;j<N;j++){
-	//	dd=val[j*M+i];
-	//std::cout<<j*N+i<<std::endl;
 	  G.set(i,j,val[j*M+i]);
-	  /*if ( val[j*N+i] < value){
-	    value = val[j*N+i];
-	    index = j*N+i;
-	    std::cout<<value <<" value  index," <<index<<std::endl;
-	    //	    std::cout<< val[j*N+i]<<","<<G(i,j)<<std::endl;
-	  }
-	  if ( G(i,j)==0){	    
-	    //    std::cout<<i<<" i,j "<<j<<", val = "<<val[j*N+i]<<std::endl;
-	  }
-	  */
-	  // std::cout<<"test "<<std::endl;;
       }
     }
     //std::cout<<M<<" M N "<<N<<std::endl;
