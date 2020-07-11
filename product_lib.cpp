@@ -604,7 +604,7 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
     {
       //  if ( debug ) std::cout<<"Gcx"<<Gcx<<"Gcz"<<Gcz<<std::endl;
       int dax=ddax,dbx=ddbx;
-      int dcx = common::quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddaz and ddbz
+      int dcx = common::quantum_dist(Gcx,Gcz,dax*dbx,debug,0);//donot use estimated value ddax and ddbx
       if (debug) std::cout<<"dax,daz,dbx,dbz = "<<ddax<<","<<ddaz<<","<<ddbx<<","<<ddbz<<","<<std::endl;    
       if (dcx == dax*dbx){
 	if (debug) std::cout<<"dcx = dax*dbx = "<<dcx<<std::endl;

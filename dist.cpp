@@ -45,8 +45,15 @@ int common::min_wt_decoding(itpp::GF2mat C,itpp::GF2mat G){
   //  std::cout<<"call min_wt_decoding"<<std::endl;
   // make sure G and C are full rank before calling this function. Otherwise it is a waste of computing power.
   int C_rows=C.rows(), G_rows=G.rows();
+  if ( C_rows + G_rows > 20 ){
+    std::cout<<"dimension is too large for min_wt_decoding, max 20 but get : C_rows = "<<C_rows<<", G_rows = "<<G_rows<<std::endl;
+    throw 2;
+  }
+
   int dec_C=(int) pow(2, C_rows);
   int dec_G=(int) pow(2, G_rows);
+
+
   int N=C.cols();
   itpp::bvec bvec_C;
   itpp::bvec bvec_zero=itpp::zeros_b(N);
@@ -56,6 +63,7 @@ int common::min_wt_decoding(itpp::GF2mat C,itpp::GF2mat G){
   for ( int i = 1; i < dec_C ; i++){
     alpha_C.set_row(0,itpp::dec2bin(C_rows,i));
     for ( int j = 0; j < dec_G; j++){
+      //      if ( j % 100000 ==0 ) std::cout<<"j = "<<j<<", min_wt = "<<min_wt<<std::endl;
       alpha_G.set_row(0,itpp::dec2bin(G_rows,j));
       bvec_C = (alpha_C * C + alpha_G * G).get_row(0);
       //    std::cout<<bvec_C<<std::endl;
@@ -228,18 +236,31 @@ int common::quantum_dist_v2(itpp::GF2mat G_x, itpp::GF2mat G_z, int flip){//with
   }
   return min_wt;
 }
+
+/** criteria of number of trials
+ * (1) trials > trialQ_min
+ * (2) 5 times more after finding the min distance
+ * (3) 5 times of encounting the same min distance
+ */
 int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, int debug, int flip){
   //right or x  distance of (G_x,G_z)
   //flip left and right if flip = 1;
   int trialQ=50000;//1000;permute GQ this max amount of time
-  const int trialQ_min = 10;//100;
+  const int trialQ_MIN = 10;//100;
   const int RAND_DIST_PERM = 3; // default 10
+  const int REDUNDANT_TRIALS = 10; // 10 times of more trials after hitting min distance. 10 is not good enough for product of steane codes
   if ( dist_expected > 10 ) trialQ = trialQ*2;
-  int trialQflag=1;//a flag to adjust the max amount of permutation
+  //  const int trialQflag_count=1; //number of times to hit min weight codeword 
+  int trialQflag= 1;//trialQflag_count;//a flag to adjust the max amount of permutation
   
   if (flip==1){//flip G_x and G_z
     itpp::GF2mat temp=G_x;    G_x=G_z;    G_z=temp;
   }
+
+  /*  if ( true ) { //always use min weight decoding for debug
+    std::cout<<"use min wt decode"<<std::endl;
+    return min_wt_decoding(getC(G_x, G_z), G_x);
+    }*/
 
   itpp::GF2mat T,U;  itpp::ivec P;
   int rank_of_G_z =   G_z.transpose().T_fact(T,U,P);
@@ -250,17 +271,19 @@ int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, 
   itpp::GF2mat GQ=G_x.concatenate_vertical(Q);
   int min_wt=GQ.cols(),wt;
 
+  int rank_of_G_x = G_x.row_rank();
+  int rank_of_Q = Q.rows();
+  if (rank_of_G_x == rank_of_Q){
+    return INF;//999 for infinity
+  }
+  itpp::ivec perm;
+  itpp::GF2mat C;
   for ( int iq=0;iq<trialQ;iq++){
-    itpp::ivec perm = sort_index(  itpp::randu( GQ.cols()  ));//random permutation
+    perm = sort_index(  itpp::randu( GQ.cols()  ));//random permutation
     GQ.permute_cols(perm,false);
     GQ.T_fact(T,U,P);
-    int rank_of_G_x = G_x.row_rank();
-    int rank_of_Q = Q.rows();
 
-    if (rank_of_G_x == rank_of_Q){
-      return INF;//999 for infinity
-    }
-    itpp::GF2mat C = U.get_submatrix(rank_of_G_x,0,rank_of_Q-1,G_x.cols()-1 );
+    C = U.get_submatrix(rank_of_G_x,0,rank_of_Q-1,G_x.cols()-1 );
     C.permute_cols(P,true);//codewords/logical group //not necessary to permute it back here
     //Question 1: does the row in C include some stabilizer generators which may increase its weight?
   
@@ -269,18 +292,22 @@ int common::quantum_dist(itpp::GF2mat G_x, itpp::GF2mat G_z, int dist_expected, 
     //std::cout<<"iq = "<<iq<<", [wt="<<wt<<"] "<<std::endl;;
     //  std::cout<<"got min wt of logical operator C  = "<<min_wt<<std::endl;
     //save_dist(min_wt,filename_dist);
+    /*
     int max_trial = 0;//no need to run C again, always get the same result
     for (int i =0;i<max_trial;i++){
 	  wt=rand_dist(C);
 	  min_wt=(wt<min_wt)? wt:min_wt;
-    }
+	  }*/
     if (trialQflag) {//adjust the max number of permutation, only do this once
         if (min_wt <= dist_expected){
 	  trialQflag=0;
-	  trialQ = 10*iq;
-	  // continue to run to see if smaller distance can be achieved.
-	  trialQ=(trialQ<trialQ_min)? trialQ_min:trialQ;
-	  if (debug) std::cout<<"quantum_dist: reach min distance when iq = "<<iq<<", continue to run with trialQ = "<<trialQ<<std::endl;
+	  //	  if (trialQflag == 0){	  
+	  trialQ = iq * REDUNDANT_TRIALS;
+	    // continue to run to see if smaller distance can be achieved.
+	  trialQ=(trialQ<trialQ_MIN)? trialQ_MIN:trialQ;
+	    //	  }
+	  //	  debug=1;
+	  if (debug) std::cout<<"quantum_dist: reach min distance "<<min_wt<<", when iq = "<<iq<<", continue to run with trialQ = "<<trialQ<<std::endl;
 	}
     }
   }
