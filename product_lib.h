@@ -195,10 +195,11 @@ int generate_code(CSSCode & code, int debug);
 
 
 
-// a version include both reduce and concatenation
-// mode=1 for reduce/subsystem product
-// mode=2 for concatenation
-//only dz is checked cause dx is known to be tight
+/** a version include both reduce and concatenation
+ *@param mode=1 for reduce/subsystem product
+ *@param mode=2 for concatenation
+ *only dz is checked cause dx is known to be tight
+*/
 int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat Gbz,int ddax,int ddaz,int ddbx,int ddbz, int debug, int mode);
 
 

@@ -1,16 +1,16 @@
 //Weilei Zeng, April 8 , 2020
 //copied from bp.c
 
-//#include "weilei_lib/my_lib.h"
 #include "dist.h"
 #include <itpp/itbase.h>
-//#include <itpp/itcomm.h>
-//#include <stdio.h>
-//#include "weilei_lib.h"
-//#include <cmath>
 #include <stdexcept> //for invalid argument
 
 
+const double INF_BP=10000; ///< infinity belief
+
+/**return weight of bvec
+ * should use itpp::BERC::count_errors
+ */
 int summation(itpp::bvec u){
   int result = 0;
   for ( int i=0; i<u.size(); i++){
@@ -20,17 +20,26 @@ int summation(itpp::bvec u){
 }
 
 
+
+/**\class BP_Decoder
+ * belief propagation decoder
+ */
 class BP_Decoder{
  public:
-  bool silent_mode = false;//not is use
+  bool silent_mode = false;///<not in use
   bool debug = false;
-  const double INF_BP=10000;
-  itpp::GF2mat H;//parity check matrix
+
+  itpp::GF2mat H; ///<parity check matrix
+  int nvar, ncheck, nedge;
   int exit_iteration=50;
-  double alpha=1.0; // used for normalized decoder, alpha=1.25
+  double alpha=1.0; ///< used for normalized decoder, alpha=1.25
   int decode_mode = 2;
   std::string decode_mode_str="min sum";
-  int nvar, ncheck, nedge;
+
+  //should be replaced by constant. not in use yet
+  const int STANDARD=1;
+  const int MIN_SUM=2;
+  const int NORMALIZATION=3;
 
   bool is_initialized=false;
   bool is_H_valid(itpp::GF2mat H_temp);
@@ -79,8 +88,8 @@ bool BP_Decoder::is_H_valid(itpp::GF2mat H_temp){
   return true;
 }
 
+/**set up parity check matrix*/
 void BP_Decoder::init(itpp::GF2mat H_temp){
-  //set up parity check matrix
   H = H_temp;
   nvar = H.cols();
   ncheck = H.rows();  
@@ -118,7 +127,9 @@ void BP_Decoder::set_exit_iteration(int exit_iteration_temp){
 
 
 
-
+/**set decode_mode
+ * should replace those int and string by class const int, not implemented yet
+ */
 void BP_Decoder::set_decode_mode(int decode_mode_temp){
   decode_mode = decode_mode_temp;
   alpha=1.0;//reset first

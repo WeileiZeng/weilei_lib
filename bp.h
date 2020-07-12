@@ -1,14 +1,7 @@
 #ifndef BP_H
 #define BP_H
-//Weilei Zeng, April 4, 2020
 
-
-//#include <itpp/itbase.h>
 #include <itpp/itcomm.h> //qllr_to_bvec
-//#include <stdio.h>
-//#include "weilei_lib.h"
-//#include "lib.h"
-
 
 
 itpp::bvec reduce_weight(itpp::bvec e, itpp::GF2mat G);
