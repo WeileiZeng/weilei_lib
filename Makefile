@@ -3,7 +3,7 @@ MAKEFLAGS += --no-print-directory
 #INC_DIR=weilei_lib
 INC_DIR=.
 #INC_DIR=~/working/weilei_lib
-CXX=g++ -O3 -Wall -std=c++11
+CXX=g++ -O3 -Wall -std=c++11 -fPIC
 #-fPIC for dynamic lib
 ### -O2 -O5 -Os
 #g++ `pkg-config --cflags itpp` -o hello.out hello.cpp `pkg-config --libs itpp`
@@ -53,9 +53,17 @@ libweilei.so:$(object_files)
 	cp libweilei.so $(LIB_WEILEI_PATH)
 #    $(CXX) -fPIC -c shared.cpp -o shared.o
 #    $(CXX) -shared  -Wl,-soname,libshared.so -o libshared.so shared.o
+
+
+#for dynamic lib, in order to find the libitpp.so, add the following commander when running program
+#export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+#for local installation, copy the lib files into some local fold
+#export LD_LIBRARY_PATH="/home/weileizeng/.local/lib:$LD_LIBRARY_PATH"
+
 dynamic_lib:libweilei.so test_lib.o
 	make libweilei.so
 	$(CXX) $(ITPP) -o test_dynamic_lib.out  test_lib.o -L$(LIB_WEILEI_PATH) -lweilei
+#	$(CXX) $(ITPP) -L$(LIB_WEILEI_PATH) -o test_dynamic_lib.out  test_lib.o -lweilei
 	./test_dynamic_lib.out
 
 clean:
