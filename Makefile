@@ -9,6 +9,7 @@ CXX=g++ -O3 -Wall -std=c++11 -fPIC
 #g++ `pkg-config --cflags itpp` -o hello.out hello.cpp `pkg-config --libs itpp`
 
 #ITPP=`pkg-config --cflags itpp` `pkg-config --libs itpp`
+#itpp-config was copy/linked to the system path ~/.local/bin
 ITPP=`itpp-config --cflags` `itpp-config --libs`
 
 header_files=bp.h      bp_decoder.h      dist.h      lib.h      mm_read.h      mm_write.h      mmio.h      product_lib.h      weilei_lib.h
