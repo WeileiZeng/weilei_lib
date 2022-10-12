@@ -10,7 +10,13 @@ CXX=g++ -O3 -Wall -std=c++11 -fPIC
 
 #ITPP=`pkg-config --cflags itpp` `pkg-config --libs itpp`
 #itpp-config was copy/linked to the system path ~/.local/bin
-ITPP=`itpp-config --cflags` `itpp-config --libs`
+#ITPP=`itpp-config --cflags` `itpp-config --libs`
+#Expliciltlly the above config cmd yields
+#ITPP=-I/home/weileizeng/gitrepo/install-itpp-locally/itpp-4.3.1/include -O2 -DNDEBUG -L/home/weileizeng/gitrepo/install-itpp-locally/itpp-4.3.1/lib -litpp
+#After copying files to /sharedata01/weileizeng/gitrepo/install-itpp-locally, it changes to
+ITPP=-I/sharedata01/weileizeng/gitrepo/install-itpp-locally/itpp-4.3.1/include -O2 -DNDEBUG -L/sharedata01/weileizeng/gitrepo/install-itpp-locally/itpp-4.3.1/lib -litpp
+
+
 
 header_files=bp.h      bp_decoder.h      dist.h      lib.h      mm_read.h      mm_write.h      mmio.h      product_lib.h      weilei_lib.h
 
@@ -46,7 +52,8 @@ test_lib.out:test_lib.o $(object_files)
 #build dynamic lib
 # require -fPIC option
 #LIB_WEILEI_PATH=/rhome/wzeng002/.local/lib
-LIB_WEILEI_PATH=/home/weileizeng/.local/lib
+#LIB_WEILEI_PATH=/home/weileizeng/.local/lib
+LIB_WEILEI_PATH=/sharedata01/weileizeng/.local/lib
 
 libweilei.so:$(object_files)
 	make all
