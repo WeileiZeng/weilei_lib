@@ -10,7 +10,8 @@ CXX=g++ -O3 -Wall -std=c++11 -fPIC
 
 #ITPP=`pkg-config --cflags itpp` `pkg-config --libs itpp`
 #itpp-config was copy/linked to the system path ~/.local/bin
-ITPP=`itpp-config --cflags` `itpp-config --libs`
+#ITPP=`itpp-config --cflags` `itpp-config --libs`
+ITPP=-I/sharedata01/weileizeng/gitrepo/install-itpp-locally/itpp-4.3.1/include -O2 -DNDEBUG -L/sharedata01/weileizeng/gitrepo/install-itpp-locally/itpp-4.3.1/lib -litpp
 
 header_files=bp.h      bp_decoder.h      dist.h      lib.h      mm_read.h      mm_write.h      mmio.h      product_lib.h      weilei_lib.h
 
@@ -60,7 +61,7 @@ libweilei.so:$(object_files)
 #for dynamic lib, in order to find the libitpp.so, add the following commander when running program
 #export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 #for local installation, copy the lib files into some local fold
-#export LD_LIBRARY_PATH="/home/weileizeng/.local/lib:$LD_LIBRARY_PATH"
+#export LD_LIBRARY_PATH="/sharedata01/weileizeng/.local/lib:$LD_LIBRARY_PATH"
 
 dynamic_lib:libweilei.so test_lib.o
 	make libweilei.so
@@ -72,3 +73,5 @@ clean:
 	rm *.o
 	rm *.h.gch
 	rm *.out
+
+
