@@ -141,6 +141,14 @@ int CSSCode::getGoodCode(int debug){
   return getGoodQuantumCode(n, Gx_row, Gz_row, Gx, Gz, Cx, Cz, debug);
 }
 
+
+int CSSCode::set_up_CxCz(){  
+  Cx=common::getC(Gx,Gz);
+  Cz=common::getC(Gz,Gx);  
+  is_C_defined=1;
+  return 0;
+}
+
 bool CSSCode::is_valid(){
   if ( is_C_defined ) {
     return common::is_quantum_code(Gx, Gz, Cx, Cz);
@@ -270,7 +278,6 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2
   Cx=common::getC(Gx,Gz);
   Cz=common::getC(Gx,Gz,1);
   //  if (! is_quantum_code(Gx,Gz,Cx,Cz)) throw "invalid code";
-
   return 0;
 }
 

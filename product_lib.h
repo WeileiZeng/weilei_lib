@@ -102,6 +102,8 @@ public:
   int getRandomCode();
   /** get a random code with distance > 1*/
   int getGoodCode(int debug);
+  /** calculate Cx and Cz based on Gx and Gz */
+  int set_up_CxCz();
 
   //sanity check
   bool is_valid();   ///< check if the code is valid
