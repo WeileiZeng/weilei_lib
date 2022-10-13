@@ -46,7 +46,8 @@ test_lib.out:test_lib.o $(object_files)
 #build dynamic lib
 # require -fPIC option
 #LIB_WEILEI_PATH=/rhome/wzeng002/.local/lib
-LIB_WEILEI_PATH=/home/weileizeng/.local/lib
+#LIB_WEILEI_PATH=/home/weileizeng/.local/lib
+LIB_WEILEI_PATH=/sharedata01/weileizeng/.local/lib
 
 libweilei.so:$(object_files)
 	make all
