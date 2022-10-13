@@ -127,7 +127,7 @@ int CSSCode::generate_by_id(int debug){
 
   int temp = generate_code(Gx, Gz, n, Gx_row, id_Gx, Gz_row, id_Gz, debug);
   if ( temp == 2){
-    if ( true ) std::cout<<"Duplicate code for this ID, cod enot generated"<<std::endl;
+    if ( true ) std::cout<<"Duplicate code for this ID, code not generated"<<std::endl;
   }
   return temp;
 }
