@@ -8,15 +8,16 @@ void test_CSS_code();
 
 void test_classical_code();
 
-
+void test_CSS_Code_IO();
 
 int main(){
   std::cout<<" --------------------- begin test"<<std::endl;
 
   //  test_getC();
   //  test_classical_code();
-  //  test_CSS_code();
-  test_mmio();
+  test_CSS_code();
+  //  test_mmio();
+  //  test_CSS_Code_IO();  //inside test_CSS_code();
   std::cout<<" --------------------- finish test"<<std::endl;
   return 0;
 }
@@ -29,6 +30,9 @@ int main(){
 
 
 
+void test_CSS_Code_IO(){
+  return;
+}
 
 void test_mmio(){
   itpp::GF2mat G = common::get_check_code743(7);
@@ -126,7 +130,7 @@ void test_CSS_code(){
   codeP.title="some codeP";
   std::cout<<codeP<<std::endl;
 
-    ConcatenatedProductCSSCode codeCP;
+  ConcatenatedProductCSSCode codeCP;
   codeCP.n=61;
   std::cout<<codeCP<<std::endl;
 
@@ -141,6 +145,21 @@ void test_CSS_code(){
 
 
   std::cout<<"finish test for ProductCSSCode"<<std::endl;
+
+
+  std::cout<<"start test for CSSCode IO"<<std::endl;
+
+  CSSCode codeS, codeL;
+  codeR.save("tmp/testCode");
+
+  codeL.load("tmp/testCode");
+  std::cout<<codeL<<std::endl;
+  std::cout<<codeL.Gx<<std::endl;
+  std::cout<<codeL.Gz<<std::endl;
+  std::cout<<"finish test for CSSCode IO"<<std::endl;
+
+
+
   return;
 }
 
