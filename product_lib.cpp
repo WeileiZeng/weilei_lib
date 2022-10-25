@@ -207,6 +207,23 @@ void CSSCode::get_713_code(){
 
 }
 
+int CSSCode::save(std::string filename_prefix){
+  const char * title = filename_prefix.c_str();
+  char filename_Gx[256];char filename_Gz[256];
+  sprintf(filename_Gx,"%sGx.mm",title);  
+  sprintf(filename_Gz,"%sGz.mm",title); 
+  GF2mat_to_MM(Gx,filename_Gx);
+  GF2mat_to_MM(Gz,filename_Gz);
+  return 0;
+}
+
+int CSSCode::load(std::string filename_prefix){
+  Gx=MM_to_GF2mat(filename_prefix+"Gx.mm");
+  Gz=MM_to_GF2mat(filename_prefix+"Gz.mm");
+  n=Gx.cols();  
+  return 0;
+}
+
 
 
 ProductCSSCode::ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp){

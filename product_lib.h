@@ -125,6 +125,11 @@ public:
   //generate sample code
   /** generate 7 qubit hamming code*/
   void get_713_code();
+
+  //I/O
+  
+  int save(std::string filename_prefix); ///<save code matrices into MM 
+  int load(std::string filename_prefix);
 };
  
 class ProductCSSCode: public CSSCode{
