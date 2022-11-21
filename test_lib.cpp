@@ -247,50 +247,20 @@ int weight(itpp::bvec &b){//we can use BPSK::count(zero_b(N),b) to count the wei
 }
 
 //double decode(itpp::bvec e_in, itpp::bvec e_out,double p){
+//bool decode(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
+//bool decode(itpp::GF2mat& G,itpp::GF2mat& S, itpp::GF2mat& H, itpp::bvec e_t, const int perm_try){
+bool decode(itpp::GF2mat& Gx,itpp::GF2mat& Gz, itpp::bvec e_t, const int perm_try){
+    //G and S must be full rank
+    itpp::GF2mat G=Gz,S=Gx;  
+    itpp::GF2mat H=S;    
+    H.set_size(S.rows(),S.cols()+1,true);//H=(H_x,s)//H=(H_x,H_z,s)
+    G.set_size(G.rows()+1,G.cols(),true);//add one row, use G here because we will use diff=e+X later
 
-bool decode(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
-  return false;
-}
 
-double simulate(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
-  //  itpp::GF2mat Gx,Gz;
-  //G and S must be full rank
-  itpp::GF2mat G=Gz,S=Gx;
-
-  itpp::RNG_randomize();//get randome seed 
-  //#set up parameters#
-  int e_try=100;//number of random errors generated
-  int perm_try=100;//20;//5;//number of trails of random window / permutation;
-  int N=G.cols();///2;//number of qubits, size of the lattice
-
-  itpp::GF2mat T,U;
-  itpp::ivec P;//used for all the gaussian elimination in this file, T_fact(T,U,P)
-
-  //cout<<"test commutation: G_t*(S.transpoze()) is "<<G_t*(S.transpose())<<endl;
-  //define H=(S_x|S_z|s)
-  //find Q, the dual of H, which is e+G+L, HQ^T=0
-  
-  itpp::GF2mat H=S;    
-  H.set_size(S.rows(),S.cols()+1,true);//H=(H_x,s)//H=(H_x,H_z,s)
-  G.set_size(G.rows()+1,G.cols(),true);//add one row, use G here because we will use diff=e+X later
- 
-  itpp::bvec e_t = itpp::zeros_b(N);//e_t(2*N);//e_tilde=e_z//(e_z,e_x)
-  //read error from file
-  //  GF2mat E_input=MM_to_GF2mat(filename_E);//here the input is the output of the nonconvergent cases after BP decoding. The first row of this vector is an extra zero vector.
-  //int e_try=E_input.rows()-1;//number of total input errors
-  //   e_try=(10<e_try) ? 10 :e_try; limit it to 10 to smaller
-  //GF2mat E_input_good(e_t,false),E_input_bad(e_t,false),E_output_good(e_t,false),E_output_bad(e_t,false);//false for row vectors
-  
-  itpp::ivec perm(S.cols()+1);
-  perm.set(S.cols(),S.cols());//the last col for syndrome, is fixed
-
-  int e_bad=0;//count of bad errors
-  for(int i1=0;i1<e_try;i1++){
-    for (int i2=0;i2<2*N;i2++){//setup random error with error rate p
-      e_t.set(i2,(itpp::randu()-p<0)? 1:0); 
-    }
-
-    //    e_t=E_input.get_row(i1+1);//get input error
+    itpp::GF2mat T,U;
+    itpp::ivec P;//used for all the gaussian elimination in this file, T_fact(T,U,P)
+    itpp::ivec perm(S.cols()+1);
+    perm.set(S.cols(),S.cols());//the last col for syndrome, is fixed
     itpp::bvec s=S*e_t;//syndrome s=s_x;//(s_x,s_z);
     H.set_col(H.cols()-1,s);//add syndrome
     //cout<<"parity check matrix H=(S_x,S_z,s). The last column is the syndrome. "<<H<<endl;
@@ -351,13 +321,15 @@ double simulate(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
     G.set_row(G.rows()-1,diff_t);//check if the diff belong to gauge group
     //    std::cout<<G.rows()<<", rank of new G = "<<G.row_rank()<<std::endl;
     if(G.rows()==G.row_rank()){//not belond to gauge -> belongs to logical group -> bad error
-      e_bad++;
+      //      e_bad++;
+      return false;
       //cout<<"BAD* ";
       //cout<<"weight(e_t) = "<<weight(e_t)<<", wmin = "<<wmin<<", weight(diff_t) = "<<weight(diff_t)<<endl;
       //      E_input_bad = append_vector(E_input_bad,e_t);
       //      E_output_bad = append_vector(E_output_bad,e_d);
       
     }else{
+      return true;
       //      std::cout<<e_d<<", "<<e_t<<", "<<diff_t;
       //      std::cout<<"__good__"<<std::endl;
       //      E_input_good = append_vector(E_input_good,e_t);
@@ -365,6 +337,57 @@ double simulate(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
       
     }
     //cout<<S*diff_t<<endl;//check if get the same syndrome
+    std::cout<<"shoudl neven reach here"<<std::endl;
+    return false;
+}
+
+double simulate(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
+  //  itpp::GF2mat Gx,Gz;
+  //Gx and Gz must be full rank
+  //decode X type error, syndrom s=Gz*e^T
+
+  itpp::RNG_randomize();//get randome seed 
+  //#set up parameters#
+  const int e_try=100000;//number of random errors generated
+  const int perm_try=100;//20;//5;//number of trails of random window / permutation;
+  int N=Gx.cols();///2;//number of qubits, size of the lattice
+
+  //cout<<"test commutation: G_t*(S.transpoze()) is "<<G_t*(S.transpose())<<endl;
+  //define H=(S_x|S_z|s)
+  //find Q, the dual of H, which is e+G+L, HQ^T=0
+
+ 
+
+  //read error from file
+  //  GF2mat E_input=MM_to_GF2mat(filename_E);//here the input is the output of the nonconvergent cases after BP decoding. The first row of this vector is an extra zero vector.
+  //int e_try=E_input.rows()-1;//number of total input errors
+  //   e_try=(10<e_try) ? 10 :e_try; limit it to 10 to smaller
+  //GF2mat E_input_good(e_t,false),E_input_bad(e_t,false),E_output_good(e_t,false),E_output_bad(e_t,false);//false for row vectors
+  
+
+
+  int e_bad=0;//count of bad errors
+//add pragma here for e_try
+  int num_cores=30;
+#pragma omp parallel for schedule(guided) num_threads(num_cores)
+  for(int i1=0;i1<e_try;i1++){
+    itpp::bvec e_t = itpp::zeros_b(N);//e_t(2*N);//e_tilde=e_z//(e_z,e_x)
+    for (int i2=0;i2<2*N;i2++){//setup random error with error rate p
+      e_t.set(i2,(itpp::randu()-p<0)? 1:0); 
+    }
+    //    e_t=E_input.get_row(i1+1);//get input error
+    //bool decode(itpp::GF2mat& S, itpp::GF2mat& H, itpp::bvec e_t, const int perm_try){
+
+
+    bool decode_result = decode(Gx, Gz, e_t, perm_try);
+#pragma omp critical
+    {
+      if (! decode_result){
+	e_bad ++;
+      }
+    }
+
+    //counting e_bad here.
   }
   double failure_rate=1.0*e_bad/e_try;
 
@@ -408,6 +431,7 @@ void test_decode(){
   code.Gx = common::make_it_full_rank(code.Gx);
   code.Gz = common::make_it_full_rank(code.Gz);
   double p_block = simulate(code.Gx, code.Gz, p);
+  //  code.simulate(p)
 
 
   std::cout<<"finish test_decode"<<std::endl;
