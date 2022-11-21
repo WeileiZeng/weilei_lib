@@ -252,3 +252,15 @@ int common::mat2gnudata(itpp::mat data, std::string filename, std::string header
 }
 
 
+/*
+int common::weight(itpp::bvec &b){//we can use BPSK::count(zero_b(N),b) to count the weight
+  int length=b.length();
+  int weight=0;
+  for (int i=0;i<length;i++){
+    if(b.get(i)){
+      weight++;
+    }
+  }
+  return weight;
+}
+*/
