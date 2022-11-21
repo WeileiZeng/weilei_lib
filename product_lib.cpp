@@ -238,6 +238,26 @@ ProductCSSCode::ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp){
   
 }
 
+void SubsystemProductCSSCode::product(){
+  Gx = common::kron(codeA.Gx,itpp::gf2dense_eye(codeB.n)).concatenate_vertical(common::kron(itpp::gf2dense_eye(codeA.n),codeB.Gx));
+  Gz = common::kron(codeA.Gz,itpp::gf2dense_eye(codeB.n)).concatenate_vertical(common::kron(itpp::gf2dense_eye(codeA.n),codeB.Gz));
+  
+  /*  std::cout<<"debug 0:"<<std::endl;
+  std::cout<<codeA.Gz<<codeB.Gz<<std::endl;
+  Hx = common::kron(codeA.Gz,codeB.Gz);
+  std::cout<<"debug 0.1:"<<std::endl; */
+  Hz=common::kron(codeA.Gz,codeB.Gz)
+    .concatenate_vertical(common::kron(codeA.Cz,codeB.Gz))
+    .concatenate_vertical(common::kron(codeA.Gz,codeB.Cz));
+  //  std::cout<<"debug 1:"<<std::endl;
+  Hx=common::kron(codeA.Gx,codeB.Gx)
+    .concatenate_vertical(common::kron(codeA.Cx,codeB.Gx))
+    .concatenate_vertical(common::kron(codeA.Gx,codeB.Cx));
+
+ 
+  return;
+}
+
 /*SubsystemProductCSSCode::SubsystemProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode::ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp){
   }*/
 

@@ -140,6 +140,7 @@ public:
   ProductCSSCode(){
   }
   ProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp);
+  //shourld I use  virtual  here or not?
   void product(); ///< generate the product code from codeA and codeB, to be impelmented in each derived class
 
   friend std::ostream& operator<<(std::ostream& os, const ProductCSSCode& code);
@@ -151,11 +152,13 @@ class SubsystemProductCSSCode : public ProductCSSCode {
 public:
   //  string title_str, string note, int mode, int sub_mode_A, int sub_mode_B,     //general info
   // int n_low, int n_high, int k_low, int k_high, int debug,                     //for random simulation
+  itpp::GF2mat Hx;
+  itpp::GF2mat Hz;
   std::string      type="SubsytemProductCSSCode";
   //  SubsystemProductCode();
-  SubsystemProductCSSCode(){
-  }
+  SubsystemProductCSSCode(){}
   SubsystemProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode( codeA_temp, codeB_temp){}
+  void product();
 
   friend std::ostream& operator<<(std::ostream& os, const SubsystemProductCSSCode& code);
 };
@@ -166,6 +169,7 @@ public:
   ConcatenatedProductCSSCode(){
 }
   ConcatenatedProductCSSCode(CSSCode codeA_temp, CSSCode codeB_temp):ProductCSSCode( codeA_temp, codeB_temp){}
+  //  void product();
 
   friend std::ostream& operator<<(std::ostream& os, const ConcatenatedProductCSSCode& code);
 };
