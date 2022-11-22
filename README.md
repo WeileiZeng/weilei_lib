@@ -1,3 +1,13 @@
+## weilei-lib v0.2
+Nov 2022
+LOG
+- [ ] finish decode and simulate with CSSCode
+
+TODO
+- [ ] add google test
+- [ ] pass parameters for decode and simulate
+
+
 ## weilei-lib v0.1
 
 [![CodeFactor](https://www.codefactor.io/repository/github/weileizeng/weilei_lib/badge/master)](https://www.codefactor.io/repository/github/weileizeng/weilei_lib/overview/master)
