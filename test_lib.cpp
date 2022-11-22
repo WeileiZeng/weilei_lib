@@ -12,7 +12,13 @@ void test_classical_code();
 
 void test_CSS_Code_IO();
 
+void test_weight();
+
 void test_decode();
+
+void test_decode_within_CSS_Code();
+
+
 
 int main(){
   std::cout<<" --------------------- begin test"<<std::endl;
@@ -24,7 +30,11 @@ int main(){
   //  test_mmio();
   //  test_CSS_Code_IO();  //inside test_CSS_code();
 
-  test_decode();
+
+
+  //  test_decode();
+  test_decode_within_CSS_Code();
+
   std::cout<<" --------------------- finish test"<<std::endl;
   return 0;
 }
@@ -36,6 +46,18 @@ int main(){
 // ============    implementations   ==============
 
 
+void test_weight(){
+  int N = 7;
+  double p =0.5;
+  itpp::bvec e_t = itpp::zeros_b(N);
+  for (int i2=0;i2<2*N;i2++){//setup random error with error rate p
+    e_t.set(i2,(itpp::randu()-p<0)? 1:0); 
+  }
+  std::cout<<e_t<<std::endl;
+  std::cout<<"weight of e_t: "<<weight(e_t)<<std::endl;
+  //  std::cout<<"weight of e_t: "<<common::weight(e_t)<<std::endl;
+  return;
+}
 
 void test_CSS_Code_IO(){
   return;
@@ -234,17 +256,7 @@ void test_product_code(){
 }
 
 
-//should move to common::
-int weight(itpp::bvec &b){//we can use BPSK::count(zero_b(N),b) to count the weight
-  int length=b.length();
-  int weight=0;
-  for (int i=0;i<length;i++){
-    if(b.get(i)){
-      weight++;
-    }
-  }
-  return weight;
-}
+
 
 //double decode(itpp::bvec e_in, itpp::bvec e_out,double p){
 //bool decode(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
@@ -348,7 +360,7 @@ double simulate(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
 
   itpp::RNG_randomize();//get randome seed 
   //#set up parameters#
-  const int e_try=100000;//number of random errors generated
+  const int e_try=1000;//number of random errors generated
   const int perm_try=100;//20;//5;//number of trails of random window / permutation;
   int N=Gx.cols();///2;//number of qubits, size of the lattice
 
@@ -434,6 +446,43 @@ void test_decode(){
   //  code.simulate(p)
 
 
+  std::cout<<"finish test_decode"<<std::endl;
+  return;
+}
+
+void test_decode_within_CSS_Code(){
+  std::cout<<"begin test_decode2"<<std::endl;
+  CSSCode code;
+  code.n = 7;
+  code.title="Quantum hamming 713 code";
+  code.get_713_code();
+  //  std::cout<<code<<std::endl;
+  //  code.full_rank();
+  //  code.info();
+  //  code.d = 
+  code.dist();
+  code.k = code.n - code.Gx.row_rank() - code.Gz.row_rank();
+  //std::cout<<"[7,1,3] Hamming code: dx="<<code.dx<<std::endl;
+  std::cout<<code<<std::endl;
+  std::cout<<"finish generating Steane code"<<std::endl;
+
+  //  double decode(itpp::GF2mat Gx, itpp::GF2mat Gz, double p)
+  double p = 0.1;
+  code.Gx = common::make_it_full_rank(code.Gx);
+  code.Gz = common::make_it_full_rank(code.Gz);
+  //  double p_block_2 = code.simulate(p);
+  //  double p_block = simulate(code.Gx, code.Gz, p);
+
+  for ( int i =0 ; i<10; i++){
+    // code.simulate(p);
+    //    code.info();
+    //    std::cout<<code.Gz<<std::endl;
+  }
+
+
+  for ( double pp = 0.01; pp < 0.11; pp += 0.01 ){
+    code.simulate(pp);
+  }
   std::cout<<"finish test_decode"<<std::endl;
   return;
 }

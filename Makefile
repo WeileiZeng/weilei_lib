@@ -3,7 +3,7 @@ MAKEFLAGS += --no-print-directory
 #INC_DIR=weilei_lib
 INC_DIR=.
 #INC_DIR=~/working/weilei_lib
-CXX=g++ -O3 -Wall -std=c++11 -fPIC
+CXX=g++ -O3 -Wall -std=c++11 -fPIC -fopenmp
 #-fPIC for dynamic lib
 ### -O2 -O5 -Os
 #g++ `pkg-config --cflags itpp` -o hello.out hello.cpp `pkg-config --libs itpp`
@@ -40,7 +40,7 @@ test:
 	make all
 	make test_lib.o
 	make test_lib.out
-	./test_lib.out
+	srun -n 1 --cpus-per-task=32 -q short ./test_lib.out
 test_lib.out:test_lib.o $(object_files)
 	$(CXX) $(ITPP) -o $@ $< $(object_files)
 
