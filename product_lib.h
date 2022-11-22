@@ -121,6 +121,13 @@ public:
   int rand_dist_z();
 
   //decoding
+  /** decode error e 
+      
+   */
+  //  void decode(itpp::bvec e_in, itpp::bvec e_out);
+  bool decode(itpp::bvec e_t, const int perm_try);
+  //should add e_out here
+  double simulate(double p);
 
   //generate sample code
   /** generate 7 qubit hamming code*/

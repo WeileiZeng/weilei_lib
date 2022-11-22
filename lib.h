@@ -103,6 +103,10 @@ namespace common{
   int mat2gnudata(itpp::mat data, std::string filename, std::string header);
 
 
+
+  //  int weight(itpp::bvec &b);//we can use BPSK::count(zero_b(N),b) to count the weight
+
+
 }
 
 #endif

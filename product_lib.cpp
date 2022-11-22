@@ -200,6 +200,11 @@ int CSSCode::rand_dist_z(){
   return common::quantum_dist_v2(Gx, Gz, 1);
 }
 
+void decode(itpp::bvec e_in, itpp::bvec e_out){
+
+
+}
+
 void CSSCode::get_713_code(){
   Gx=common::get_check_code743(n);
   Gz=common::get_check_code743(n);
@@ -692,3 +697,173 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
   return 0;
   
 }
+
+
+
+// ============    implementations   ==============
+
+
+//bool CSSCode::decode(itpp::GF2mat& Gx_temp,itpp::GF2mat& Gz_temp, itpp::bvec e_t, const int perm_try){
+bool CSSCode::decode(itpp::bvec e_t, const int perm_try){
+    //G and S must be full rank
+    itpp::GF2mat G=Gz,S=Gx;  
+    itpp::GF2mat H=S;    
+    H.set_size(S.rows(),S.cols()+1,true);//H=(H_x,s)//H=(H_x,H_z,s)
+    G.set_size(G.rows()+1,G.cols(),true);//add one row, use G here because we will use diff=e+X later
+
+
+    itpp::GF2mat T,U;
+    itpp::ivec P;//used for all the gaussian elimination in this file, T_fact(T,U,P)
+    itpp::ivec perm(S.cols()+1);
+    perm.set(S.cols(),S.cols());//the last col for syndrome, is fixed
+    itpp::bvec s=S*e_t;//syndrome s=s_x;//(s_x,s_z);
+    H.set_col(H.cols()-1,s);//add syndrome
+    //cout<<"parity check matrix H=(S_x,S_z,s). The last column is the syndrome. "<<H<<endl;
+    
+    int wmin=e_t.length();//minimum weight
+    itpp::bvec e_d = itpp::zeros_b(e_t.length() );//error detected with minimum weight wmin //e_d =(e_z,e_x)
+    for (int i3=0;i3<perm_try;i3++){//find the error with minimum weight
+      //set up random permutation vector for H
+      perm.set_subvector(0,itpp::sort_index(itpp::randu( S.cols() )) );
+
+      H.permute_cols( perm, false);
+      H.transpose().T_fact(T,U,P);//can I use same T,U,P matrix/vec here despite different size of them: Yes, any size and any value won't affect the result
+      //The rows of this matrix are respectively: all errors with non-zero syndrome; all errors with zero syndrome (gauge errors and logical errors); error with the given syndrome. This maybe useful.
+      //T should include all the other inequivelant errors. The resize make it cleaner but may lose some meaningful info
+      itpp::GF2mat Q=T.get_submatrix(H.rows(),0,H.cols()-1,H.cols()-1);//does permutation matter?  It doesn't matter cause we only look at the zero rows in the H_z.transpose() after gauss. I don't need the nonzero rows to be triangle or not
+      //In fact, this Q=(Q_z,Q_x,1) should be Q_tilde. But it is up to the definition, and doesn't affect the permutation
+      //cout<<(H*Q.transpose()).density()<<endl;
+      //cout<<(H*Q.transpose())<<endl;
+      Q.permute_cols(perm,true);//permute back
+      /*check permutation relation of Q,H,G
+	cout<<"G*Q^T, "<<
+	  (G.get_submatrix(0,0,G.rows()-2,G.cols()-1)*
+	    Q.get_submatrix(0,0,Q.rows()-2,Q.cols()-2).transpose()
+	       ).density()
+	       <<endl;
+	       cout<<"rank of G: "<<G.get_submatrix(0,0,G.rows()-2,G.cols()-1).T_fact(T,U,P)<<endl;
+	       cout<<"rank of Q: "<<Q.get_submatrix(0,0,Q.rows()-2,Q.cols()-2).transpose().T_fact(T,U,P)<<endl;
+      */
+      
+      //cout<<"Q, "<<Q<<endl;
+      //cout<<"Q: The last column means if the error match zero syndrome or match the given syndrome in H. Hence only the last row is the error we want."<<endl;
+
+      //get error and check
+      itpp::bvec X_t=Q.get_row(Q.rows()-1);//the error detected, X_t=(X_z,X_x,1)
+
+      //get the row with minimum weight. add X_t to make sure the last element is one
+      int ww=weight(X_t);
+      for (int a = 0;a<Q.rows()-1;a++){
+	if (ww> weight(X_t+Q.get_row(a)) ){
+	  ww= weight(X_t+Q.get_row(a));
+	  X_t=X_t+Q.get_row(a);
+	}
+      }
+      X_t.set_size(X_t.size()-1,true);//remove the last 1.  X_t=(X_z,X_x)
+      int w=weight(X_t);
+      if(wmin>w){//find another error with smaller weight, update it
+	wmin=w;
+	e_d=X_t;
+      }
+      H.permute_cols(perm, true);//permute back for another run
+    }
+  
+    //check the error and syndrome    
+    itpp::bvec diff_t=e_d+e_t;//same format, (e_z,e_x)
+      
+    // bvec diff=get_tilde(diff_t);
+    //      G.set_row(G.rows()-1,diff);//check if the diff belong to gauge group
+    G.set_row(G.rows()-1,diff_t);//check if the diff belong to gauge group
+    //    std::cout<<G.rows()<<", rank of new G = "<<G.row_rank()<<std::endl;
+    if(G.rows()==G.row_rank()){//not belond to gauge -> belongs to logical group -> bad error
+      //      e_bad++;
+      return false;
+      //cout<<"BAD* ";
+      //cout<<"weight(e_t) = "<<weight(e_t)<<", wmin = "<<wmin<<", weight(diff_t) = "<<weight(diff_t)<<endl;
+      //      E_input_bad = append_vector(E_input_bad,e_t);
+      //      E_output_bad = append_vector(E_output_bad,e_d);
+      
+    }else{
+      return true;
+      //      std::cout<<e_d<<", "<<e_t<<", "<<diff_t;
+      //      std::cout<<"__good__"<<std::endl;
+      //      E_input_good = append_vector(E_input_good,e_t);
+      //      E_output_good = append_vector(E_output_good,e_d);
+      
+    }
+    //cout<<S*diff_t<<endl;//check if get the same syndrome
+    std::cout<<"should never reach here"<<std::endl;
+    return false;
+}
+
+//double simulate(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
+double CSSCode::simulate(double p){
+  //  itpp::GF2mat Gx,Gz;
+  //Gx and Gz must be full rank
+  //decode X type error, syndrom s=Gz*e^T
+
+  itpp::RNG_randomize();//get randome seed 
+  //#set up parameters#
+  const int e_try=30000;//number of random errors generated
+  const int perm_try=100;//20;//5;//number of trails of random window / permutation;
+  int N=Gx.cols();///2;//number of qubits, size of the lattice
+
+  //cout<<"test commutation: G_t*(S.transpoze()) is "<<G_t*(S.transpose())<<endl;
+  //define H=(S_x|S_z|s)
+  //find Q, the dual of H, which is e+G+L, HQ^T=0
+
+ 
+
+  //read error from file
+  //  GF2mat E_input=MM_to_GF2mat(filename_E);//here the input is the output of the nonconvergent cases after BP decoding. The first row of this vector is an extra zero vector.
+  //int e_try=E_input.rows()-1;//number of total input errors
+  //   e_try=(10<e_try) ? 10 :e_try; limit it to 10 to smaller
+  //GF2mat E_input_good(e_t,false),E_input_bad(e_t,false),E_output_good(e_t,false),E_output_bad(e_t,false);//false for row vectors
+  
+
+
+  int e_bad=0;//count of bad errors
+//add pragma here for e_try
+  int num_cores=30;
+#pragma omp parallel for schedule(guided) num_threads(num_cores)
+  for(int i1=0;i1<e_try;i1++){
+    itpp::bvec e_t = itpp::zeros_b(N);//e_t(2*N);//e_tilde=e_z//(e_z,e_x)
+    for (int i2=0;i2<2*N;i2++){//setup random error with error rate p
+      e_t.set(i2,(itpp::randu()-p<0)? 1:0); 
+    }
+    //    e_t=E_input.get_row(i1+1);//get input error
+    //bool decode(itpp::GF2mat& S, itpp::GF2mat& H, itpp::bvec e_t, const int perm_try){
+
+
+    //    bool decode_result = decode(Gx, Gz, e_t, perm_try);
+    bool decode_result = decode(e_t, perm_try);
+#pragma omp critical
+    {
+      if (! decode_result){
+	e_bad ++;
+	//	std::cout<<"critical_test"<<std::endl;
+      }
+    }
+
+    //counting e_bad here.
+  }
+  double failure_rate=1.0*e_bad/e_try;
+
+  //cout<<"E_output_bad "<<E_output_bad<<endl;
+  //cout<<"p="<<p<<", failure_rate="<<failure_rate<<endl;
+  //cout<<"number of input errors:"<<e_try<<endl;
+  //cout<<"number of bad errors:"<<e_bad<<endl;
+
+    
+  //print result
+  std::cout<<"# of bonds/qubits N = "<<N
+      <<", # of total input error e_try= "<<e_try
+      <<", p = "<<p
+      <<", failure_rate = "<<failure_rate
+	   <<std::endl;
+    
+  return failure_rate;
+}
+
+
+
