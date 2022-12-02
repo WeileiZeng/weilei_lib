@@ -125,9 +125,10 @@ public:
       
    */
   //  void decode(itpp::bvec e_in, itpp::bvec e_out);
-  bool decode(itpp::bvec e_t, const int perm_try);
+  bool decode(itpp::bvec e_t, const int perm_try, const int debug=0);
   //should add e_out here
-  double simulate(double p);
+  //  double simulate(double p, const int e_try = 1000);
+  double simulate(double p, const int e_try = 1000, const int num_cores=16, const int debug = 0);
 
   //generate sample code
   /** generate 7 qubit hamming code*/

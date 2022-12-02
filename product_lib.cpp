@@ -704,7 +704,7 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
 
 
 //bool CSSCode::decode(itpp::GF2mat& Gx_temp,itpp::GF2mat& Gz_temp, itpp::bvec e_t, const int perm_try){
-bool CSSCode::decode(itpp::bvec e_t, const int perm_try){
+bool CSSCode::decode(itpp::bvec e_t, const int perm_try, const int debug){
     //G and S must be full rank
     itpp::GF2mat G=Gz,S=Gx;  
     itpp::GF2mat H=S;    
@@ -750,6 +750,8 @@ bool CSSCode::decode(itpp::bvec e_t, const int perm_try){
 
       //get error and check
       itpp::bvec X_t=Q.get_row(Q.rows()-1);//the error detected, X_t=(X_z,X_x,1)
+      //      if (debug) std::cout<<"X_t="<<X_t<<std::endl;
+      //      if (debug) std::cout<<"Q="<<Q<<std::endl;
 
       //get the row with minimum weight. add X_t to make sure the last element is one
       int ww=weight(X_t);
@@ -765,16 +767,22 @@ bool CSSCode::decode(itpp::bvec e_t, const int perm_try){
 	wmin=w;
 	e_d=X_t;
       }
+      //      if (debug) std::cout<<"wmin="<<wmin<<std::endl;
+      if (wmin ==0) break;
+
       H.permute_cols(perm, true);//permute back for another run
     }
   
     //check the error and syndrome    
     itpp::bvec diff_t=e_d+e_t;//same format, (e_z,e_x)
+    //    if (debug) std::cout<<"diff_t="<<diff_t<<std::endl;
       
     // bvec diff=get_tilde(diff_t);
     //      G.set_row(G.rows()-1,diff);//check if the diff belong to gauge group
+
     G.set_row(G.rows()-1,diff_t);//check if the diff belong to gauge group
-    //    std::cout<<G.rows()<<", rank of new G = "<<G.row_rank()<<std::endl;
+    //    if (debug) std::cout<<G<<std::endl;
+    //    if (debug)  std::cout<<G.rows()<<", rank of new G = "<<G.row_rank()<<std::endl;
     if(G.rows()==G.row_rank()){//not belond to gauge -> belongs to logical group -> bad error
       //      e_bad++;
       return false;
@@ -797,14 +805,14 @@ bool CSSCode::decode(itpp::bvec e_t, const int perm_try){
 }
 
 //double simulate(itpp::GF2mat Gx, itpp::GF2mat Gz, double p){
-double CSSCode::simulate(double p){
+double CSSCode::simulate(double p, const int e_try, const int num_cores, const int debug){
   //  itpp::GF2mat Gx,Gz;
   //Gx and Gz must be full rank
   //decode X type error, syndrom s=Gz*e^T
 
   itpp::RNG_randomize();//get randome seed 
   //#set up parameters#
-  const int e_try=30000;//number of random errors generated
+  //  const int e_try=30000;//number of random errors generated
   const int perm_try=100;//20;//5;//number of trails of random window / permutation;
   int N=Gx.cols();///2;//number of qubits, size of the lattice
 
@@ -821,43 +829,43 @@ double CSSCode::simulate(double p){
   //GF2mat E_input_good(e_t,false),E_input_bad(e_t,false),E_output_good(e_t,false),E_output_bad(e_t,false);//false for row vectors
   
 
-
+  //  if (debug) std::cout<<"before omp, num_cores="<<num_cores<<std::endl;
   int e_bad=0;//count of bad errors
 //add pragma here for e_try
-  int num_cores=30;
+//  const int num_cores=32;
+
 #pragma omp parallel for schedule(guided) num_threads(num_cores)
   for(int i1=0;i1<e_try;i1++){
     itpp::bvec e_t = itpp::zeros_b(N);//e_t(2*N);//e_tilde=e_z//(e_z,e_x)
-    for (int i2=0;i2<2*N;i2++){//setup random error with error rate p
+    /*the bug is here
+     * for (int i2=0;i2<2*N;i2++)
+     *  should be i2<N
+    */
+    for (int i2=0;i2<N;i2++){//setup random error with error rate p
       e_t.set(i2,(itpp::randu()-p<0)? 1:0); 
     }
-    //    e_t=E_input.get_row(i1+1);//get input error
-    //bool decode(itpp::GF2mat& S, itpp::GF2mat& H, itpp::bvec e_t, const int perm_try){
 
+    bool decode_result = false;
+    if (weight(e_t) == 0){//no need to decode for zero error
+      decode_result = true;      
+    }else{
+      decode_result = decode(e_t, perm_try, debug);
+    }
 
-    //    bool decode_result = decode(Gx, Gz, e_t, perm_try);
-    bool decode_result = decode(e_t, perm_try);
 #pragma omp critical
     {
       if (! decode_result){
 	e_bad ++;
-	//	std::cout<<"critical_test"<<std::endl;
       }
-    }
-
+    }//#pragma omp critical
     //counting e_bad here.
-  }
+  }//#pragma omp parallel for
+
   double failure_rate=1.0*e_bad/e_try;
 
-  //cout<<"E_output_bad "<<E_output_bad<<endl;
-  //cout<<"p="<<p<<", failure_rate="<<failure_rate<<endl;
-  //cout<<"number of input errors:"<<e_try<<endl;
-  //cout<<"number of bad errors:"<<e_bad<<endl;
-
-    
   //print result
-  std::cout<<"# of bonds/qubits N = "<<N
-      <<", # of total input error e_try= "<<e_try
+  std::cout<<"N = "<<N
+      <<", e_try= "<<e_try
       <<", p = "<<p
       <<", failure_rate = "<<failure_rate
 	   <<std::endl;
