@@ -837,7 +837,7 @@ double CSSCode::simulate(double p, const int e_try, const int num_cores, const i
 #pragma omp parallel for schedule(guided) num_threads(num_cores)
   for(int i1=0;i1<e_try;i1++){
     itpp::bvec e_t = itpp::zeros_b(N);//e_t(2*N);//e_tilde=e_z//(e_z,e_x)
-    /*the bug is here
+    /*the bug is here: passed e_t size limit
      * for (int i2=0;i2<2*N;i2++)
      *  should be i2<N
     */
