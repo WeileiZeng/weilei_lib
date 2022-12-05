@@ -183,6 +183,7 @@ void CSSCode::info(){
 void CSSCode::dist(){
   dx = rand_dist_x();
   dz = rand_dist_z();
+  d = (dx>dz)?dz:dx;
   return;
 }
 
@@ -846,8 +847,13 @@ double CSSCode::simulate(double p, const int e_try, const int num_cores, const i
     }
 
     bool decode_result = false;
-    if (weight(e_t) == 0){//no need to decode for zero error
+    //if (weight(e_t) == 0){//no need to decode for zero error
+    //    std::cout<<"d="<<d<<std::endl;
+    //    continue;
+    if (weight(e_t) < d/2.0-0.4){//no need to decode for small error
       decode_result = true;      
+      //      if (weight(e_t) > 0 ) 
+	//	std::cout<<"d";
     }else{
       decode_result = decode(e_t, perm_try, debug);
     }
