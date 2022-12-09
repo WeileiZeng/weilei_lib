@@ -121,20 +121,29 @@ public:
   int rand_dist_z();
 
   //decoding
-  /** decode error e 
-      
+  /** decode Z type error e_t
+   *@return decoding success or failure
+   *@param e_t, input error, return decoded error. there difference is what remained after applying correction 
+   *@param perm_try, number of permutaion trials for each decoding
+   *@param debug, default 0, put 1 to turn on debugging messages.
    */
-  //  void decode(itpp::bvec e_in, itpp::bvec e_out);
   bool decode(itpp::bvec& e_t, const int perm_try, const int debug=0);
-  //should add e_out here
-  //  double simulate(double p, const int e_try = 1000);
+
+  /*for given p, run simulation and return block error rate p_block
+   *@param p, physical erroe rate
+   *@param e_try, number of trials
+   *@param num_cores, number of cores for opemmp
+   */
   double simulate(double p, const int e_try = 1000, const int num_cores=16, const int debug = 0);
 
   //generate sample code
-  /** generate 7 qubit hamming code*/
+  /** generate 7 qubit hamming code
+   *@param code.n
+   */
   void get_713_code();
 
   //I/O
+
   
   int save(std::string filename_prefix); ///<save code matrices into MM 
   int load(std::string filename_prefix);

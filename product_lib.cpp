@@ -705,6 +705,10 @@ int product(itpp::GF2mat Gax, itpp::GF2mat Gaz, itpp::GF2mat Gbx, itpp::GF2mat G
 
 
 //bool CSSCode::decode(itpp::GF2mat& Gx_temp,itpp::GF2mat& Gz_temp, itpp::bvec e_t, const int perm_try){
+/* decode Z type error
+ *@param G, G=Gz,
+ *@param S, S=Gx, decode Z type error, S*e_t=Gx*e_t=syndrome
+ */
 bool CSSCode::decode(itpp::bvec& e_t, const int perm_try, const int debug){
     //G and S must be full rank
     itpp::GF2mat G=Gz,S=Gx;  
@@ -778,7 +782,7 @@ bool CSSCode::decode(itpp::bvec& e_t, const int perm_try, const int debug){
     itpp::bvec diff_t=e_d+e_t;//same format, (e_z,e_x)
     //    if (debug) std::cout<<"diff_t="<<diff_t<<std::endl;
       
-    //return e_d
+    //return e_d through e_t
     e_t=e_d;
 
     // bvec diff=get_tilde(diff_t);
