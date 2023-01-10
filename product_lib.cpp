@@ -303,8 +303,12 @@ int getRandomQuantumCode(int n,int Gx_row,int Gz_row, itpp::GF2mat &Gx,itpp::GF2
 
   Gx = itpp::GF2mat(Gx_row,n);
   Gz = itpp::GF2mat(Gz_row,n);
+  const double rho=0.5; //preset density of the random matrix
   for ( int i =0;i<Gx_row;i++){//random G_x
-    Gx.set_row(i,itpp::randb(n));//equally 0 and 1s
+    //    Gx.set_row(i,itpp::randb(n));//equally 0 and 1s
+    for ( int j=0;j<n;j++){
+      Gx.set(i,j,(itpp::randu()-rho<0)? 1:0);
+    }
   }
   //Gx might not be full rank at this point
   
