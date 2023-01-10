@@ -479,6 +479,9 @@ void test_decode_within_CSS_Code(){
     //    std::cout<<code.Gz<<std::endl;
   }
 
+  for ( double pp = 0.1; pp > 0.0001; pp /= 2.0 ){
+    code.simulate(pp, 10000, 1);
+  }
 
   for ( double pp = 0.01; pp < 0.11; pp += 0.01 ){
     code.simulate(pp);
