@@ -520,6 +520,7 @@ void test_syndrome_table(){
   code.syndrome_table_decode(error_input,error_output);
     std::cout<<"input: "<<error_input<<std::endl;
   std::cout<<"output:"<<error_output<<std::endl;
+  std::cout<<"logical:"<<code.is_logical_error(error_input,error_output)<<std::endl;
 
 
 

@@ -318,10 +318,27 @@ void CSSCode::syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out){
   //  std::cout<<"input: "<<error_input<<std::endl;
   //  std::cout<<"output:"<<error_output<<std::endl;
   return;
-
 }
 
+bool CSSCode::is_logical_error(itpp::bvec & e_diff){
+  if (itpp::bin2dec(Gx*e_diff)==0){
+      if (itpp::bin2dec(Cx*e_diff)==0){
+	return false;
+      }else{
+	return true;
+      }
+  }else{
+    std::cout<<"non zero syndrome"<<std::endl;
+    throw "non zero syndrome";
+  }
+  throw "shold never reach here";
+  return true;
+}
 
+bool CSSCode::is_logical_error(itpp::bvec & e_in, itpp::bvec & e_out){
+  itpp::bvec e_diff = e_in+e_out;
+  return CSSCode::is_logical_error(e_diff);
+}
 
 
 

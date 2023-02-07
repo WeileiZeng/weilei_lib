@@ -131,7 +131,8 @@ public:
   void syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out);
   int syndrome_table_dist_x(); ///< return distance
   int syndrome_table_dist_z(); ///< return distance
-
+  bool is_logical_error(itpp::bvec & e_diff);
+  bool is_logical_error(itpp::bvec & e_in, itpp::bvec & e_out);
 
 
   //decoding
