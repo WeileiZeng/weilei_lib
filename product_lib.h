@@ -86,7 +86,12 @@ public:
   int dx=-1;  ///< X type min distance
   int dz=-1;  ///< Z type min distance
   int is_defined=0, is_C_defined=0;
-  
+
+  const static int syndrome_table_size=32768; //1024*1024/32=2^15, Gx.rows()<=15;
+  //  itpp::bvec * syndrome_table[32768];
+  itpp::bvec syndrome_table[syndrome_table_size];
+
+
   //constructor
   CSSCode();
   /**
@@ -119,6 +124,11 @@ public:
   int min_weight_dist_z();
   int rand_dist_x();
   int rand_dist_z();
+  
+  //itpp::bvec * get_syndrome_table();
+  void get_syndrome_table();
+  bool syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out);
+  //  itpp::bvec syndrome_table[table_size];
 
   //decoding
   /** decode Z type error e_t

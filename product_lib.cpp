@@ -201,10 +201,97 @@ int CSSCode::rand_dist_z(){
   return common::quantum_dist_v2(Gx, Gz, 1);
 }
 
-void decode(itpp::bvec e_in, itpp::bvec e_out){
 
+/**
+ *@param error, en error with weight w
+ *@param n, lenght of error
+ */
+bool next_error(itpp::bvec & error, int n, int w){
+  //  std::cout<<"input: "<<error<<std::endl;
+  //  for ( int i =0; i<n;i++){
+  //std::cout<<(error[n-1-i])<<std::endl;
+  //  }
+  //  throw;
+  for ( int i =0; i<w; i++){
+    //std::cout<<(error[n-1-i])<<std::endl;
+    //    throw "exit";
+    if (error[n-1-i]==0){
+      //shift the last 1 to the right
+      for ( int j = n-1-i; j>-1; j--){
+        if (error[j]==1){
+          error[j]=0;
+          for ( int k=0;k<i+1;k++){
+            error[j+1+k]=1;
+            error[n-i+k]=0;
+          }
+          //      std::cout<<"output: "<<error<<std::endl;
+          return true;
+        }
+      }
+    }else{
+      //      std::cout<<"get one for "<<error<<std::endl;
+    }
+  }
+  return false;
 
 }
+
+//itpp::bvec * 
+void CSSCode::get_syndrome_table(){
+  //  int table_size_temp=int (pow(2,code.Gx.rows()));
+  //const int table_size=128;
+  //static itpp::bvec syndrome_table[table_size];
+  //  const int table_size=1024*1024/32;//table_size_temp;
+  if (Gx.rows()>15) {
+    std::cout<<"Gx is too big. Cannot save syndrome table";
+    throw "Gx is too big";
+  }
+  //  itpp::bvec syndrome_table[table_size];
+  //syndrome_table = itpp::bvec[table_size];
+  itpp::bvec b_zero=itpp::zeros_b(n);
+  for ( int i =0;i<syndrome_table_size;i++){
+    syndrome_table[i]=b_zero;
+  }
+  itpp::bvec syndrome;
+  int syndrome_dec;
+  for ( int w = 1; w < Gx.rows()+1; w ++){
+    bool run_flag = true;
+    itpp::bvec error=itpp::zeros_b(n);
+    for ( int i =0 ;i<w;i++){
+      error.set(i,1);
+    }
+    std::cout<<"init error:   "<<error<<std::endl;
+    while (run_flag) {
+      syndrome = Gx*error;
+      //      std::cout<<"error:   "<<error<<std::endl;
+      //std::cout<<"syndrome:"<<syndrome<<std::endl;
+      syndrome_dec=itpp::bin2dec(syndrome);
+      if (syndrome_table[syndrome_dec]==b_zero){
+        //if empty
+        syndrome_table[syndrome_dec] = error;
+      }
+      run_flag = next_error(error,n,w);
+      //      std::cout<<"run_flag:"<<run_flag<<std::endl;
+    }
+  }
+  std::cout<<"Finish generating syndrome table"<<std::endl;
+
+  return;
+  //  return syndrome_table;
+}
+
+
+
+
+
+
+
+
+
+
+
+//void decode(itpp::bvec e_in, itpp::bvec e_out){
+//}
 
 void CSSCode::get_713_code(){
   Gx=common::get_check_code743(n);
