@@ -88,8 +88,8 @@ public:
   int is_defined=0, is_C_defined=0;
 
   const static int syndrome_table_size=32768; //1024*1024/32=2^15, Gx.rows()<=15;
-  //  itpp::bvec * syndrome_table[32768];
-  itpp::bvec syndrome_table[syndrome_table_size];
+  //  int table_size_temp=int (pow(2,code.Gx.rows()));
+  itpp::bvec syndrome_table[syndrome_table_size]; ///< syndrome for Gx
 
 
   //constructor
@@ -125,10 +125,14 @@ public:
   int rand_dist_x();
   int rand_dist_z();
   
-  //itpp::bvec * get_syndrome_table();
-  void get_syndrome_table();
-  bool syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out);
-  //  itpp::bvec syndrome_table[table_size];
+
+  void get_syndrome_table(); ///<syndrome for Gx 
+  /**decode z type error*/
+  void syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out);
+  int syndrome_table_dist_x(); ///< return distance
+  int syndrome_table_dist_z(); ///< return distance
+
+
 
   //decoding
   /** decode Z type error e_t

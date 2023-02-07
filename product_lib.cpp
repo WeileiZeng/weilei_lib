@@ -236,24 +236,18 @@ bool next_error(itpp::bvec & error, int n, int w){
 
 }
 
-//itpp::bvec * 
 void CSSCode::get_syndrome_table(){
-  //  int table_size_temp=int (pow(2,code.Gx.rows()));
-  //const int table_size=128;
-  //static itpp::bvec syndrome_table[table_size];
-  //  const int table_size=1024*1024/32;//table_size_temp;
-  if (Gx.rows()>15) {
+  if (Gx.rows()>15) {//memory limitation
     std::cout<<"Gx is too big. Cannot save syndrome table";
     throw "Gx is too big";
   }
-  //  itpp::bvec syndrome_table[table_size];
-  //syndrome_table = itpp::bvec[table_size];
   itpp::bvec b_zero=itpp::zeros_b(n);
   for ( int i =0;i<syndrome_table_size;i++){
     syndrome_table[i]=b_zero;
   }
   itpp::bvec syndrome;
-  int syndrome_dec;
+  int syndrome_dec;//decimal representation of binary syndrome vector
+  //loop through vectors with weight w=0..r
   for ( int w = 1; w < Gx.rows()+1; w ++){
     bool run_flag = true;
     itpp::bvec error=itpp::zeros_b(n);
@@ -275,11 +269,57 @@ void CSSCode::get_syndrome_table(){
     }
   }
   std::cout<<"Finish generating syndrome table"<<std::endl;
-
   return;
-  //  return syndrome_table;
+  //could return distance d=w_max here
 }
 
+/**increase error weight until getting zero syndrome*/
+//only work for non-degenerate codes
+int syndrome_table_dist(itpp::GF2mat & Gx, itpp::GF2mat & Cz){
+  itpp::bvec syndrome;
+  int n = Gx.cols();
+  int syndrome_dec;//decimal representation of binary syndrome vector
+  //loop through vectors with weight w=0..r
+  for ( int w = 1; w < Gx.rows()+1; w ++){
+    bool run_flag = true;
+    itpp::bvec error=itpp::zeros_b(n);
+    for ( int i =0 ;i<w;i++){
+      error.set(i,1);
+    }
+    std::cout<<"init error:   "<<error<<std::endl;
+    while (run_flag) {
+      syndrome = Gx*error;
+      syndrome_dec=itpp::bin2dec(syndrome);
+      if (syndrome_dec == 0){
+	if (itpp::bin2dec(Cz*error) > 0){//not a stabilizer
+	  return w;
+	}
+      }
+      run_flag = next_error(error,n,w);
+      //      std::cout<<"run_flag:"<<run_flag<<std::endl;
+    }
+  }
+  return -1;
+}
+
+int CSSCode::syndrome_table_dist_x(){
+  return syndrome_table_dist(Gz,Cx);
+}
+int CSSCode::syndrome_table_dist_z(){
+  return syndrome_table_dist(Gx,Cz);
+}
+
+void CSSCode::syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out){
+  //  itpp::bvec error_input=itpp::zeros_b(code.n);
+  //  error_input[6]=1;
+  itpp::bvec syndrome= Gx*e_in;
+  int syndrome_dec=itpp::bin2dec(syndrome);
+  e_out = syndrome_table[syndrome_dec];
+  //  std::cout<<"input: "<<error_input<<std::endl;
+  //  std::cout<<"output:"<<error_output<<std::endl;
+  return;
+
+}
 
 
 
