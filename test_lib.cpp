@@ -18,7 +18,7 @@ void test_decode();
 
 void test_decode_within_CSS_Code();
 
-
+void test_syndrome_table();
 
 int main(){
   std::cout<<" --------------------- begin test"<<std::endl;
@@ -33,7 +33,8 @@ int main(){
 
 
   //  test_decode();
-  test_decode_within_CSS_Code();
+  //  test_decode_within_CSS_Code();
+  test_syndrome_table();
 
   std::cout<<" --------------------- finish test"<<std::endl;
   return 0;
@@ -487,5 +488,40 @@ void test_decode_within_CSS_Code(){
     code.simulate(pp);
   }
   std::cout<<"finish test_decode"<<std::endl;
+  return;
+}
+
+
+void test_syndrome_table(){
+  std::cout<<"begin test_decode2"<<std::endl;
+  CSSCode code;
+  code.n = 7;
+  code.title="Quantum hamming 713 code";
+  code.get_713_code();
+
+  code.Gx = common::make_it_full_rank(code.Gx);
+  code.Gz = common::make_it_full_rank(code.Gz);
+  code.set_up_CxCz();
+  int d = code.syndrome_table_dist_z();
+  std::cout<<"dist:d="<<d<<std::endl;
+  code.get_syndrome_table();
+  
+  //  itpp::bvec  syndrome_table[] = 
+  //code.syndrome_table;
+  //now decode
+  itpp::bvec error_input=itpp::zeros_b(code.n);
+  error_input[6]=1;
+  error_input[5]=1;
+  //  itpp::bvec syndrome= code.Gx*error_input;
+  //  int syndrome_dec=itpp::bin2dec(syndrome);
+  //  itpp::bvec error_output = code.syndrome_table[syndrome_dec];
+  itpp::bvec error_output;
+  //  itpp::bvec error_output = 
+  code.syndrome_table_decode(error_input,error_output);
+    std::cout<<"input: "<<error_input<<std::endl;
+  std::cout<<"output:"<<error_output<<std::endl;
+
+
+
   return;
 }
