@@ -268,6 +268,7 @@ void CSSCode::get_syndrome_table(){
       //      std::cout<<"run_flag:"<<run_flag<<std::endl;
     }
   }
+  syndrome_table[0] = b_zero;
   std::cout<<"Finish generating syndrome table"<<std::endl;
   return;
   //could return distance d=w_max here
@@ -310,15 +311,19 @@ int CSSCode::syndrome_table_dist_z(){
 }
 
 void CSSCode::syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out){
-  //  itpp::bvec error_input=itpp::zeros_b(code.n);
-  //  error_input[6]=1;
   itpp::bvec syndrome= Gx*e_in;
   int syndrome_dec=itpp::bin2dec(syndrome);
   e_out = syndrome_table[syndrome_dec];
-  //  std::cout<<"input: "<<error_input<<std::endl;
-  //  std::cout<<"output:"<<error_output<<std::endl;
   return;
 }
+
+void CSSCode::syndrome_table_decode(itpp::bvec & e_t){
+  itpp::bvec e_out;
+  CSSCode::syndrome_table_decode(e_t, e_out);
+  e_t = e_out;
+  return;
+}
+
 
 bool CSSCode::is_logical_error(itpp::bvec & e_diff){
   if (itpp::bin2dec(Gx*e_diff)==0){
