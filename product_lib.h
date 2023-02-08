@@ -87,7 +87,7 @@ public:
   int dz=-1;  ///< Z type min distance
   int is_defined=0, is_C_defined=0;
 
-  const static int syndrome_table_size=32768; //1024*1024/32=2^15, Gx.rows()<=15;
+  const static int syndrome_table_size=1024*16;//32768; //1024*1024/32=2^15, Gx.rows()<=15;
   //  int table_size_temp=int (pow(2,code.Gx.rows()));
   itpp::bvec syndrome_table[syndrome_table_size]; ///< syndrome for Gx
 
@@ -129,6 +129,8 @@ public:
   void get_syndrome_table(); ///<syndrome for Gx 
   /**decode z type error*/
   void syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out);
+  /**evolve e_t from e_in to e_out*/
+  void syndrome_table_decode(itpp::bvec & e_t);
   int syndrome_table_dist_x(); ///< return distance
   int syndrome_table_dist_z(); ///< return distance
   bool is_logical_error(itpp::bvec & e_diff);
