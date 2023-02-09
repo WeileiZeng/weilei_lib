@@ -237,14 +237,25 @@ bool next_error(itpp::bvec & error, int n, int w){
 }
 
 void CSSCode::get_syndrome_table(){
-  if (Gx.rows()>15) {//memory limitation
-    std::cout<<"Gx is too big. Cannot save syndrome table";
-    throw "Gx is too big";
+  if (Gx.rows()>25) {//memory limitation
+    std::cout<<"Gx is very big. takes very long to generate syndrome table"<<std::endl;
+    //    throw "Gx is too big";
   }
+  //read from file
+  try {
+    syndrome_table = common::MM_to_GF2mat(filename_prefix+"sx.mm");
+    return;
+  }
+  catch () {
+    std::cout<<"syndrome table not found"<<std::endl;
+  }
+
+  syndrome_table.set_size(int (pow(2,Gx.rows())), n);
   itpp::bvec b_zero=itpp::zeros_b(n);
-  for ( int i =0;i<syndrome_table_size;i++){
-    syndrome_table[i]=b_zero;
-  }
+  /*  for ( int i =0;i<syndrome_table.rows();i++){
+    //    syndrome_table[i]=b_zero;
+    syndrome_table.set_row(i,b_zero);
+    }*/
   itpp::bvec syndrome;
   int syndrome_dec;//decimal representation of binary syndrome vector
   //loop through vectors with weight w=0..r
@@ -254,21 +265,21 @@ void CSSCode::get_syndrome_table(){
     for ( int i =0 ;i<w;i++){
       error.set(i,1);
     }
-    std::cout<<"init error:   "<<error<<std::endl;
+    std::cout<<"w="<<w<<", "<<error<<std::endl;
     while (run_flag) {
       syndrome = Gx*error;
-      //      std::cout<<"error:   "<<error<<std::endl;
+      //std::cout<<"error:   "<<error<<std::endl;
       //std::cout<<"syndrome:"<<syndrome<<std::endl;
       syndrome_dec=itpp::bin2dec(syndrome);
-      if (syndrome_table[syndrome_dec]==b_zero){
+      if (syndrome_table.get_row(syndrome_dec)==b_zero){
         //if empty
-        syndrome_table[syndrome_dec] = error;
+        syndrome_table.set_row(syndrome_dec, error);
       }
       run_flag = next_error(error,n,w);
       //      std::cout<<"run_flag:"<<run_flag<<std::endl;
     }
   }
-  syndrome_table[0] = b_zero;
+  syndrome_table.set_row(0, b_zero);
   std::cout<<"Finish generating syndrome table"<<std::endl;
   return;
   //could return distance d=w_max here
@@ -293,6 +304,7 @@ int syndrome_table_dist(itpp::GF2mat & Gx, itpp::GF2mat & Cz){
       syndrome_dec=itpp::bin2dec(syndrome);
       if (syndrome_dec == 0){
 	if (itpp::bin2dec(Cz*error) > 0){//not a stabilizer
+	  //weight of the first error with zero syndrome
 	  return w;
 	}
       }
@@ -313,7 +325,7 @@ int CSSCode::syndrome_table_dist_z(){
 void CSSCode::syndrome_table_decode(itpp::bvec & e_in, itpp::bvec & e_out){
   itpp::bvec syndrome= Gx*e_in;
   int syndrome_dec=itpp::bin2dec(syndrome);
-  e_out = syndrome_table[syndrome_dec];
+  e_out = syndrome_table.get_row(syndrome_dec);
   return;
 }
 
@@ -359,11 +371,10 @@ void CSSCode::get_713_code(){
   Gx=common::get_check_code743(n);
   Gz=common::get_check_code743(n);
   return;
-
 }
 
-int CSSCode::save(std::string filename_prefix){
-  const char * title = filename_prefix.c_str();
+int CSSCode::save(std::string filename_prefix_temp){
+  const char * title = filename_prefix_temp.c_str();
   char filename_Gx[256];char filename_Gz[256];
   sprintf(filename_Gx,"%sGx.mm",title);  
   sprintf(filename_Gz,"%sGz.mm",title); 
@@ -372,9 +383,9 @@ int CSSCode::save(std::string filename_prefix){
   return 0;
 }
 
-int CSSCode::load(std::string filename_prefix){
-  Gx=MM_to_GF2mat(filename_prefix+"Gx.mm");
-  Gz=MM_to_GF2mat(filename_prefix+"Gz.mm");
+int CSSCode::load(std::string filename_prefix_temp){
+  Gx=MM_to_GF2mat(filename_prefix_temp+"Gx.mm");
+  Gz=MM_to_GF2mat(filename_prefix_temp+"Gz.mm");
   n=Gx.cols();  
   return 0;
 }

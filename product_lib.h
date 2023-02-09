@@ -82,15 +82,16 @@ public:
   int id_Gz;   ///< id used when enumerating all cases, see definition in generate_by_id()
   std::string title="no title";
   std::string type="CSSCode";
+  std::string filename_prefix="none"; ///< *Gx.mm,*Gz.mm,sx.mm
   int d=-1;   ///< d=min(dx,dz)
   int dx=-1;  ///< X type min distance
   int dz=-1;  ///< Z type min distance
   int is_defined=0, is_C_defined=0;
 
-  const static int syndrome_table_size=1024*16;//32768; //1024*1024/32=2^15, Gx.rows()<=15;
+  //  const static int syndrome_table_size=1024*16;//32768; //1024*1024/32=2^15, Gx.rows()<=15;
   //  int table_size_temp=int (pow(2,code.Gx.rows()));
-  itpp::bvec syndrome_table[syndrome_table_size]; ///< syndrome for Gx
-
+  //  itpp::bvec syndrome_table[syndrome_table_size]; ///< syndrome for Gx
+  itpp::GF2mat syndrome_table;
 
   //constructor
   CSSCode();
@@ -162,8 +163,8 @@ public:
   //I/O
 
   
-  int save(std::string filename_prefix); ///<save code matrices into MM 
-  int load(std::string filename_prefix);
+  int save(std::string filename_prefix_temp); ///<save code matrices into MM 
+  int load(std::string filename_prefix_temp);
 };
  
 class ProductCSSCode: public CSSCode{
