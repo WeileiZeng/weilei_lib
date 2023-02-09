@@ -243,10 +243,9 @@ void CSSCode::get_syndrome_table(){
   }
   //read from file
   try {
-    syndrome_table = common::MM_to_GF2mat(filename_prefix+"sx.mm");
+    syndrome_table = MM_to_GF2mat(filename_prefix+"sx.mm");
     return;
-  }
-  catch () {
+  } catch (...){
     std::cout<<"syndrome table not found"<<std::endl;
   }
 
@@ -280,7 +279,14 @@ void CSSCode::get_syndrome_table(){
     }
   }
   syndrome_table.set_row(0, b_zero);
-  std::cout<<"Finish generating syndrome table"<<std::endl;
+
+  //  syndrome_table = MM_to_GF2mat(filename_prefix+"sx.mm");
+
+  //  const char * title = filename_prefix_temp.c_str();
+  char filename_sx[256];char filename_Gz[256];
+  sprintf(filename_sx,"%ssx.mm",filename_prefix.c_str());  
+  GF2mat_to_MM(syndrome_table, filename_sx);
+  std::cout<<"Syndrome table saved to "<<filename_sx<<std::endl;
   return;
   //could return distance d=w_max here
 }
