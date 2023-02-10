@@ -278,7 +278,7 @@ void CSSCode::get_syndrome_table(){
       run_flag = next_error(error,n,w);
     }
   }
-  syndrome_table.set_row(0, b_zero); //Replace minimal weight codeword by zero vector for decoding 
+  syndrome_table.set_row(0, b_zero); //Replace minimal weight codeword/stabilizer by zero vector for decoding 
 
   //  const char * title = filename_prefix_temp.c_str();
   char filename_sx[256];char filename_Gz[256];
@@ -286,7 +286,6 @@ void CSSCode::get_syndrome_table(){
   GF2mat_to_MM(syndrome_table, filename_sx);
   std::cout<<"Syndrome table saved to "<<filename_sx<<std::endl;
   return;
-  //could return distance d=w_max here, refer to syndrome_table_dist()
 }
 
 /**increase error weight until getting zero syndrome*/
