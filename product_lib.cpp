@@ -244,9 +244,10 @@ void CSSCode::get_syndrome_table(){
   //read from file
   try {
     syndrome_table = MM_to_GF2mat(filename_prefix+"sx.mm");
+    std::cout<<"Got syndrome table from"<<filename_prefix<<"sx.mm"<<std::endl;
     return;
   } catch (...){
-    std::cout<<"syndrome table not found"<<std::endl;
+    std::cout<<"Syndrome table not found. start generating..."<<std::endl;
   }
 
   syndrome_table.set_size(int (pow(2,Gx.rows())), n);
@@ -261,7 +262,7 @@ void CSSCode::get_syndrome_table(){
   for ( int w = 1; w < Gx.rows()+1; w ++){
     bool run_flag = true;
     itpp::bvec error=itpp::zeros_b(n);
-    for ( int i =0 ;i<w;i++){
+    for ( int i =0 ;i<w;i++){//initialize the first error
       error.set(i,1);
     }
     std::cout<<"w="<<w<<", "<<error<<std::endl;
@@ -271,16 +272,13 @@ void CSSCode::get_syndrome_table(){
       //std::cout<<"syndrome:"<<syndrome<<std::endl;
       syndrome_dec=itpp::bin2dec(syndrome);
       if (syndrome_table.get_row(syndrome_dec)==b_zero){
-        //if empty
+        //if empty, then this is the minimal weight error 
         syndrome_table.set_row(syndrome_dec, error);
       }
       run_flag = next_error(error,n,w);
-      //      std::cout<<"run_flag:"<<run_flag<<std::endl;
     }
   }
-  syndrome_table.set_row(0, b_zero);
-
-  //  syndrome_table = MM_to_GF2mat(filename_prefix+"sx.mm");
+  syndrome_table.set_row(0, b_zero); //Replace minimal weight codeword by zero vector for decoding 
 
   //  const char * title = filename_prefix_temp.c_str();
   char filename_sx[256];char filename_Gz[256];
@@ -288,7 +286,7 @@ void CSSCode::get_syndrome_table(){
   GF2mat_to_MM(syndrome_table, filename_sx);
   std::cout<<"Syndrome table saved to "<<filename_sx<<std::endl;
   return;
-  //could return distance d=w_max here
+  //could return distance d=w_max here, refer to syndrome_table_dist()
 }
 
 /**increase error weight until getting zero syndrome*/
@@ -315,7 +313,6 @@ int syndrome_table_dist(itpp::GF2mat & Gx, itpp::GF2mat & Cz){
 	}
       }
       run_flag = next_error(error,n,w);
-      //      std::cout<<"run_flag:"<<run_flag<<std::endl;
     }
   }
   return -1;
@@ -393,6 +390,7 @@ int CSSCode::load(std::string filename_prefix_temp){
   Gx=MM_to_GF2mat(filename_prefix_temp+"Gx.mm");
   Gz=MM_to_GF2mat(filename_prefix_temp+"Gz.mm");
   n=Gx.cols();  
+  filename_prefix = filename_prefix_temp;
   return 0;
 }
 
