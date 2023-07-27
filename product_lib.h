@@ -80,9 +80,9 @@ public:
   int Gx_row, Gz_row;
   int id_Gx;   ///< id used when enumerating all cases, see definition in generate_by_id()
   int id_Gz;   ///< id used when enumerating all cases, see definition in generate_by_id()
-  std::string title="no title";
+  std::string title="fancy title";
   std::string type="CSSCode";
-  std::string filename_prefix="none"; ///< *Gx.mm,*Gz.mm,sx.mm
+  std::string filename_prefix="magic_code007"; ///< *Gx.mm,*Gz.mm,sx.mm
   int d=-1;   ///< d=min(dx,dz)
   int dx=-1;  ///< X type min distance
   int dz=-1;  ///< Z type min distance
