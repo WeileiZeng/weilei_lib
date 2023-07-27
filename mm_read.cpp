@@ -57,6 +57,7 @@ itpp::GF2mat MM_to_GF2mat(char * file_name)
 
     if ((f = fopen(file_name, "r")) == NULL) {
       std::cout<<"file open fail:"<<file_name<<std::endl;
+      throw file_name;
       exit(1);}
     if (mm_read_banner(f, &matcode) != 0)
     {
