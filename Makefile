@@ -40,7 +40,8 @@ test:
 	make all
 	make test_lib.o
 	make test_lib.out
-	srun -n 1 --cpus-per-task=32 -q short ./test_lib.out
+	./test_lib.out
+#	srun -p small -n 1 --cpus-per-task=2 -q short ./test_lib.out
 test_lib.out:test_lib.o $(object_files)
 	$(CXX) $(ITPP) -o $@ $< $(object_files)
 
