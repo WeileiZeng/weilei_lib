@@ -521,7 +521,36 @@ void test_syndrome_table(){
     std::cout<<"input: "<<error_input<<std::endl;
   std::cout<<"output:"<<error_output<<std::endl;
   std::cout<<"logical:"<<code.is_logical_error(error_input,error_output)<<std::endl;
+  code.syndrome_table_decode(error_input,error_output);
+  code.decode(error_input,100,0);
+  std::cout<<"decode:"<<error_input<<std::endl;
 
+  const int e_try=20;
+  double p = 0.1;
+  for(int i1=0;i1<e_try;i1++){
+    itpp::bvec e_t = itpp::zeros_b(code.n);
+    for (int i2=0;i2<code.n;i2++){//setup random error with error rate p
+      e_t.set(i2,(itpp::randu()-p<0)? 1:0); 
+    }
+    std::cout<<"in:"<<e_t;
+    itpp::bvec e_out;
+    code.syndrome_table_decode(e_t,e_out);
+    code.is_logical_error(e_t,e_out);
+    code.decode(e_t,100,0);
+    std::cout<<"random:  "<<e_t
+	     <<"syndrome:"<<e_out
+	     <<std::endl;
+  }
+
+
+  int size=1024*1024*16;
+  itpp::GF2mat syn(size,code.Gx.rows());
+  itpp::bvec b_zero = itpp::zeros_b(code.Gx.rows());
+  for ( int i = 0; i <size; i++){
+    //    std::cout<<"debug "<<i<<std::endl;
+    syn.set_row(i,b_zero);
+  }
+  std::cout<<"debug end"<<std::endl;
 
 
   return;
