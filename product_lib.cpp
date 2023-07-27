@@ -289,7 +289,6 @@ void CSSCode::get_syndrome_table(){
 }
 
 /**increase error weight until getting zero syndrome*/
-//only work for non-degenerate codes
 int syndrome_table_dist(itpp::GF2mat & Gx, itpp::GF2mat & Cz){
   itpp::bvec syndrome;
   int n = Gx.cols();
